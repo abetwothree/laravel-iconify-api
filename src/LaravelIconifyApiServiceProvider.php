@@ -2,9 +2,9 @@
 
 namespace AbeTwoThree\LaravelIconifyApi;
 
+use AbeTwoThree\LaravelIconifyApi\Commands\LaravelIconifyApiCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use AbeTwoThree\LaravelIconifyApi\Commands\LaravelIconifyApiCommand;
 
 class LaravelIconifyApiServiceProvider extends PackageServiceProvider
 {
@@ -18,8 +18,8 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         $package
             ->name('laravel-iconify-api')
             ->hasConfigFile()
-            ->hasViews()
             ->hasMigration('create_laravel_iconify_api_table')
+            ->hasRoute('api')
             ->hasCommand(LaravelIconifyApiCommand::class);
     }
 }
