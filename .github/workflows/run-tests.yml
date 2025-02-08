@@ -51,5 +51,8 @@ jobs:
       - name: List Installed Dependencies
         run: composer show -D
 
+      - name: Install workflow npm dependencies
+        run: cd workflow && npm install && cd ..
+
       - name: Execute tests
         run: vendor/bin/pest --ci
