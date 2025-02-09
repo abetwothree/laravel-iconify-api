@@ -7,6 +7,11 @@ use Illuminate\Support\Str;
 
 class LaravelIconifyApi
 {
+    public function iconsLocation(): string
+    {
+        return config()->string('iconify-api.icons_location');
+    }
+
     public function cacheStore(): string
     {
         $store = config()->get('iconify-api.cache_store') ?? config()->get('cache.default');

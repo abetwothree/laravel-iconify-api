@@ -6,7 +6,7 @@ use AbeTwoThree\LaravelIconifyApi\Icons\IconDataResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class IconifyApiController
+class IconifyIconsController
 {
     public function show(string $set, Request $request): JsonResponse
     {

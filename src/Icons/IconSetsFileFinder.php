@@ -2,18 +2,12 @@
 
 namespace AbeTwoThree\LaravelIconifyApi\Icons;
 
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
 use Exception;
 
 class IconSetsFileFinder implements IconSetsFileFinderContract
 {
-    protected string $iconsLocation;
-
-    public function __construct()
-    {
-        $this->iconsLocation = config()->string('iconify-api.icons_location');
-    }
-
     public function find(string $set): string
     {
         $singleSetFile = $this->getIconsFromIndividualSets($set);
@@ -35,7 +29,7 @@ class IconSetsFileFinder implements IconSetsFileFinderContract
      */
     protected function getIconsFromIndividualSets(string $set): bool|string
     {
-        $folderPath = $this->iconsLocation.'/@iconify-json/'.$set;
+        $folderPath = LaravelIconifyApi::iconsLocation().'/@iconify-json/'.$set;
         $filePath = $folderPath.'/icons.json';
 
         if (! is_dir($folderPath) || ! file_exists($filePath)) {
@@ -50,7 +44,7 @@ class IconSetsFileFinder implements IconSetsFileFinderContract
      */
     protected function getIconsFromAllSets(string $set): bool|string
     {
-        $basePath = $this->iconsLocation.'/@iconify/json/json';
+        $basePath = LaravelIconifyApi::iconsLocation().'/@iconify/json/json';
         $filepath = $basePath."/{$set}.json";
 
         if (! is_dir($basePath) || ! file_exists($filepath)) {
