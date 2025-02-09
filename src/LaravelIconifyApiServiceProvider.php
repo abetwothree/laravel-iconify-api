@@ -9,9 +9,9 @@ use AbeTwoThree\LaravelIconifyApi\Icons\IconFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconFinderCached;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinderCached;
+use Illuminate\Support\Facades\Blade;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Illuminate\Support\Facades\Blade;
 
 class LaravelIconifyApiServiceProvider extends PackageServiceProvider
 {

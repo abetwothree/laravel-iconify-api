@@ -4,7 +4,7 @@ use AbeTwoThree\LaravelIconifyApi\IconifyDirective;
 
 it('can render the directive', function () {
     config()->set('app.url', 'http://localhost');
-    $directive = new IconifyDirective();
+    $directive = new IconifyDirective;
     $rendered = $directive->render();
 
     expect($rendered)->toBeString();
@@ -30,7 +30,7 @@ it('can render the directive with custom providers', function () {
             'rotate' => 1000,
         ],
     ]);
-    $directive = new IconifyDirective();
+    $directive = new IconifyDirective;
     $rendered = $directive->render();
 
     expect($rendered)->toBeString();

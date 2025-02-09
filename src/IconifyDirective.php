@@ -11,10 +11,10 @@ class IconifyDirective
         $url = LaravelIconifyApi::domain().'/'.LaravelIconifyApi::path();
         $customProviders = $this->gatherCustomProviders();
 
-        if (empty($customProviders)){
+        if (empty($customProviders)) {
             $customProviders = '';
-        }else{
-            $customProviders = json_encode($customProviders, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        } else {
+            $customProviders = json_encode($customProviders, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         }
 
         return <<<HTML

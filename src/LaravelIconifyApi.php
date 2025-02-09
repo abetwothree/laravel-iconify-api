@@ -11,7 +11,7 @@ class LaravelIconifyApi
     {
         $store = config()->get('iconify-api.cache_store') ?? config()->get('cache.default');
 
-        if (!is_string($store)) {
+        if (! is_string($store)) {
             throw new Exception('Cache store must be a string');
         }
 
@@ -22,7 +22,7 @@ class LaravelIconifyApi
     {
         $domain = config()->get('iconify-api.route_domain') ?? config()->get('app.url');
 
-        if (!is_string($domain) || empty($domain)) {
+        if (! is_string($domain) || empty($domain)) {
             throw new Exception('Domain must be a set in your env or config files');
         }
 
@@ -31,6 +31,6 @@ class LaravelIconifyApi
 
     public function path(): string
     {
-        return Str::finish(config()->string('iconify-api.route_path'), '/') . 'api';
+        return Str::finish(config()->string('iconify-api.route_path'), '/').'api';
     }
 }

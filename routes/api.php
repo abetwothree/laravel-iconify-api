@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
+use Illuminate\Support\Facades\Route;
 
 Route::group([
     'domain' => LaravelIconifyApi::domain(),
