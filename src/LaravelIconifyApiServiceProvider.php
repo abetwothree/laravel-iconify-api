@@ -11,6 +11,7 @@ use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinderCached;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Illuminate\Support\Facades\Blade;
 
 class LaravelIconifyApiServiceProvider extends PackageServiceProvider
 {
@@ -24,7 +25,6 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         $package
             ->name('laravel-iconify-api')
             ->hasConfigFile()
-            ->hasMigration('create_laravel_iconify_api_table')
             ->hasRoute('api');
     }
 
@@ -46,6 +46,10 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
             }
 
             return resolve(IconFinder::class);
+        });
+
+        Blade::directive('iconify', function () {
+            return (new IconifyDirective)->render();
         });
     }
 }

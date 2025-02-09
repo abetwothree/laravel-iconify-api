@@ -12,7 +12,7 @@ return [
     |
     */
 
-    'route_domain' => '',
+    'route_domain' => null,
 
     /*
     |--------------------------------------------------------------------------
@@ -58,6 +58,29 @@ return [
     */
 
     'icons_location' => base_path('node_modules'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Iconify Icon Providers
+    |--------------------------------------------------------------------------
+    | By default, this will package will use your application's url as the provider
+    | for all iconify icons you install with NPM. If you would like to use a
+    | different provider for a specific icon set, you can specify it here.
+    |
+    | @see https://iconify.design/docs/api/config.html#using-iconifyproviders
+    | @see https://iconify.design/docs/api/providers.html#api-config
+    */
+
+    'custom_providers' => [
+        // Example:
+        // 'mdi' => [
+        //     'resources' => [
+        //         'https://api.iconify.design',
+        //         'https://example.com',
+        //     ],
+        //     'rotate' => 1000,
+        // ],
+    ],
 
     /*
     |--------------------------------------------------------------------------

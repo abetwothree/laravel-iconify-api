@@ -1,11 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 
 Route::group([
-    'domain' => config()->string('iconify-api.route_domain', ''),
-    'prefix' => Str::finish(config()->string('iconify-api.route_path'), '/').'api',
+    'domain' => LaravelIconifyApi::domain(),
+    'prefix' => LaravelIconifyApi::path(),
     'namespace' => 'AbeTwoThree\LaravelIconifyApi\Http\Controllers',
     'middleware' => config()->array('iconify-api.api_middleware', []),
 ], function (): void {
