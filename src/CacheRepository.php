@@ -2,10 +2,9 @@
 
 namespace AbeTwoThree\LaravelIconifyApi;
 
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use Illuminate\Support\Facades\Cache;
-use Exception;
-use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 
 /**
  * @phpstan-import-type TIconResponse from IconFinderContract

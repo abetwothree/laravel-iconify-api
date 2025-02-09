@@ -3,15 +3,15 @@
 namespace AbeTwoThree\LaravelIconifyApi;
 
 use AbeTwoThree\LaravelIconifyApi\Commands\LaravelIconifyApiCommand;
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
-use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
+use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconFinderCached;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinderCached;
-use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class LaravelIconifyApiServiceProvider extends PackageServiceProvider
 {

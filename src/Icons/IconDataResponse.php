@@ -16,7 +16,7 @@ class IconDataResponse
     /**
      * Summary of response
      *
-     * @param array<int, string> $icons
+     * @param  array<int, string>  $icons
      * @return TIconResponse
      */
     public function get(string $set, array $icons): array
@@ -27,7 +27,7 @@ class IconDataResponse
     }
 
     /**
-     * @param array<int, string> $icons
+     * @param  array<int, string>  $icons
      * @return array<string, TIconResponse>
      */
     protected function findIcons(string $set, array $icons): array
@@ -36,7 +36,7 @@ class IconDataResponse
     }
 
     /**
-     * @param array<string, TIconResponse> $icons
+     * @param  array<string, TIconResponse>  $icons
      * @return TIconResponse
      */
     protected function flattenIconResponse(array $icons): array
