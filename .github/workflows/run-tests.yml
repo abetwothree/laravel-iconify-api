@@ -53,8 +53,7 @@ jobs:
 
       - name: Install workflow npm dependencies
         run: |
-          npm ci --prefix ./workbench
-          ls -la ./workbench/node_modules
+          npm ci
 
       - name: Execute tests
         run: vendor/bin/pest --ci

@@ -2,7 +2,6 @@
 
 namespace AbeTwoThree\LaravelIconifyApi;
 
-use AbeTwoThree\LaravelIconifyApi\Commands\LaravelIconifyApiCommand;
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
@@ -26,8 +25,7 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
             ->name('laravel-iconify-api')
             ->hasConfigFile()
             ->hasMigration('create_laravel_iconify_api_table')
-            ->hasRoute('api')
-            ->hasCommand(LaravelIconifyApiCommand::class);
+            ->hasRoute('api');
     }
 
     public function packageBooted(): void

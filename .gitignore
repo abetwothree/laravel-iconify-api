@@ -32,3 +32,4 @@ phpstan.neon
 testbench.yaml
 /docs
 /coverage
+coverage.xml

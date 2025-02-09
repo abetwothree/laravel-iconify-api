@@ -49,11 +49,9 @@
     "scripts": {
         "post-autoload-dump": [
             "@prepare",
-            "@composer run prepare",
-            "@composer run workbench-deps"
+            "@composer run prepare"
         ],
         "prepare": "@php vendor/bin/testbench package:discover --ansi",
-        "workbench-deps": "npm install --prefix ./workbench",
         "analyse": "vendor/bin/phpstan analyse",
         "test": "vendor/bin/pest",
         "testbench": "vendor/bin/testbench",

@@ -2,53 +2,70 @@
 
 use AbeTwoThree\LaravelIconifyApi\Icons\IconFinder;
 
-it('can find multiple icons', function () {
+it('can find multiple icons', function (
+    string $set,
+    array $icons
+) {
     $iconFinder = resolve(IconFinder::class);
-    $icons = $iconFinder->find('mdi', ['home', 'account']);
+    $icons = $iconFinder->find($set, $icons);
 
-    expect($icons)->each(function ($icon) {
+    expect($icons)->each(function ($icon) use ($set) {
         $icon->toBeArray()
             ->toHaveKeys(['prefix', 'lastModified', 'width', 'height', 'aliases', 'icons'])
-            ->prefix->toBe('mdi')
+            ->prefix->toBe($set)
             ->lastModified->toBeInt()
             ->width->toBeInt()
             ->height->toBeInt()
             ->aliases->toBeArray()
             ->icons->toBeArray();
     });
-});
+})->with([
+    ['mdi', ['home', 'account']],
+    ['mdi', ['home', 'account', 'abacus']],
+    ['mdi', ['account-cash']],
+    ['heroicons', ['academic-cap', 'adjustments-vertical']],
+    ['heroicons', ['academic-cap', 'adjustments-vertical', 'chart-pie-16-solid']],
+    ['heroicons', ['swatch', 'code-solid']],
+]);
 
-it('can find a specific icon', function () {
+it('can find a specific icon', function (
+    string $set,
+    array $icon,
+) {
     $iconFinder = resolve(IconFinder::class);
-
-    $icons = $iconFinder->find('mdi', ['home']);
+    $icons = $iconFinder->find($set, $icon);
 
     expect($icons)->toBeArray()
-        ->toHaveKeys(['home'])
-        ->each(function ($icon) {
+        ->toHaveKeys($icon)
+        ->each(function ($icon) use ($set) {
             $icon->toBeArray()
                 ->toHaveKeys(['prefix', 'lastModified', 'width', 'height', 'aliases', 'icons'])
-                ->prefix->toBe('mdi')
+                ->prefix->toBe($set)
                 ->lastModified->toBeInt()
                 ->width->toBeInt()
                 ->height->toBeInt()
                 ->aliases->toBeArray()
                 ->icons->toBeArray();
         });
-});
+})->with([
+    ['mdi', ['home']],
+    ['heroicons', ['academic-cap']],
+]);
 
-it('returns proper response but fails to find icon', function () {
+it('returns proper response but fails to find icon', function (
+    string $set,
+    array $icon,
+) {
     $iconFinder = resolve(IconFinder::class);
-
-    $icons = $iconFinder->find('mdi', ['not-an-icon']);
+    $icons = $iconFinder->find($set, $icon);
 
     expect($icons)
         ->toBeArray()
-        ->toHaveKeys(['not-an-icon'])
-        ->each(function ($icon) {
+        ->toHaveKeys($icon)
+        ->each(function ($icon) use ($set) {
             $icon->toBeArray()
                 ->toHaveKeys(['prefix', 'lastModified', 'width', 'height', 'aliases', 'icons', 'not_found'])
-                ->prefix->toBe('mdi')
+                ->prefix->toBe($set)
                 ->lastModified->toBeInt()
                 ->width->toBeInt()
                 ->height->toBeInt()
@@ -58,4 +75,7 @@ it('returns proper response but fails to find icon', function () {
                 ->not_found->toHaveCount(1)
                 ->not_found->each->toBe('not-an-icon');
         });
-});
+})->with([
+    ['mdi', ['not-an-icon']],
+    ['heroicons', ['not-an-icon']],
+]);
