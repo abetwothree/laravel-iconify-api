@@ -52,7 +52,9 @@ jobs:
         run: composer show -D
 
       - name: Install workflow npm dependencies
-        run: npm ci --prefix ./workbench
+        run: |
+          npm ci --prefix ./workbench
+          ls -la ./workbench/node_modules
 
       - name: Execute tests
         run: vendor/bin/pest --ci

@@ -68,7 +68,7 @@ return [
     |
     */
 
-    'cache_driver' => env('ICONIFY_API_CACHE_STORE', null),
+    'cache_store' => env('ICONIFY_API_CACHE_STORE', null),
 
     /*
     |--------------------------------------------------------------------------

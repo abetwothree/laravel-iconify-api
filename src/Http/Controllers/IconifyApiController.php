@@ -15,7 +15,10 @@ class IconifyApiController
         }
 
         $icons = explode(',', $request->string('icons'));
-        $data = new IconDataResponse($set, $icons)->response();
+
+        /** @var IconDataResponse $dataResponse */
+        $dataResponse = resolve(IconDataResponse::class);
+        $data = $dataResponse->get($set, $icons);
 
         return response()->json($data);
     }

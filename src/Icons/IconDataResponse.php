@@ -2,44 +2,63 @@
 
 namespace AbeTwoThree\LaravelIconifyApi\Icons;
 
+use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
+
+/**
+ * @phpstan-import-type TIconResponse from IconFinderContract
+ */
 class IconDataResponse
 {
-    /**
-     * @param  string[]  $icons
-     */
     public function __construct(
-        protected string $set,
-        protected array $icons,
+        protected IconFinderContract $iconFinder
     ) {}
 
     /**
      * Summary of response
      *
-     * @return array{
-        prefix: string,
-        lastModified: int,
-        aliases: array<string, string>,
-        width: int,
-        height: int,
-        icons: array<string, array<string, string>>
-     }
+     * @param array<int, string> $icons
+     * @return TIconResponse
      */
-    public function response(): array
+    public function get(string $set, array $icons): array
     {
-        return [
-            'prefix' => $this->set,
-            'lastModified' => time(),
+        $foundIcons = $this->findIcons($set, $icons);
+
+        return $this->flattenIconResponse($foundIcons);
+    }
+
+    /**
+     * @param array<int, string> $icons
+     * @return array<string, TIconResponse>
+     */
+    protected function findIcons(string $set, array $icons): array
+    {
+        return $this->iconFinder->find($set, $icons);
+    }
+
+    /**
+     * @param array<string, TIconResponse> $icons
+     * @return TIconResponse
+     */
+    protected function flattenIconResponse(array $icons): array
+    {
+        $flattenedIcons = [
+            'prefix' => '',
+            'lastModified' => 0,
+            'width' => 0,
+            'height' => 0,
             'aliases' => [],
-            'width' => 24,
-            'height' => 24,
-            'icons' => [
-                'home' => [
-                    'body' => '<path fill="currentColor" d="m16 8.41l-4.5-4.5L4.41 11H6v8h3v-6h5v6h3v-8h1.59L17 9.41V6h-1zM2 12l9.5-9.5L15 6V5h3v4l3 3h-3v8h-5v-6h-3v6H5v-8z"/>',
-                ],
-                'account-arrow-up-outline' => [
-                    'body' => '<path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10 5.52 0 10-4.48 10-10 0-5.52-4.48-10-10-10zm0 18c-4.41 0-8-3.59-8-8 0-3.07 1.74-5.74 4.29-7.07L12 7.83l3.71 5.1C18.26 8.26 20 10.93 20 14c0 4.41-3.59 8-8 8z"/>',
-                ],
-            ],
+            'icons' => [],
         ];
+
+        foreach ($icons as $icon) {
+            $flattenedIcons['prefix'] = $icon['prefix'];
+            $flattenedIcons['lastModified'] = $icon['lastModified'];
+            $flattenedIcons['width'] = $icon['width'];
+            $flattenedIcons['height'] = $icon['height'];
+            $flattenedIcons['aliases'] = array_merge($flattenedIcons['aliases'], $icon['aliases']);
+            $flattenedIcons['icons'] = array_merge($flattenedIcons['icons'], $icon['icons']);
+        }
+
+        return $flattenedIcons;
     }
 }

@@ -3,6 +3,7 @@
 namespace AbeTwoThree\LaravelIconifyApi\Icons;
 
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
+use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
 
 /**
  * @phpstan-import-type TIconSetData from IconFinderContract
@@ -10,7 +11,7 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContra
 class IconFinder implements IconFinderContract
 {
     public function __construct(
-        protected IconSetsFileFinder $iconSetsFileFinder
+        protected IconSetsFileFinderContract $iconSetsFileFinder
     ) {}
 
     /** {@inheritDoc} */

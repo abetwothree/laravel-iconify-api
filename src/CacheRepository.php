@@ -4,19 +4,21 @@ namespace AbeTwoThree\LaravelIconifyApi;
 
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use Illuminate\Support\Facades\Cache;
+use Exception;
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 
 /**
  * @phpstan-import-type TIconResponse from IconFinderContract
  */
 class CacheRepository
 {
-    protected string $driver;
-
     protected string $cachePrefix;
+
+    protected string $store;
 
     public function __construct()
     {
-        $this->driver = config()->string('iconify-api.cache_driver');
+        $this->store = LaravelIconifyApi::cacheStore();
         $this->cachePrefix = config()->string('iconify-api.cache_key_prefix');
     }
 
@@ -33,7 +35,7 @@ class CacheRepository
 
         foreach ($icons as $icon) {
             /** @var TIconResponse|null $cachedIcon */
-            $cachedIcon = Cache::store($this->driver)->get($this->iconKey($set, $icon));
+            $cachedIcon = Cache::store($this->store)->get($this->iconKey($set, $icon));
 
             if ($cachedIcon) {
                 $cacheResponse['found'][$icon] = $cachedIcon;
@@ -50,7 +52,7 @@ class CacheRepository
      */
     public function setIcon(string $set, string $icon, array $iconData): void
     {
-        Cache::store($this->driver)->put($this->iconKey($set, $icon), $iconData);
+        Cache::store($this->store)->put($this->iconKey($set, $icon), $iconData);
     }
 
     protected function iconKey(string $set, string $icon): string
@@ -60,7 +62,7 @@ class CacheRepository
 
     public function getFileSet(string $set): ?string
     {
-        $file = Cache::store($this->driver)->get($this->fileSetKey($set));
+        $file = Cache::store($this->store)->get($this->fileSetKey($set));
 
         if (! is_string($file)) {
             return null;
@@ -71,7 +73,7 @@ class CacheRepository
 
     public function setFileSet(string $set, string $file): void
     {
-        Cache::store($this->driver)->put($this->fileSetKey($set), $file);
+        Cache::store($this->store)->put($this->fileSetKey($set), $file);
     }
 
     protected function fileSetKey(string $set): string
