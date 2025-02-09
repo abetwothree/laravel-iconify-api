@@ -10,6 +10,7 @@ use AbeTwoThree\LaravelIconifyApi\Icons\IconFinderCached;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinderCached;
 use Illuminate\Support\Facades\Blade;
+use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -25,7 +26,12 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         $package
             ->name('laravel-iconify-api')
             ->hasConfigFile()
-            ->hasRoute('api');
+            ->hasRoute('api')
+            ->hasInstallCommand(function (InstallCommand $command) {
+                $command
+                    ->publishConfigFile()
+                    ->askToStarRepoOnGitHub('abetwothree/laravel-iconify-api');
+            });
     }
 
     public function packageBooted(): void

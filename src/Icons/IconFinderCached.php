@@ -2,7 +2,7 @@
 
 namespace AbeTwoThree\LaravelIconifyApi\Icons;
 
-use AbeTwoThree\LaravelIconifyApi\CacheRepository;
+use AbeTwoThree\LaravelIconifyApi\Cache\CacheRepository;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 
 class IconFinderCached implements IconFinderContract

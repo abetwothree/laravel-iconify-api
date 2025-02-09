@@ -1,26 +1,15 @@
 <?php
 
-namespace AbeTwoThree\LaravelIconifyApi;
+namespace AbeTwoThree\LaravelIconifyApi\Cache\Concerns;
 
-use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use Illuminate\Support\Facades\Cache;
 
 /**
  * @phpstan-import-type TIconResponse from IconFinderContract
  */
-class CacheRepository
+trait CachesIcons
 {
-    protected string $cachePrefix;
-
-    protected string $store;
-
-    public function __construct()
-    {
-        $this->store = LaravelIconifyApi::cacheStore();
-        $this->cachePrefix = config()->string('iconify-api.cache_key_prefix');
-    }
-
     /**
      * @param  array<int,string>  $icons
      * @return array{found: array<string, TIconResponse>, not_found: array<int, string>}
@@ -57,26 +46,5 @@ class CacheRepository
     protected function iconKey(string $set, string $icon): string
     {
         return "{$this->cachePrefix}:{$set}:{$icon}";
-    }
-
-    public function getFileSet(string $set): ?string
-    {
-        $file = Cache::store($this->store)->get($this->fileSetKey($set));
-
-        if (! is_string($file)) {
-            return null;
-        }
-
-        return $file;
-    }
-
-    public function setFileSet(string $set, string $file): void
-    {
-        Cache::store($this->store)->put($this->fileSetKey($set), $file);
-    }
-
-    protected function fileSetKey(string $set): string
-    {
-        return "{$this->cachePrefix}:{$set}:file";
     }
 }
