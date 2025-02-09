@@ -18,7 +18,7 @@ class IconifyDirective
         }
 
         return <<<HTML
-            <script>
+            <script type="text/javascript">
                 if(!window.IconifyProviders) {
                     window.IconifyProviders = {};
                 }

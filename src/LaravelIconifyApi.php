@@ -33,15 +33,15 @@ class LaravelIconifyApi
         return $store;
     }
 
-    public function domain(): string
+    public function domain(): ?string
     {
-        $domain = config()->get('iconify-api.route_domain') ?? config()->get('app.url');
+        $domain = config()->get('iconify-api.route_domain');
 
-        if (! is_string($domain) || empty($domain)) {
-            throw new Exception('Domain must be a set in your env or config files');
+        if (! is_string($domain) && $domain !== null) {
+            throw new Exception('Domain must be a string or null');
         }
 
-        return $domain;
+        return $domain ? $domain : null;
     }
 
     public function path(): string

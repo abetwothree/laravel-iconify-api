@@ -18,7 +18,7 @@ it('tests loading the full collections', function () {
     ]);
 });
 
-it('tests loading full collection from individual sets', function() {
+it('tests loading full collection from individual sets', function () {
     LaravelIconifyApi::partialMock()
         ->shouldReceive('fullSetLocation')
         ->once()
