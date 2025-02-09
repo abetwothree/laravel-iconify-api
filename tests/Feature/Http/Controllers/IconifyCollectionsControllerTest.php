@@ -1,6 +1,29 @@
 <?php
 
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
+
 it('tests loading the full collections', function () {
+    $response = test()->get(route('iconify-api.collections.index'));
+    $response->assertStatus(200);
+
+    $response->assertJsonStructure([
+        '*' => [
+            'name',
+            'total',
+            'author',
+            'license',
+            'samples',
+            'palette',
+        ],
+    ]);
+});
+
+it('tests loading full collection from individual sets', function() {
+    LaravelIconifyApi::partialMock()
+        ->shouldReceive('fullSetLocation')
+        ->once()
+        ->andReturn('wrong/path');
+
     $response = test()->get(route('iconify-api.collections.index'));
     $response->assertStatus(200);
 

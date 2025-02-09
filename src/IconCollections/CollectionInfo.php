@@ -32,7 +32,7 @@ class CollectionInfo
      */
     public function get(string $set): array
     {
-        $infoFilePath = LaravelIconifyApi::iconsLocation().'/@iconify-json/'.$set.'/info.json';
+        $infoFilePath = LaravelIconifyApi::singleSetLocation().'/'.$set.'/info.json';
 
         if (file_exists($infoFilePath)) {
             /** @var TIconCollectionInfo */

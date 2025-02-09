@@ -17,7 +17,7 @@ class CollectionsInfo
      */
     public function get(): array
     {
-        $filePath = LaravelIconifyApi::iconsLocation().'/@iconify/json/collections.json';
+        $filePath = LaravelIconifyApi::fullSetLocation().'/json/collections.json';
 
         if (file_exists($filePath)) {
             /** @var TIconCollections */
@@ -34,10 +34,8 @@ class CollectionsInfo
      */
     protected function gatherFromIndividualSets(): array
     {
-        $folderPath = LaravelIconifyApi::iconsLocation().'/@iconify-json';
-
         $finder = new Finder;
-        $finder->directories()->in($folderPath);
+        $finder->directories()->in(LaravelIconifyApi::singleSetLocation());
         $collections = [];
 
         foreach ($finder as $dir) {

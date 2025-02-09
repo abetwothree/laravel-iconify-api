@@ -12,6 +12,16 @@ class LaravelIconifyApi
         return config()->string('iconify-api.icons_location');
     }
 
+    public function fullSetLocation(): string
+    {
+        return $this->iconsLocation().'/@iconify';
+    }
+
+    public function singleSetLocation(): string
+    {
+        return $this->iconsLocation().'/@iconify-json';
+    }
+
     public function cacheStore(): string
     {
         $store = config()->get('iconify-api.cache_store') ?? config()->get('cache.default');

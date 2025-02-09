@@ -29,7 +29,7 @@ class IconSetsFileFinder implements IconSetsFileFinderContract
      */
     protected function getIconsFromIndividualSets(string $set): bool|string
     {
-        $folderPath = LaravelIconifyApi::iconsLocation().'/@iconify-json/'.$set;
+        $folderPath = LaravelIconifyApi::singleSetLocation().'/'.$set;
         $filePath = $folderPath.'/icons.json';
 
         if (! is_dir($folderPath) || ! file_exists($filePath)) {
@@ -44,7 +44,7 @@ class IconSetsFileFinder implements IconSetsFileFinderContract
      */
     protected function getIconsFromAllSets(string $set): bool|string
     {
-        $basePath = LaravelIconifyApi::iconsLocation().'/@iconify/json/json';
+        $basePath = LaravelIconifyApi::fullSetLocation().'/json/json';
         $filepath = $basePath."/{$set}.json";
 
         if (! is_dir($basePath) || ! file_exists($filepath)) {
