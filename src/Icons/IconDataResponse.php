@@ -3,14 +3,26 @@
 namespace AbeTwoThree\LaravelIconifyApi\Icons;
 
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
+use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
 
 /**
- * @phpstan-import-type TIconResponse from IconFinderContract
+ * @phpstan-import-type TIconSetInfo from IconSetInfoFinderContract
+ * @phpstan-import-type TIconData from IconFinderContract
+ * @phpstan-type TIconResponse = array{
+ *      prefix: string,
+ *      lastModified: int,
+ *      width: int,
+ *      height: int,
+ *      aliases: array<string, array<string,string>>,
+ *      icons: array<string, array<string, string>>,
+ *      not_found?: array<int, string>,
+ * }
  */
 class IconDataResponse
 {
     public function __construct(
-        protected IconFinderContract $iconFinder
+        protected IconFinderContract $iconFinder,
+        protected IconSetInfoFinderContract $iconSetInfoFinder,
     ) {}
 
     /**
@@ -21,44 +33,29 @@ class IconDataResponse
      */
     public function get(string $set, array $icons): array
     {
-        $foundIcons = $this->findIcons($set, $icons);
+        $iconInfo = $this->iconSetInfoFinder->find($set);
+        $foundIcons = $this->iconFinder->find($set, $icons);
 
-        return $this->flattenIconResponse($foundIcons);
+        return $this->flattenIconResponse($iconInfo, $foundIcons);
     }
 
     /**
-     * @param  array<int, string>  $icons
-     * @return array<string, TIconResponse>
-     */
-    protected function findIcons(string $set, array $icons): array
-    {
-        return $this->iconFinder->find($set, $icons);
-    }
-
-    /**
-     * @param  array<string, TIconResponse>  $icons
+     * @param  TIconSetInfo  $iconSetInfo
+     * @param  array<string, TIconData>  $icons
      * @return TIconResponse
      */
-    protected function flattenIconResponse(array $icons): array
+    protected function flattenIconResponse(array $iconSetInfo, array $icons): array
     {
-        $flattenedIcons = [
-            'prefix' => '',
-            'lastModified' => 0,
-            'width' => 0,
-            'height' => 0,
-            'aliases' => [],
-            'icons' => [],
-        ];
+        $iconSetInfo['icons'] = [];
+        $iconSetInfo['aliases'] = [];
+        $iconSetInfo['not_found'] = [];
 
         foreach ($icons as $icon) {
-            $flattenedIcons['prefix'] = $icon['prefix'];
-            $flattenedIcons['lastModified'] = $icon['lastModified'];
-            $flattenedIcons['width'] = $icon['width'];
-            $flattenedIcons['height'] = $icon['height'];
-            $flattenedIcons['aliases'] = array_merge($flattenedIcons['aliases'], $icon['aliases']);
-            $flattenedIcons['icons'] = array_merge($flattenedIcons['icons'], $icon['icons']);
+            $iconSetInfo['aliases'] = array_merge($iconSetInfo['aliases'], $icon['aliases']);
+            $iconSetInfo['icons'] = array_merge($iconSetInfo['icons'], $icon['icons']);
+            $iconSetInfo['not_found'] = array_merge($iconSetInfo['not_found'], ($icon['not_found']?? []));
         }
 
-        return $flattenedIcons;
+        return $iconSetInfo;
     }
 }

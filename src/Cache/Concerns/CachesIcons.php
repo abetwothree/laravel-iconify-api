@@ -6,13 +6,13 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContra
 use Illuminate\Support\Facades\Cache;
 
 /**
- * @phpstan-import-type TIconResponse from IconFinderContract
+ * @phpstan-import-type TIconData from IconFinderContract
  */
 trait CachesIcons
 {
     /**
      * @param  array<int,string>  $icons
-     * @return array{found: array<string, TIconResponse>, not_found: array<int, string>}
+     * @return array{found: array<string, TIconData>, not_found: array<int, string>}
      */
     public function getIcons(string $set, array $icons): array
     {
@@ -22,7 +22,7 @@ trait CachesIcons
         ];
 
         foreach ($icons as $icon) {
-            /** @var TIconResponse|null $cachedIcon */
+            /** @var TIconData|null $cachedIcon */
             $cachedIcon = Cache::store($this->store)->get($this->iconKey($set, $icon));
 
             if ($cachedIcon) {
@@ -36,7 +36,7 @@ trait CachesIcons
     }
 
     /**
-     * @param  TIconResponse  $iconData
+     * @param  TIconData  $iconData
      */
     public function setIcon(string $set, string $icon, array $iconData): void
     {

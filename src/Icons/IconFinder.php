@@ -25,12 +25,8 @@ class IconFinder implements IconFinderContract
         $iconsData = json_decode($contents, true);
 
         $iconsSetInfo = [
-            'prefix' => $iconsData['prefix'],
-            'lastModified' => $iconsData['lastModified'],
-            'width' => $iconsData['width'],
-            'height' => $iconsData['height'],
-            'aliases' => [],
             'icons' => [],
+            'aliases' => [],
         ];
 
         $iconsResponse = [];
