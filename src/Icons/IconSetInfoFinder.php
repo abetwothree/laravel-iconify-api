@@ -31,6 +31,8 @@ class IconSetInfoFinder implements IconSetInfoFinderContract
             'height' => $content['height'] ?? 0,
         ];
 
+        unset($content);
+
         return $data;
     }
 }
