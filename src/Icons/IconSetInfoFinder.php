@@ -8,6 +8,7 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSets
 
 /**
  * @phpstan-import-type TIconSetData from IconFinderContract
+ * @phpstan-import-type TIconSetInfo from IconSetInfoFinderContract
  */
 class IconSetInfoFinder implements IconSetInfoFinderContract
 {
@@ -20,10 +21,10 @@ class IconSetInfoFinder implements IconSetInfoFinderContract
     {
         $file = $this->iconSetsFileFinder->find($set);
 
-        /** @var array<string, string|int> $content */
+        /** @var TIconSetData $content */
         $content = json_decode((string) file_get_contents($file), true);
 
-        /** @var TIconSetData $data */
+        /** @var TIconSetInfo $data */
         $data = [
             'prefix' => $content['prefix'],
             'lastModified' => $content['lastModified'],

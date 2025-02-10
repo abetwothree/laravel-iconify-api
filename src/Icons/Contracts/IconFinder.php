@@ -5,11 +5,11 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
 /**
  * @phpstan-type TIconSetData = array{
  *      prefix: string,
- *      width: int,
- *      height: int,
  *      lastModified: int,
  *      icons: array<string, array{body: string}>,
  *      aliases: array<string, array<string,string>>,
+ *      width?: int,
+ *      height?: int,
  * }
  * @phpstan-type TIconData = array{
  *      icons: array<string, array{body: string}>,

@@ -6,6 +6,6 @@ arch('it will not use debugging functions')
 
 arch()->preset()->php();
 
-arch()->preset()->security()->ignoring('assert');
+arch()->preset()->security();
 
 arch()->preset()->laravel();

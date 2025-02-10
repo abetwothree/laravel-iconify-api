@@ -18,11 +18,9 @@ class IconFinder implements IconFinderContract
     public function find(string $set, array $icons): array
     {
         $iconFile = $this->iconSetsFileFinder->find($set);
-        $contents = file_get_contents($iconFile);
-        assert($contents !== false);
 
         /** @var TIconSetData $iconsData */
-        $iconsData = json_decode($contents, true);
+        $iconsData = json_decode( (string) file_get_contents($iconFile), true);
 
         $iconsSetInfo = [
             'icons' => [],
@@ -47,7 +45,7 @@ class IconFinder implements IconFinderContract
             $iconsResponse[$icon]['icons'][$icon] = $iconsData['icons'][$icon];
         }
 
-        unset($contents, $iconsData);
+        unset($iconsData);
 
         return $iconsResponse;
     }
