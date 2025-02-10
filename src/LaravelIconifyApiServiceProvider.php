@@ -19,6 +19,16 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class LaravelIconifyApiServiceProvider extends PackageServiceProvider
 {
+    public function boot(): static
+    {
+        if (! config()->boolean('iconify-api.enabled')) {
+            return $this;
+        }
+
+        /** @phpstan-ignore-next-line */
+        return parent::boot();
+    }
+
     public function configurePackage(Package $package): void
     {
         /*

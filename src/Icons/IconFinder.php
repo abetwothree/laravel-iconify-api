@@ -20,7 +20,7 @@ class IconFinder implements IconFinderContract
         $iconFile = $this->iconSetsFileFinder->find($set);
 
         /** @var TIconSetData $iconsData */
-        $iconsData = json_decode( (string) file_get_contents($iconFile), true);
+        $iconsData = json_decode((string) file_get_contents($iconFile), true);
 
         $iconsSetInfo = [
             'icons' => [],

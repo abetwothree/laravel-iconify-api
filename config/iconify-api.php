@@ -8,7 +8,7 @@ return [
     | Iconify API Domain
     |--------------------------------------------------------------------------
     | You may change the domain where Iconify API should be active.
-    | If the domain is empty, all domains will be valid.
+    | If the domain is empty, it will be active on your application's domain.
     |
     */
 
@@ -18,7 +18,7 @@ return [
     |--------------------------------------------------------------------------
     | Iconify API Route
     |--------------------------------------------------------------------------
-    | Iconify API will be available under this URL.
+    | Iconify API will be available under this URL path.
     |
     */
 
@@ -87,7 +87,7 @@ return [
     | Cache driver
     |--------------------------------------------------------------------------
     | Cache driver to use for storing the icon set caches. Indices are used to speed up
-    | icon response navigation. Defaults to your application's default cache driver.
+    | icon response. Defaults to your application's default cache driver.
     |
     */
 
@@ -101,7 +101,7 @@ return [
     | some reason you would like to change this prefix, you can do so here.
     |
     | The format of Iconify API cache keys is:
-    | {cache-prefix}:{icon-set}:{icon-name}
+    | {cache-prefix}:{icon-set-prefix}:{icon-name}
     |
     */
 
