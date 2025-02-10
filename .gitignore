@@ -4,6 +4,7 @@ composer.lock
 
 # Frontend Assets
 /node_modules
+/workbench/node_modules
 
 # Logs
 npm-debug.log
@@ -13,6 +14,7 @@ yarn-error.log
 .phpunit.cache
 .phpunit.result.cache
 /build
+.DS_Store
 
 # IDE Helper
 _ide_helper.php
@@ -30,3 +32,4 @@ phpstan.neon
 testbench.yaml
 /docs
 /coverage
+coverage.xml
