@@ -16,15 +16,6 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  *      aliases: array<string, array<string,string>>,
  *      not_found?: array<int, string>,
  * }
- * @phpstan-type TIconResponse = array{
- *      prefix: string,
- *      lastModified: int,
- *      width: int,
- *      height: int,
- *      aliases: array<string, array<string,string>>,
- *      icons: array<string, array<string, string>>,
- *      not_found?: array<int, string>,
- * }
  */
 interface IconFinder
 {
