@@ -47,12 +47,6 @@ This will publish a `iconify-api.php` file in your `config` directory. You can t
 
 For advanced setting details, please see the [config file](config/iconify-api.php).
 
-## Testing
-
-```bash
-composer test
-```
-
 ## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
