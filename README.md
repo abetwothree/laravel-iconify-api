@@ -5,15 +5,15 @@
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/abetwothree/laravel-iconify-api/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/abetwothree/laravel-iconify-api/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/abetwothree/laravel-iconify-api.svg?style=flat-square)](https://packagist.org/packages/abetwothree/laravel-iconify-api)
 
-This is a Laravel package for the [Iconify](https://iconify.design/index.html) icons [on demand](https://iconify.design/docs/icon-components/) API. It allows you to easily use on demand icons and use your Laravel applicatioin as the Iconify API.
+This is a Laravel package for the [Iconify](https://iconify.design/index.html) icons [on demand API](https://iconify.design/docs/icon-components/). It allows you to easily use on demand icons and use your Laravel applicatioin as the Iconify API.
 
 It works similarly to the [Node Iconify API](https://github.com/iconify/api) and is a spiritual successor to their [PHP implementation](https://github.com/iconify/api.php).
 
-Great whether you use Livewire, Inertia, or just plain old Blade views to render your Laravel application and want to render icons dynamically.
+On demand icons work great whether you use Livewire, Inertia, or just plain Blade views to render your Laravel application and want to render icons dynamically using a single component.
 
 ## How To Use
 
-You can install the package via composer:
+Install the package via composer:
 
 ```bash
 composer require abetwothree/laravel-iconify-api
@@ -25,11 +25,11 @@ In your core application blade layout file add the following directive in the he
 @iconify
 ```
 
-This will configure the Iconify on demand icons to load the icons from your Laravel application.
+This will configure the [Iconify API](https://iconify.design/docs/api/providers.html#api-config) on demand icons to load the icons from your Laravel application instead of the Iconify API.
 
 ### How To Display Icons
 
-To displays icons follow the instructions on the [Iconify](https://iconify.design/docs/icon-components/) on demand docs and use their component libraries in your Laravel Application.
+To displays icons follow the instructions on the [Iconify](https://iconify.design/docs/icon-components/) on demand docs and use any of their component libraries in your Laravel Application.
 
 You also need icon set data to be available in your application. You'll need to install the icon set data using NPM. See more [info here](https://iconify.design/docs/icons/icon-data.html#sources).
 
