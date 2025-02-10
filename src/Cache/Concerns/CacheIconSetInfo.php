@@ -2,10 +2,8 @@
 
 namespace AbeTwoThree\LaravelIconifyApi\Cache\Concerns;
 
-use Illuminate\Support\Facades\Cache;
-use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
-use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @phpstan-import-type TIconSetInfo from IconSetInfoFinderContract

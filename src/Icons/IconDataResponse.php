@@ -8,6 +8,7 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetIn
 /**
  * @phpstan-import-type TIconSetInfo from IconSetInfoFinderContract
  * @phpstan-import-type TIconData from IconFinderContract
+ *
  * @phpstan-type TIconResponse = array{
  *      prefix: string,
  *      lastModified: int,
@@ -53,7 +54,7 @@ class IconDataResponse
         foreach ($icons as $icon) {
             $iconSetInfo['aliases'] = array_merge($iconSetInfo['aliases'], $icon['aliases']);
             $iconSetInfo['icons'] = array_merge($iconSetInfo['icons'], $icon['icons']);
-            $iconSetInfo['not_found'] = array_merge($iconSetInfo['not_found'], ($icon['not_found']?? []));
+            $iconSetInfo['not_found'] = array_merge($iconSetInfo['not_found'], ($icon['not_found'] ?? []));
         }
 
         return $iconSetInfo;
