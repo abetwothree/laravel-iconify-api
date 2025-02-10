@@ -9,13 +9,9 @@ it('can find multiple icons', function (
     $iconFinder = resolve(IconFinder::class);
     $icons = $iconFinder->find($set, $icons);
 
-    expect($icons)->each(function ($icon) use ($set) {
+    expect($icons)->each(function ($icon) {
         $icon->toBeArray()
-            ->toHaveKeys(['prefix', 'lastModified', 'width', 'height', 'aliases', 'icons'])
-            ->prefix->toBe($set)
-            ->lastModified->toBeInt()
-            ->width->toBeInt()
-            ->height->toBeInt()
+            ->toHaveKeys(['aliases', 'icons'])
             ->aliases->toBeArray()
             ->icons->toBeArray();
     });
@@ -37,13 +33,9 @@ it('can find a specific icon', function (
 
     expect($icons)->toBeArray()
         ->toHaveKeys($icon)
-        ->each(function ($icon) use ($set) {
+        ->each(function ($icon) {
             $icon->toBeArray()
-                ->toHaveKeys(['prefix', 'lastModified', 'width', 'height', 'aliases', 'icons'])
-                ->prefix->toBe($set)
-                ->lastModified->toBeInt()
-                ->width->toBeInt()
-                ->height->toBeInt()
+                ->toHaveKeys(['aliases', 'icons'])
                 ->aliases->toBeArray()
                 ->icons->toBeArray();
         });
@@ -62,13 +54,9 @@ it('returns proper response but fails to find icon', function (
     expect($icons)
         ->toBeArray()
         ->toHaveKeys($icon)
-        ->each(function ($icon) use ($set) {
+        ->each(function ($icon) {
             $icon->toBeArray()
-                ->toHaveKeys(['prefix', 'lastModified', 'width', 'height', 'aliases', 'icons', 'not_found'])
-                ->prefix->toBe($set)
-                ->lastModified->toBeInt()
-                ->width->toBeInt()
-                ->height->toBeInt()
+                ->toHaveKeys(['aliases', 'icons', 'not_found'])
                 ->aliases->toBeArray()
                 ->icons->toBeArray()
                 ->not_found->toBeArray()

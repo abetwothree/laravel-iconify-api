@@ -20,14 +20,17 @@ class IconSetInfoFinder implements IconSetInfoFinderContract
     {
         $file = $this->iconSetsFileFinder->find($set);
 
-        /** @var TIconSetData $content */
+        /** @var array<string, string|int> $content */
         $content = json_decode((string) file_get_contents($file), true);
 
-        return [
+        /** @var TIconSetData $data */
+        $data = [
             'prefix' => $content['prefix'],
-            'width' => $content['width'],
-            'height' => $content['height'],
             'lastModified' => $content['lastModified'],
+            'width' => $content['width'] ?? 0,
+            'height' => $content['height'] ?? 0,
         ];
+
+        return $data;
     }
 }
