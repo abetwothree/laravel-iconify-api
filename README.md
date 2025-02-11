@@ -59,6 +59,14 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 
+## Code Quality
+
+This package uses the following code quality tools:
+
+- PHPStan 2.x at level 10 for static analysis.
+- Laravel Pint for consistent code style.
+- PHP Pest for testing.
+
 ## Credits
 
 - [Abraham Arango](https://github.com/abetwothree)

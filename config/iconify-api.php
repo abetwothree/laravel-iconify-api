@@ -22,7 +22,7 @@ return [
     |
     */
 
-    'route_path' => 'iconify-api',
+    'route_path' => 'iconify',
 
     /*
     |--------------------------------------------------------------------------
@@ -63,7 +63,7 @@ return [
     |--------------------------------------------------------------------------
     | Iconify Icon Providers
     |--------------------------------------------------------------------------
-    | By default, this will package will use your application's url as the provider
+    | By default, this package will use your Laravel application as the provider
     | for all iconify icons you install with NPM. If you would like to use a
     | different provider for a specific icon set, you can specify it here.
     |

@@ -9,7 +9,9 @@ class IconifyDirective
     public function render(): string
     {
         $url = LaravelIconifyApi::domain().'/'.LaravelIconifyApi::path();
-        $customProviders = $this->gatherCustomProviders();
+
+        /** @var array<string, array{resources: array<int, string>, rotate?: int}> $customProviders */
+        $customProviders = config()->get('iconify-api.custom_providers', []);
 
         if (empty($customProviders)) {
             $customProviders = '';
@@ -33,23 +35,5 @@ class IconifyDirective
                 };
             </script>
         HTML;
-    }
-
-    /**
-     * @return array<string, array{resources: array<int, string>, rotate?: int}>
-     */
-    protected function gatherCustomProviders(): array
-    {
-        /**
-         * @var array<string, array{resources: array<int, string>, rotate?: int}> $customProviders
-         */
-        $customProviders = config()->get('iconify-api.custom_providers', []);
-        $providerList = [];
-
-        foreach ($customProviders as $provider => $data) {
-            $providerList[$provider] = $data;
-        }
-
-        return $providerList;
     }
 }
