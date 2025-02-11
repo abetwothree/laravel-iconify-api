@@ -9,11 +9,17 @@ it('can find info', function (
     $info = $iconFinder->find($set);
 
     expect($info)->toBeArray()
-        ->toHaveKeys(['prefix', 'lastModified', 'width', 'height'])
+        ->toHaveKeys(['prefix', 'lastModified'])
         ->prefix->toBe($set)
-        ->lastModified->toBeInt()
-        ->width->toBeInt()
-        ->height->toBeInt();
+        ->lastModified->toBeInt();
+
+    if (isset($info['width'])) {
+        expect($info['width'])->toBeInt();
+    }
+
+    if (isset($info['height'])) {
+        expect($info['height'])->toBeInt();
+    }
 })->with([
     ['mdi'],
     ['heroicons'],

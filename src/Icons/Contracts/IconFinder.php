@@ -8,8 +8,8 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  *      lastModified: int,
  *      icons: array<string, array{body: string}>,
  *      aliases: array<string, array<string,string>>,
- *      width?: int,
- *      height?: int,
+ *      width?: int|null,
+ *      height?: int|null,
  * }
  * @phpstan-type TIconData = array{
  *      icons: array<string, array{body: string}>,

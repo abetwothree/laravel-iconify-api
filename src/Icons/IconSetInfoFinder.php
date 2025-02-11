@@ -28,9 +28,15 @@ class IconSetInfoFinder implements IconSetInfoFinderContract
         $data = [
             'prefix' => $content['prefix'],
             'lastModified' => $content['lastModified'],
-            'width' => $content['width'] ?? 0,
-            'height' => $content['height'] ?? 0,
         ];
+
+        if(isset($content['width']) && ! empty($content['width'])) {
+            $data['width'] = $content['width'];
+        }
+
+        if(isset($content['height']) && ! empty($content['height'])) {
+            $data['height'] = $content['height'];
+        }
 
         unset($content);
 
