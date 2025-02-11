@@ -30,11 +30,11 @@ class IconSetInfoFinder implements IconSetInfoFinderContract
             'lastModified' => $content['lastModified'],
         ];
 
-        if(isset($content['width']) && ! empty($content['width'])) {
+        if (isset($content['width']) && ! empty($content['width'])) {
             $data['width'] = $content['width'];
         }
 
-        if(isset($content['height']) && ! empty($content['height'])) {
+        if (isset($content['height']) && ! empty($content['height'])) {
             $data['height'] = $content['height'];
         }
 
