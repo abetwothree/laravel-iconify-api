@@ -73,8 +73,6 @@ This package uses Laravel's caching system to cache the icon data to make repeat
 
 You can set which cache store to use for this package in your `config/iconify-api.php` file. Otherwise, it will use your default cache store setting.
 
-If your application doesn't have a cache store defined then this package will not use any caching when fetching icon data. Though we recommend using a cache store to improve performance.
-
 ## Missing Features
 
 The MVP of this package was to provide an API for on demand icons in your Laravel Application. A few API endpoints that currently exist on the Node JS package are missing in this package and will be added in future releases:
