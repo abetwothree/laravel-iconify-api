@@ -58,4 +58,4 @@ jobs:
           npm ci
 
       - name: Execute tests
-        run: vendor/bin/pest --ci --coverage-text
+        run: vendor/bin/pest --ci --coverage-text --coverage-clover clover.xml
