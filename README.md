@@ -43,7 +43,7 @@ By default Icon API routes will work out of the following route path in your Lar
 The following routes are currently available:
 
 - `/iconify/api/{prefix}.json?icons={icon-prefix}` - Returns icon SVG data for an icon set. Icon prefix can be comma separated for multiple icons.
-- `/iconify/api/{prefix}/icons.jsonicons={icon-prefix}` - Same as above.
+- `/iconify/api/{prefix}/icons.json?icons={icon-prefix}` - Same as above.
 - `/iconify/api/collections` - Returns a list of icon collections available in your application.
 - `/iconify/api/collection?prefix={prefix}` - Returns the information for a specific icon collection.
 
@@ -67,6 +67,14 @@ This will publish a `iconify-api.php` file in your `config` directory. You can t
 
 For advanced setting details, please see the [config file](config/iconify-api.php).
 
+If you update your configuration file, make sure to break your application cache with the following commands:
+
+```bash
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+```
+
 ## Icon Caching
 
 This package uses Laravel's caching system to cache the icon data to make repeated requests for the same icon faster. It caches icon data when it is requested so that it only caches the icons that are actually used in your application.
@@ -75,7 +83,7 @@ You can set which cache store to use for this package in your `config/iconify-ap
 
 ## Missing Features
 
-The MVP of this package was to provide an API for on demand icons in your Laravel Application. A few API endpoints that currently exist on the Node JS package are missing in this package and will be added in future releases:
+The MVP of this package was to provide an API for on demand icons in your Laravel Application. A few API endpoints that currently exist on the Node JS package that are missing in this package and will be added in future releases:
 
 - [ ] Return icon data in in JSONP callback format.
 - [ ] List icons in a collection.

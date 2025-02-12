@@ -15,8 +15,8 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetIn
  *      width: int,
  *      height: int,
  *      aliases: array<string, array<string,string>>,
- *      icons: array<string, array<string, string>>,
- *      not_found?: array<int, string>,
+ *      icons: array<string, array<string,string>>,
+ *      not_found?: array<int,string>,
  * }
  */
 class IconDataResponse
@@ -27,17 +27,15 @@ class IconDataResponse
     ) {}
 
     /**
-     * Summary of response
-     *
      * @param  array<int, string>  $icons
      * @return TIconResponse
      */
     public function get(string $set, array $icons): array
     {
-        $iconInfo = $this->iconSetInfoFinder->find($set);
+        $iconSetInfo = $this->iconSetInfoFinder->find($set);
         $foundIcons = $this->iconFinder->find($set, $icons);
 
-        return $this->flattenIconResponse($iconInfo, $foundIcons);
+        return $this->flattenIconResponse($iconSetInfo, $foundIcons);
     }
 
     /**
