@@ -26,7 +26,7 @@ it('tests loading an icon', function (string $route) {
 ]);
 
 it('tests loading multiple icons', function (string $route) {
-    $response = test()->get(route($route, ['set' => 'bytesize', 'icons' => 'activity,alert']));
+    $response = test()->get(route($route, ['set' => 'bytesize', 'icons' => 'activity,alert,bad-icon']));
     $response->assertStatus(200);
     $response->assertJsonStructure([
         'prefix',
@@ -42,7 +42,10 @@ it('tests loading multiple icons', function (string $route) {
                 'body',
             ],
         ],
+        'not_found',
     ]);
+
+    expect($response->json('not_found'))->toBe(['bad-icon']);
 })->with([
     ['iconify-api.set-icons-json.show'],
     ['iconify-api.set-json.show'],

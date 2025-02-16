@@ -2,44 +2,39 @@
 
 namespace AbeTwoThree\LaravelIconifyApi\Icons;
 
-use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
-use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
+use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder;
+use pcrov\JsonReader\JsonReader;
 
 /**
- * @phpstan-import-type TIconSetData from IconFinderContract
  * @phpstan-import-type TIconSetInfo from IconSetInfoFinderContract
  */
 class IconSetInfoFinder implements IconSetInfoFinderContract
 {
     public function __construct(
-        protected IconSetsFileFinderContract $iconSetsFileFinder
+        protected IconSetsFileFinder $fileFinder,
     ) {}
 
     /** {@inheritDoc} */
-    public function find(string $set): array
+    public function find(string $prefix): array
     {
-        $file = $this->iconSetsFileFinder->find($set);
+        $file = $this->fileFinder->find($prefix, 'info');
 
-        /** @var TIconSetData $content */
-        $content = json_decode((string) file_get_contents($file), true);
+        $reader = new JsonReader;
+        $reader->open($file);
 
-        /** @var TIconSetInfo $data */
-        $data = [
-            'prefix' => $content['prefix'],
-            'lastModified' => $content['lastModified'],
-        ];
-
-        if (isset($content['width']) && ! empty($content['width'])) {
-            $data['width'] = $content['width'];
+        if (str_contains($file, LaravelIconifyApi::singleSetLocation())) {
+            $reader->read();
+        } else {
+            $reader->read('info');
         }
 
-        if (isset($content['height']) && ! empty($content['height'])) {
-            $data['height'] = $content['height'];
-        }
+        /** @var TIconSetInfo $info */
+        $info = $reader->value();
 
-        unset($content);
+        $reader->close();
 
-        return $data;
+        return $info;
     }
 }

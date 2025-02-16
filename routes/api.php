@@ -13,4 +13,5 @@ Route::group([
     Route::get('/{set}.json', 'IconifyIconsController@show')->name('iconify-api.set-json.show');
     Route::get('/collections', 'IconifyCollectionsController@index')->name('iconify-api.collections.index');
     Route::get('/collection', 'IconifyCollectionsController@show')->name('iconify-api.collections.show');
+    Route::get('/search', 'IconifyIconSearchController@index')->name('iconify-api.search.index');
 });

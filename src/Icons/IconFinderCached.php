@@ -13,18 +13,18 @@ class IconFinderCached implements IconFinderContract
     ) {}
 
     /** {@inheritDoc} */
-    public function find(string $set, array $icons): array
+    public function find(string $prefix, array $icons): array
     {
-        $cachedIcons = $this->cacheRepository->getIcons($set, $icons);
+        $cachedIcons = $this->cacheRepository->getIcons($prefix, $icons);
 
         if (count($cachedIcons['not_found']) === 0) {
             return $cachedIcons['found'];
         }
 
-        $foundIcons = $this->iconFinder->find($set, $cachedIcons['not_found']);
+        $foundIcons = $this->iconFinder->find($prefix, $cachedIcons['not_found']);
 
         foreach ($foundIcons as $icon => $iconData) {
-            $this->cacheRepository->setIcon($set, $icon, $iconData);
+            $this->cacheRepository->setIcon($prefix, $icon, $iconData);
         }
 
         return array_merge($cachedIcons['found'], $foundIcons);

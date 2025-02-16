@@ -8,10 +8,10 @@ use Exception;
 
 class IconSetsFileFinder implements IconSetsFileFinderContract
 {
-    public function find(string $set): string
+    public function find(string $prefix, string $type = 'icons'): string
     {
-        $singleSetFile = $this->getIconsFromIndividualSets($set);
-        $allSetsFile = $this->getIconsFromAllSets($set);
+        $singleSetFile = $this->getIconsFromIndividualSets($prefix, $type);
+        $allSetsFile = $this->getIconsFromAllSets($prefix);
 
         if (is_string($singleSetFile)) {
             return $singleSetFile;
@@ -21,18 +21,17 @@ class IconSetsFileFinder implements IconSetsFileFinderContract
             return $allSetsFile;
         }
 
-        throw new Exception("Could not find the icons file for the set: {$set}");
+        throw new Exception("Could not find the icons file for the set: {$prefix}");
     }
 
     /**
      * This will try to find the path of the icons of individual icon set as "@iconify-json/mdi"
      */
-    protected function getIconsFromIndividualSets(string $set): bool|string
+    protected function getIconsFromIndividualSets(string $prefix, string $type): bool|string
     {
-        $folderPath = LaravelIconifyApi::singleSetLocation().'/'.$set;
-        $filePath = $folderPath.'/icons.json';
+        $filePath = LaravelIconifyApi::singleSetJsonLocation($prefix, $type);
 
-        if (! is_dir($folderPath) || ! file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             return false;
         }
 
@@ -42,10 +41,10 @@ class IconSetsFileFinder implements IconSetsFileFinderContract
     /**
      * This will try to find the icons file path from the full "@iconify/json" package
      */
-    protected function getIconsFromAllSets(string $set): bool|string
+    protected function getIconsFromAllSets(string $prefix): bool|string
     {
-        $basePath = LaravelIconifyApi::fullSetLocation().'/json/json';
-        $filepath = $basePath."/{$set}.json";
+        $basePath = LaravelIconifyApi::fullSetsJsonLocation();
+        $filepath = $basePath."/{$prefix}.json";
 
         if (! is_dir($basePath) || ! file_exists($filepath)) {
             return false;

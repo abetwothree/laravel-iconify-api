@@ -29,7 +29,13 @@
         "pestphp/pest-plugin-laravel": "^3.0",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan-deprecation-rules": "^2.0",
-        "phpstan/phpstan-phpunit": "^2.0"
+        "phpstan/phpstan-phpunit": "^2.0",
+        "pcrov/jsonreader": "^1.0.3"
+    },
+    "suggest": {
+        "laravel/scout": "Used to search icons with a scout driver (e.g. Algolia, Meilisearch, Typesense, Database, etc)",
+        "pcrov/jsonreader": "Used to search icons without scout to process large JSON icon files",
+        "ext-intl": "required by pcrov/jsonreader"
     },
     "autoload": {
         "psr-4": {
@@ -53,11 +59,10 @@
         "prepare": "@php vendor/bin/testbench package:discover --ansi",
         "analyse": "vendor/bin/phpstan analyse",
         "test": "vendor/bin/pest",
+        "test-cov": "export XDEBUG_MODE=coverage && vendor/bin/pest --coverage --coverage-clover coverage.xml",
+        "test-cov-html": "export XDEBUG_MODE=coverage && vendor/bin/pest --coverage-html coverage",
+        "test-cov-xml": "export XDEBUG_MODE=coverage && vendor/bin/pest --coverage-xml coverage",
         "testbench": "vendor/bin/testbench",
-        "test-coverage": "export XDEBUG_MODE=coverage && vendor/bin/pest --coverage",
-        "test-coverage-html": "export XDEBUG_MODE=coverage && vendor/bin/pest --coverage-html coverage",
-        "test-coverage-xml": "export XDEBUG_MODE=coverage && vendor/bin/pest --coverage-xml coverage",
-        "test-coverage-cov": "export XDEBUG_MODE=coverage && vendor/bin/pest --coverage-clover coverage.xml",
         "format": "vendor/bin/pint",
         "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
         "build": "@php vendor/bin/testbench workbench:build --ansi",

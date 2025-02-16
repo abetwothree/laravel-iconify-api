@@ -12,17 +12,16 @@ class IconSetsFileFinderCached implements IconSetsFileFinderContract
         protected CacheRepository $cacheRepository
     ) {}
 
-    public function find(string $set): string
+    public function find(string $prefix, string $type = 'icons'): string
     {
-        $file = $this->cacheRepository->getFileSet($set);
+        $file = $this->cacheRepository->getFileSet($prefix, $type);
 
         if ($file !== null) {
             return $file;
         }
 
-        $file = $this->iconSetsFileFinder->find($set);
-
-        $this->cacheRepository->setFileSet($set, $file);
+        $file = $this->iconSetsFileFinder->find($prefix, $type);
+        $this->cacheRepository->setFileSet($prefix, $file, $type);
 
         return $file;
     }

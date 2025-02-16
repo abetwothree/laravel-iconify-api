@@ -23,5 +23,5 @@ interface IconFinder
      * @param  array<int, string>  $icons
      * @return array<string, TIconData>
      */
-    public function find(string $set, array $icons): array;
+    public function find(string $prefix, array $icons): array;
 }

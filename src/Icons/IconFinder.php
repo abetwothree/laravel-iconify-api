@@ -15,9 +15,9 @@ class IconFinder implements IconFinderContract
     ) {}
 
     /** {@inheritDoc} */
-    public function find(string $set, array $icons): array
+    public function find(string $prefix, array $icons): array
     {
-        $iconFile = $this->iconSetsFileFinder->find($set);
+        $iconFile = $this->iconSetsFileFinder->find($prefix);
 
         /** @var TIconSetData $iconsData */
         $iconsData = json_decode((string) file_get_contents($iconFile), true);

@@ -12,7 +12,6 @@ it('tests loading the full collections', function () {
             'total',
             'author',
             'license',
-            'samples',
             'palette',
         ],
     ]);
@@ -21,7 +20,6 @@ it('tests loading the full collections', function () {
 it('tests loading full collection from individual sets', function () {
     LaravelIconifyApi::partialMock()
         ->shouldReceive('fullSetLocation')
-        ->once()
         ->andReturn('wrong/path');
 
     $response = test()->get(route('iconify-api.collections.index'));
@@ -33,7 +31,6 @@ it('tests loading full collection from individual sets', function () {
             'total',
             'author',
             'license',
-            'samples',
             'palette',
         ],
     ]);
@@ -48,7 +45,6 @@ it('tests getting an error if no prefix is specified', function (string $prefix)
         'total',
         'author',
         'license',
-        'samples',
         'palette',
     ]);
 })->with([

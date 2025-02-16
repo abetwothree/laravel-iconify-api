@@ -14,7 +14,7 @@ trait CachesIcons
      * @param  array<int,string>  $icons
      * @return array{found: array<string, TIconData>, not_found: array<int, string>}
      */
-    public function getIcons(string $set, array $icons): array
+    public function getIcons(string $prefix, array $icons): array
     {
         $cacheResponse = [
             'found' => [],
@@ -23,7 +23,7 @@ trait CachesIcons
 
         foreach ($icons as $icon) {
             /** @var TIconData|null $cachedIcon */
-            $cachedIcon = Cache::store($this->store)->get($this->iconKey($set, $icon));
+            $cachedIcon = Cache::store($this->store)->get($this->iconKey($prefix, $icon));
 
             if ($cachedIcon) {
                 $cacheResponse['found'][$icon] = $cachedIcon;
@@ -38,13 +38,13 @@ trait CachesIcons
     /**
      * @param  TIconData  $iconData
      */
-    public function setIcon(string $set, string $icon, array $iconData): void
+    public function setIcon(string $prefix, string $icon, array $iconData): void
     {
-        Cache::store($this->store)->put($this->iconKey($set, $icon), $iconData);
+        Cache::store($this->store)->put($this->iconKey($prefix, $icon), $iconData);
     }
 
-    protected function iconKey(string $set, string $icon): string
+    protected function iconKey(string $prefix, string $icon): string
     {
-        return "{$this->cachePrefix}:{$set}:{$icon}";
+        return "{$this->cachePrefix}:{$prefix}:{$icon}";
     }
 }

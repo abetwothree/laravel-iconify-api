@@ -4,54 +4,29 @@ namespace AbeTwoThree\LaravelIconifyApi\IconCollections;
 
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use Symfony\Component\Finder\Finder;
+use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi as LaravelIconifyApiFacade;
 
 /**
- * @phpstan-import-type TIconCollectionInfo from CollectionInfo
- *
- * @phpstan-type TIconCollections = array<string, TIconCollectionInfo>
+ * @phpstan-import-type TIconSetInfo from IconSetInfoFinderContract
+ * @phpstan-type TIconInfoCollection = array<string, TIconSetInfo>
  */
 class CollectionsInfo
 {
+    public function __construct(
+        protected IconSetInfoFinderContract $iconSetInfoFinder,
+    ) {}
+
     /**
-     * @return TIconCollections
+     * @return TIconInfoCollection
      */
     public function get(): array
     {
-        $filePath = LaravelIconifyApi::fullSetLocation().'/json/collections.json';
-
-        if (file_exists($filePath)) {
-            /** @var TIconCollections */
-            $data = json_decode((string) file_get_contents($filePath), true);
-        } else {
-            $data = $this->gatherFromIndividualSets();
+        $data = [];
+        foreach(LaravelIconifyApiFacade::prefixes() as $prefix) {
+            $data[$prefix] = $this->iconSetInfoFinder->find($prefix);
         }
 
         return $data;
-    }
-
-    /**
-     * @return TIconCollections
-     */
-    protected function gatherFromIndividualSets(): array
-    {
-        $finder = new Finder;
-        $finder->directories()->in(LaravelIconifyApi::singleSetLocation());
-        $collections = [];
-
-        foreach ($finder as $dir) {
-            $metadataPath = $dir->getRealPath().'/info.json';
-
-            if (! file_exists($metadataPath)) {
-                continue;
-            }
-
-            /** @var TIconCollectionInfo */
-            $metadata = json_decode((string) file_get_contents($metadataPath), true);
-
-            $name = $metadata['prefix'] ?? $dir->getFilename();
-            $collections[$name] = $metadata;
-        }
-
-        return $collections;
     }
 }

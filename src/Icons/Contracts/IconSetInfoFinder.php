@@ -4,10 +4,23 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
 
 /**
  * @phpstan-type TIconSetInfo = array{
- *      prefix: string,
- *      width: int,
+ *      name: string,
+ *      total: int,
+ *      version: string,
+ *      author: array{
+ *          name: string,
+ *          url: string,
+ *      },
+ *      license: array{
+ *          title: string,
+ *          spdx: string,
+ *          url: string,
+ *      },
  *      height: int,
- *      lastModified: int,
+ *      category: string,
+ *      tags: array<int,string>,
+ *      palette: bool,
+ *      samples?: array<int,string>,
  * }
  */
 interface IconSetInfoFinder
@@ -15,5 +28,5 @@ interface IconSetInfoFinder
     /**
      * @return TIconSetInfo
      */
-    public function find(string $set): array;
+    public function find(string $prefix): array;
 }

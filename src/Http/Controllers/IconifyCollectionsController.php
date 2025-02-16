@@ -25,8 +25,8 @@ class IconifyCollectionsController
 
         /** @var CollectionInfo $collection */
         $collection = resolve(CollectionInfo::class);
-        $set = $request->string('prefix');
+        $prefix = $request->string('prefix');
 
-        return response()->json($collection->get($set));
+        return response()->json($collection->get($prefix));
     }
 }

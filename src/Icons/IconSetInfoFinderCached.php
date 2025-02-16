@@ -11,22 +11,22 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetIn
 class IconSetInfoFinderCached implements IconSetInfoFinderContract
 {
     public function __construct(
+        protected IconSetInfoFinder $infoFinder,
         protected CacheRepository $cacheRepository,
-        protected IconSetInfoFinder $iconSetInfoFinder
     ) {}
 
     /** {@inheritDoc} */
-    public function find(string $set): array
+    public function find(string $prefix): array
     {
-        /** @var TIconSetInfo|null $iconSetInfo */
-        $iconSetInfo = $this->cacheRepository->getIconSetInfo($set);
+        $cachedInfo = $this->cacheRepository->getIconSetInfo($prefix);
 
-        if ($iconSetInfo === null) {
-            $iconSetInfo = $this->iconSetInfoFinder->find($set);
-
-            $this->cacheRepository->setIconSetInfo($set, $iconSetInfo);
+        if ($cachedInfo !== null) {
+            return $cachedInfo;
         }
 
-        return $iconSetInfo;
+        $info = $this->infoFinder->find($prefix);
+        $this->cacheRepository->setIconSetInfo($prefix, $info);
+
+        return $info;
     }
 }

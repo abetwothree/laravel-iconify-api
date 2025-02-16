@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class IconifyIconsController
 {
-    public function show(string $set, Request $request): JsonResponse
+    public function show(string $prefix, Request $request): JsonResponse
     {
         if (! $request->has('icons')) {
             return response()->json(['error' => 'No icons specified'], 404);
@@ -18,7 +18,7 @@ class IconifyIconsController
 
         /** @var IconDataResponse $dataResponse */
         $dataResponse = resolve(IconDataResponse::class);
-        $data = $dataResponse->get($set, $icons);
+        $data = $dataResponse->get($prefix, $icons);
 
         return response()->json($data);
     }

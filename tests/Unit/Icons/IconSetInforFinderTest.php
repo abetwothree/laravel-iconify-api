@@ -1,11 +1,11 @@
 <?php
 
-use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoFinder;
+use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoSummaryFinder;
 
 it('can find info', function (
     string $set
 ) {
-    $iconFinder = resolve(IconSetInfoFinder::class);
+    $iconFinder = resolve(IconSetInfoSummaryFinder::class);
     $info = $iconFinder->find($set);
 
     expect($info)->toBeArray()

@@ -5,11 +5,14 @@ namespace AbeTwoThree\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
+use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoSummaryFinder as IconSetInfoSummaryFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconFinderCached;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoFinderCached;
+use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoSummaryFinder;
+use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoSummaryFinderCached;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinderCached;
 use Illuminate\Support\Facades\Blade;
@@ -78,6 +81,14 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
             }
 
             return resolve(IconFinder::class);
+        });
+
+        $this->app->bind(IconSetInfoSummaryFinderContract::class, function ($app) use ($store) {
+            if (! empty($store)) {
+                return resolve(IconSetInfoSummaryFinderCached::class);
+            }
+
+            return resolve(IconSetInfoSummaryFinder::class);
         });
 
         $this->app->bind(IconSetInfoFinderContract::class, function ($app) use ($store) {
