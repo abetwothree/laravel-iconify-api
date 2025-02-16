@@ -19,64 +19,13 @@ class IconFinder implements IconFinderContract
         protected IconSetsFileFinderContract $iconSetsFileFinder
     ) {}
 
-    // /** {@inheritDoc} */
-    // public function find(string $prefix, array $icons): array
-    // {
-    //     $iconFile = $this->iconSetsFileFinder->find($prefix);
-
-    //     /** @var TIconSetData $iconsData */
-    //     $iconsData = json_decode((string) file_get_contents($iconFile), true);
-
-    //     $iconsSetInfo = [
-    //         'icons' => [],
-    //         'aliases' => [],
-    //     ];
-
-    //     $iconsResponse = [];
-
-    //     foreach ($icons as $icon) {
-    //         $iconsResponse[$icon] = $iconsSetInfo;
-
-    //         if (isset($iconsData['aliases'][$icon])) {
-    //             $iconsResponse[$icon]['aliases'][$icon] = $iconsData['aliases'][$icon];
-
-
-    //         }
-
-    //         if (! isset($iconsData['icons'][$icon])) {
-    //             $iconsResponse[$icon]['not_found'][] = $icon;
-
-    //             continue;
-    //         }
-
-    //         $iconsResponse[$icon]['icons'][$icon] = $iconsData['icons'][$icon];
-
-
-    //     }
-
-    //     unset($iconsData);
-
-    //     return $iconsResponse;
-    // }
-
     /** {@inheritDoc} */
     public function find(string $prefix, array $icons): array
     {
         $iconFile = $this->iconSetsFileFinder->find($prefix);
 
-        $iconsData = [];
-        $reader = new JsonReader;
-        $reader->open($iconFile);
-
-        $reader->read('icons');
-        /** @var TIcons $iconsData */
-        $iconsData['icons'] = $reader->value();
-
-        $reader->read('aliases');
-        /** @var TAliases $iconsData */
-        $iconsData['aliases'] = $reader->value();
-
-        $reader->close();
+        /** @var TIconSetData $iconsData */
+        $iconsData = json_decode((string) file_get_contents($iconFile), true);
 
         $iconsSetInfo = [
             'icons' => [],
@@ -89,9 +38,9 @@ class IconFinder implements IconFinderContract
             $iconsResponse[$icon] = $iconsSetInfo;
 
             if (isset($iconsData['aliases'][$icon])) {
-                /** @var TAlias $alias */
-                $alias = $iconsData['aliases'][$icon];
-                $iconsResponse[$icon]['aliases'][$icon] = $alias;
+                $iconsResponse[$icon]['aliases'][$icon] = $iconsData['aliases'][$icon];
+
+
             }
 
             if (! isset($iconsData['icons'][$icon])) {
@@ -100,9 +49,9 @@ class IconFinder implements IconFinderContract
                 continue;
             }
 
-            /** @var TIcon $foundIcon */
-            $foundIcon = $iconsData['icons'][$icon];
-            $iconsResponse[$icon]['icons'][$icon] = $foundIcon;
+            $iconsResponse[$icon]['icons'][$icon] = $iconsData['icons'][$icon];
+
+
         }
 
         unset($iconsData);
