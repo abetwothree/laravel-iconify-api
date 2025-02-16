@@ -2,10 +2,8 @@
 
 namespace AbeTwoThree\LaravelIconifyApi\IconCollections;
 
-use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
-use Symfony\Component\Finder\Finder;
-use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi as LaravelIconifyApiFacade;
+use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
 
 /**
  * @phpstan-import-type TIconSetInfo from IconSetInfoFinderContract
@@ -23,7 +21,7 @@ class CollectionsInfo
     public function get(): array
     {
         $data = [];
-        foreach(LaravelIconifyApiFacade::prefixes() as $prefix) {
+        foreach (LaravelIconifyApiFacade::prefixes() as $prefix) {
             $data[$prefix] = $this->iconSetInfoFinder->find($prefix);
         }
 

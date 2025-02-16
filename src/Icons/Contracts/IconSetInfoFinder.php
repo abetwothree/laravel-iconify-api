@@ -20,6 +20,7 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  *      category: string,
  *      tags: array<int,string>,
  *      palette: bool,
+ *      prefix?: string,
  *      samples?: array<int,string>,
  * }
  */

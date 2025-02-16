@@ -30,17 +30,14 @@ class FileSearcher
     {
         $this->filterBag = $filterBag;
 
-        // load initial prefixes
         $prefixes = ! empty($filterBag['prefixes']) ? $filterBag['prefixes'] : LaravelIconifyApiFacade::prefixes();
 
-        // filter out ignored prefixes
         /** @var TPrefixes */
         $ignoredPrefixes = config()->array('iconify-api.search.ignored_prefixes');
         $prefixes = array_filter($prefixes, function ($prefix) use ($ignoredPrefixes) {
             return ! in_array($prefix, $ignoredPrefixes);
         });
 
-        // filter prefixes by icon set info search
         $prefixes = $this->filterByInfoValues($prefixes);
 
         // search icons in the remaining prefixes

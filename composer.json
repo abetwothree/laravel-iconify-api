@@ -16,8 +16,10 @@
     ],
     "require": {
         "php": "^8.4",
+        "ext-json": "*",
         "spatie/laravel-package-tools": "^1.16",
-        "illuminate/contracts": "^11.0"
+        "illuminate/contracts": "^11.0",
+        "pcrov/jsonreader": "^1.0"
     },
     "require-dev": {
         "larastan/larastan": "^3.0",
@@ -29,13 +31,10 @@
         "pestphp/pest-plugin-laravel": "^3.0",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan-deprecation-rules": "^2.0",
-        "phpstan/phpstan-phpunit": "^2.0",
-        "pcrov/jsonreader": "^1.0.3"
+        "phpstan/phpstan-phpunit": "^2.0"
     },
     "suggest": {
-        "laravel/scout": "Used to search icons with a scout driver (e.g. Algolia, Meilisearch, Typesense, Database, etc)",
-        "pcrov/jsonreader": "Used to search icons without scout to process large JSON icon files",
-        "ext-intl": "required by pcrov/jsonreader"
+        "laravel/scout": "Used to search icons with a scout driver (e.g. Algolia, Meilisearch, Typesense, Database, etc)"
     },
     "autoload": {
         "psr-4": {

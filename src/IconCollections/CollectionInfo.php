@@ -2,8 +2,6 @@
 
 namespace AbeTwoThree\LaravelIconifyApi\IconCollections;
 
-use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
-use Exception;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
 
 /**

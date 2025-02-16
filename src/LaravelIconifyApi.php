@@ -105,6 +105,8 @@ class LaravelIconifyApi
             }
         }
 
+        sort($prefixes);
+
         return $prefixes;
     }
 }
