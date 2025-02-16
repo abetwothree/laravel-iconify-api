@@ -33,7 +33,7 @@ class IconSetInfoFinder implements IconSetInfoFinderContract
         /** @var TIconSetInfo $info */
         $info = $reader->value();
 
-        if(! isset($info['prefix'])) {
+        if (! isset($info['prefix'])) {
             $info['prefix'] = $prefix;
         }
 

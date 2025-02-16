@@ -3,7 +3,7 @@
 namespace AbeTwoThree\LaravelIconifyApi\Search\Traits;
 
 /**
- * @phpstan-type TFilterBag = array{
+ * @phpstan-type TFilters = array{
  *  query: string,
  *  page: int,
  *  limit: int,
@@ -18,9 +18,9 @@ namespace AbeTwoThree\LaravelIconifyApi\Search\Traits;
 trait Filterable
 {
     /**
-     * @var TFilterBag
+     * @var TFilters
      */
-    protected array $filterBag = [
+    protected array $filters = [
         'query' => '',
         'page' => 1,
         'limit' => 100,
@@ -29,35 +29,35 @@ trait Filterable
     /** {@inheritDoc} */
     public function prefixes(array $prefixes): static
     {
-        $this->filterBag['prefixes'] = $prefixes;
+        $this->filters['prefixes'] = $prefixes;
 
         return $this;
     }
 
     public function limit(int $limit): static
     {
-        $this->filterBag['limit'] = $limit;
+        $this->filters['limit'] = $limit;
 
         return $this;
     }
 
     public function page(int $page): static
     {
-        $this->filterBag['page'] = $page;
+        $this->filters['page'] = $page;
 
         return $this;
     }
 
     public function category(string $category): static
     {
-        $this->filterBag['category'] = $category;
+        $this->filters['category'] = $category;
 
         return $this;
     }
 
     public function similar(bool $similar): static
     {
-        $this->filterBag['similar'] = $similar;
+        $this->filters['similar'] = $similar;
 
         return $this;
     }
@@ -65,21 +65,21 @@ trait Filterable
     /** {@inheritDoc} */
     public function tags(array $tags): static
     {
-        $this->filterBag['tags'] = $tags;
+        $this->filters['tags'] = $tags;
 
         return $this;
     }
 
     public function palette(bool $palette): static
     {
-        $this->filterBag['palette'] = $palette;
+        $this->filters['palette'] = $palette;
 
         return $this;
     }
 
     public function style(string $style): static
     {
-        $this->filterBag['style'] = $style;
+        $this->filters['style'] = $style;
 
         return $this;
     }

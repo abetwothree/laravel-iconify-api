@@ -4,14 +4,9 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons;
 
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
-use pcrov\JsonReader\JsonReader;
 
 /**
  * @phpstan-import-type TIconSetData from IconFinderContract
- * @phpstan-import-type TIcon from IconFinderContract
- * @phpstan-import-type TIcons from IconFinderContract
- * @phpstan-import-type TAlias from IconFinderContract
- * @phpstan-import-type TAliases from IconFinderContract
  */
 class IconFinder implements IconFinderContract
 {
@@ -39,8 +34,6 @@ class IconFinder implements IconFinderContract
 
             if (isset($iconsData['aliases'][$icon])) {
                 $iconsResponse[$icon]['aliases'][$icon] = $iconsData['aliases'][$icon];
-
-
             }
 
             if (! isset($iconsData['icons'][$icon])) {
@@ -50,7 +43,6 @@ class IconFinder implements IconFinderContract
             }
 
             $iconsResponse[$icon]['icons'][$icon] = $iconsData['icons'][$icon];
-
 
         }
 

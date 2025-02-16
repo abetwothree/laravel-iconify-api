@@ -7,6 +7,7 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetIn
 
 /**
  * @phpstan-import-type TIconSetInfo from IconSetInfoFinderContract
+ *
  * @phpstan-type TIconInfoCollection = array<string, TIconSetInfo>
  */
 class CollectionsInfo

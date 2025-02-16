@@ -15,7 +15,7 @@ class SearchDatabaseDriver implements SearchDriver
         return [
             'query' => $query,
             'driver' => 'files',
-            'filters' => $this->filterBag,
+            'filters' => $this->filters,
         ];
     }
 }
