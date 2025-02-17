@@ -31,9 +31,8 @@ class TestCase extends Orchestra
     {
         config()->set('database.default', 'testing');
         config()->set('app.key', 'base64:yTtQNlEOB1IqYydLG9Z5pKRSxhZffdOxT1iuZIJi+eM=');
-        // set the path to the parent folder directory of the node_modules folder
-        // config()->set('iconify-api.iconify-api.route_domain', 'http://localhost');
         config()->set('iconify-api.icons_location', __DIR__.'/../node_modules');
+        config()->set('cache.default', 'file');
 
         /*
          foreach (\Illuminate\Support\Facades\File::allFiles(__DIR__ . '/database/migrations') as $migration) {

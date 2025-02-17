@@ -121,8 +121,6 @@ return [
 
         'default' => 'files',
 
-        'require_prefixes' => true,
-
         'ignored_prefixes' => [],
 
         'drivers' => [

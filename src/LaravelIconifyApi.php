@@ -15,6 +15,11 @@ class LaravelIconifyApi
 
     public static string $singleSetFolder = '@iconify-json';
 
+    /**
+     * @var TPrefixes
+     */
+    protected static array $prefixes = [];
+
     public function iconsLocation(): string
     {
         return config()->string('iconify-api.icons_location');
@@ -80,6 +85,10 @@ class LaravelIconifyApi
      */
     public function prefixes(): array
     {
+        if (count(self::$prefixes) > 0) {
+            return self::$prefixes;
+        }
+
         $prefixes = [];
 
         if (is_dir($this->singleSetLocation())) {
@@ -106,6 +115,8 @@ class LaravelIconifyApi
         }
 
         sort($prefixes);
+
+        self::$prefixes = $prefixes;
 
         return $prefixes;
     }

@@ -6,7 +6,7 @@ beforeEach(function () {
 
 it('can search for icons files', function (
     string $query,
-    string $prefixes,
+    ?string $prefixes = null,
     ?string $category = null,
     ?bool $similar = null,
     ?string $tags = null,
@@ -24,10 +24,13 @@ it('can search for icons files', function (
     dump($response->json());
 })->with([
     [
-        'query' => 'home',
-        'prefixes' => 'bx,mdi,heroicons,bx',
-        'category' => 'Material',
+        'query' => 'arrows-horizontal',
     ],
+    // [
+    //     'query' => 'prefix:bxl prefix:bitcoin-* home silly cat',
+    //     'prefixes' => 'bx,mdi,heroicons,bx,billiardcon',
+    //     'category' => 'Material',
+    // ],
     // [
     //     'query' => 'activity',
     //     'prefixes' => 'bytesize,cbi,cil',

@@ -2,15 +2,24 @@
 
 namespace AbeTwoThree\LaravelIconifyApi\Search\Traits;
 
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi as LaravelIconifyApiFacade;
+use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApi;
+
 /**
+ * @phpstan-import-type TPrefixes from LaravelIconifyApi
+ *
+ * @phpstan-type TKeywords = array<int,string>
+ * @phpstan-type TTags = array<int,string>
  * @phpstan-type TFilters = array{
  *  query: string,
+ *  search?: string,
+ *  keywords: TKeywords,
  *  page: int,
  *  limit: int,
- *  prefixes?: array<int,string>,
+ *  prefixes?: TPrefixes,
  *  category?: string,
  *  similar?: bool,
- *  tags?: array<int,string>,
+ *  tags?: TTags,
  *  palette?: bool,
  *  style?: string,
  * }
@@ -22,6 +31,7 @@ trait Filterable
      */
     protected array $filters = [
         'query' => '',
+        'keywords' => [],
         'page' => 1,
         'limit' => 100,
     ];
@@ -29,9 +39,57 @@ trait Filterable
     /** {@inheritDoc} */
     public function prefixes(array $prefixes): static
     {
-        $this->filters['prefixes'] = $prefixes;
+        $this->filters['prefixes'] = array_values(array_unique(array_intersect($prefixes, LaravelIconifyApiFacade::prefixes())));
 
         return $this;
+    }
+
+    /**
+     * @param  TPrefixes  $prefixes
+     */
+    public function addPrefixes(array $prefixes): bool
+    {
+        $prefixes = array_intersect($prefixes, LaravelIconifyApiFacade::prefixes());
+        $prefixes = array_merge($prefixes, ($this->filters['prefixes'] ?? []));
+
+        if (! empty($prefixes)) {
+            $this->filters['prefixes'] = array_values(array_unique($prefixes));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  TPrefixes  $prefixes
+     */
+    public function addPartialPrefixes(array $prefixes): bool
+    {
+        $prefixList = LaravelIconifyApiFacade::prefixes();
+        $prefixesToAdd = [];
+
+        foreach ($prefixes as $prefix) {
+
+            if (str_ends_with($prefix, '*')) {
+                $prefix = substr($prefix, 0, -1);
+            }
+
+            $prefixesToAdd = array_merge($prefixesToAdd, array_filter(
+                $prefixList,
+                fn ($p) => str_starts_with($p, $prefix)
+            ));
+        }
+
+        $prefixesToAdd = array_values(array_unique($prefixesToAdd));
+
+        if (! empty($prefixesToAdd)) {
+            $this->addPrefixes($prefixesToAdd);
+
+            return true;
+        }
+
+        return false;
     }
 
     public function limit(int $limit): static

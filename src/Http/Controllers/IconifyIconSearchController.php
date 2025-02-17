@@ -24,14 +24,6 @@ class IconifyIconSearchController
             ], 400);
         }
 
-        if (! $request->has('prefixes')
-            && config()->boolean('iconify-api.search.require_prefixes')
-        ) {
-            return response()->json([
-                'error' => 'Icon set prefixes are required',
-            ], 400);
-        }
-
         if ($request->has('prefixes')) {
             $driver->prefixes(explode(',', $request->string('prefixes')));
         }

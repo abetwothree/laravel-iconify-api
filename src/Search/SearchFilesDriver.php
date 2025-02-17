@@ -7,6 +7,8 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetIn
 use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\Search\Contracts\SearchDriver;
 use AbeTwoThree\LaravelIconifyApi\Search\Traits\Filterable;
+use AbeTwoThree\LaravelIconifyApi\Search\Traits\ParsesKeywords;
+use AbeTwoThree\LaravelIconifyApi\Search\Traits\ParsesQuery;
 
 /**
  * @phpstan-import-type TPrefixes from LaravelIconifyApi
@@ -15,6 +17,8 @@ use AbeTwoThree\LaravelIconifyApi\Search\Traits\Filterable;
 class SearchFilesDriver implements SearchDriver
 {
     use Filterable;
+    use ParsesKeywords;
+    use ParsesQuery;
 
     public function __construct(
         protected IconSetInfoFinderContract $iconSetInfoFinder,
@@ -24,6 +28,7 @@ class SearchFilesDriver implements SearchDriver
     public function search(string $query): array
     {
         $this->filters['query'] = $query;
+        $this->filters['keywords'] = $this->parseQuery($query);
 
         $prefixes = ! empty($this->filters['prefixes']) ? $this->filters['prefixes'] : LaravelIconifyApiFacade::prefixes();
 
@@ -35,6 +40,8 @@ class SearchFilesDriver implements SearchDriver
 
         $prefixes = $this->filterByInfoValues($prefixes);
 
+        // $results = $this->searchIcons($prefixes);
+
         return [
             'query' => $query,
             'driver' => 'files',
@@ -44,7 +51,7 @@ class SearchFilesDriver implements SearchDriver
 
     /**
      * @param  TPrefixes  $prefixes
-     * @return array<string>
+     * @return array<int,string>
      */
     protected function filterByInfoValues(array $prefixes): array
     {
@@ -99,17 +106,30 @@ class SearchFilesDriver implements SearchDriver
     }
 
     /**
-     * @param  array<int,string>  $files
+     * @param  TPrefixes  $prefixes
      * @return array<string>
      */
-    protected function searchIcons(array $files): array
-    {
-        $results = [];
+    // protected function searchIcons(array $prefixes): array
+    // {
+    //     $results = [];
+    //     foreach ($prefixes as $prefix) {
+    //         $results = array_merge($results, $this->searchFileIcons($prefix));
+    //     }
 
-        foreach ($files as $file) {
-            // $fileResult = $this->searchFileIcons($file);
-        }
+    //     return $results;
+    // }
 
-        return $results;
-    }
+    // protected function searchFileIcons(string $prefix): array
+    // {
+    //     $icons = $this->getIcons($prefix);
+
+    //     $results = [];
+    //     foreach ($icons as $icon) {
+    //         if (str_contains($icon, $this->filters['query'])) {
+    //             $results[] = $icon;
+    //         }
+    //     }
+
+    //     return $results;
+    // }
 }
