@@ -9,15 +9,15 @@ namespace AbeTwoThree\LaravelIconifyApi\Search\Traits;
  *  prefix?:string|null,
  *  test?:non-empty-array<int|non-falsy-string, int|string|true>|null,
  * }
- * @phpstan-type TEntry = array{value:string, empty:bool}
- * @phpstan-type TResults = non-empty-array<string|int, TKeywordsSet>
+ * @phpstan-type TKeywordEntry = array{value:string, empty:bool}
+ * @phpstan-type TKeywordResults = non-empty-array<string|int, TKeywordsSet>
  */
 trait ParsesKeywords
 {
     /**
      * @param  array<int,string>  $values
      * @param  array<string,bool>  $options
-     * @return TResults|array<void>|null
+     * @return TKeywordResults|array<void>|null
      */
     protected function splitKeywordEntries(array $values, array $options): ?array
     {
@@ -72,19 +72,19 @@ trait ParsesKeywords
                 }
 
                 if ($emptyPos === null || ($firstItemCount > 1 && $emptyPos === $firstItemCount - 1)) {
-                    $prefix = $this->valuesToString($firstItem) ?? $firstItem[0]['value'];
+                    $prefix = $this->keywordValuesToString($firstItem) ?? $firstItem[0]['value'];
 
                     if (! empty($prefix)) {
-                        $set = $this->createSet();
+                        $set = $this->createKeywordSet();
                         for ($i = 1; $i <= $lastIndex; $i++) {
-                            $this->processEntries(
+                            $this->processKeywordEntries(
                                 $splitValues[$i],
                                 $set,
                                 ($options['partial'] ?? false) && ($i === $lastIndex),
                                 $minPartialLength,
                             );
                         }
-                        $this->addResult($results, $set, $prefix);
+                        $this->addKeywordResult($results, $set, $prefix);
                     }
                 }
             }
@@ -94,31 +94,31 @@ trait ParsesKeywords
                 $modifiedItem = array_slice($firstItem, 1);
                 $prefix = $firstItem[0]['value'];
 
-                $set = $this->createSet();
+                $set = $this->createKeywordSet();
                 for ($i = 0; $i <= $lastIndex; $i++) {
                     $entries = ($i === 0) ? $modifiedItem : $splitValues[$i];
-                    $this->processEntries(
+                    $this->processKeywordEntries(
                         $entries,
                         $set,
                         ($options['partial'] ?? false) && ($i === $lastIndex),
                         $minPartialLength,
                     );
                 }
-                $this->addResult($results, $set, $prefix);
+                $this->addKeywordResult($results, $set, $prefix);
             }
         }
 
         // Process default case
-        $defaultSet = $this->createSet();
+        $defaultSet = $this->createKeywordSet();
         foreach ($splitValues as $i => $entries) {
-            $this->processEntries(
+            $this->processKeywordEntries(
                 $entries,
                 $defaultSet,
                 ($options['partial'] ?? false) && ($i === $lastIndex),
                 $minPartialLength
             );
         }
-        $this->addResult($results, $defaultSet);
+        $this->addKeywordResult($results, $defaultSet);
 
         // Process merges
         if (count($splitValues) > 1) {
@@ -135,26 +135,41 @@ trait ParsesKeywords
                             break;
                         }
 
-                        $merged = implode('', array_column(array_slice($splitValues, $start, $end - $start + 1), '0.value'));
+                        $merged = implode('',
+                            array_column(
+                                array_slice($splitValues, $start, $end - $start + 1),
+                                '0.value'
+                            )
+                        );
+
                         $newValues = array_merge(
                             array_slice($splitValues, 0, $start),
                             [[['value' => $merged, 'empty' => false]]],
                             array_slice($splitValues, $end + 1)
                         );
 
-                        $mergeSet = $this->createSet();
+                        $mergeSet = $this->createKeywordSet();
                         foreach ($newValues as $i => $entries) {
-                            $this->processEntries(
+                            $this->processKeywordEntries(
                                 $entries,
                                 $mergeSet,
                                 ($options['partial'] ?? false) && ($i === count($newValues) - 1),
                                 $minPartialLength
                             );
                         }
-                        $this->addResult($results, $mergeSet);
+                        $this->addKeywordResult($results, $mergeSet);
                     }
                 }
             }
+        }
+
+        $prefixes = array_values(array_map(
+            fn ($result) => $result['prefix'],
+            array_filter($results, fn ($result) => isset($result['prefix']) && ! empty($result['prefix']))
+        ));
+
+        if (! empty($prefixes)) {
+            $this->processPrefixes($prefixes);
         }
 
         return $results;
@@ -163,7 +178,7 @@ trait ParsesKeywords
     /**
      * @param  array<int,array{value: string, empty: bool}>  $entries
      */
-    protected function valuesToString(array $entries): ?string
+    protected function keywordValuesToString(array $entries): ?string
     {
         if (empty($entries) || (count($entries) === 1 && ! $entries[0]['empty'])) {
             return null;
@@ -175,16 +190,16 @@ trait ParsesKeywords
     /**
      * @return TKeywordsSet
      */
-    protected function createSet(): array
+    protected function createKeywordSet(): array
     {
         return ['keywords' => [], 'prefix' => null, 'test' => null, 'partial' => null];
     }
 
     /**
-     * @param  array<int,TEntry>  $entries
+     * @param  array<int,TKeywordEntry>  $entries
      * @param  TKeywordsSet  $set
      */
-    protected function processEntries(array $entries, array &$set, bool $allowPartial, int $minPartial): void
+    protected function processKeywordEntries(array $entries, array &$set, bool $allowPartial, int $minPartial): void
     {
         $last = count($entries) - 1;
 
@@ -200,16 +215,16 @@ trait ParsesKeywords
             }
         }
 
-        if ($testValue = $this->valuesToString($entries)) {
+        if ($testValue = $this->keywordValuesToString($entries)) {
             $set['test'][$testValue] = true;
         }
     }
 
     /**
-     * @param  TResults|array<void>  $results
+     * @param  TKeywordResults|array<void>  $results
      * @param  TKeywordsSet  $set
      */
-    protected function addResult(array &$results, array $set, ?string $prefix = null): void
+    protected function addKeywordResult(array &$results, array $set, ?string $prefix = null): void
     {
         $keywords = array_keys($set['keywords'] ?? []);
         $test = array_keys($set['test'] ?? []);
@@ -217,7 +232,7 @@ trait ParsesKeywords
 
         if (! empty($keywords) || $partial) {
             $result = [
-                'keywords' => $keywords,
+                'keywords' => array_filter($keywords, fn ($value) => ! empty($value)),
                 'prefix' => $prefix,
                 'partial' => $partial,
                 'test' => ! empty($test) ? $test : null,

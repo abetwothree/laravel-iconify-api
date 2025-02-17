@@ -7,13 +7,13 @@ use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApi;
 
 /**
  * @phpstan-import-type TPrefixes from LaravelIconifyApi
+ * @phpstan-import-type TKeywordResults from ParsesKeywords
  *
- * @phpstan-type TKeywords = array<int,string>
  * @phpstan-type TTags = array<int,string>
  * @phpstan-type TFilters = array{
  *  query: string,
  *  search?: string,
- *  keywords: TKeywords,
+ *  keywords: TKeywordResults|array<void>|null,
  *  page: int,
  *  limit: int,
  *  prefixes?: TPrefixes,
@@ -31,7 +31,7 @@ trait Filterable
      */
     protected array $filters = [
         'query' => '',
-        'keywords' => [],
+        'keywords' => null,
         'page' => 1,
         'limit' => 100,
     ];
@@ -39,9 +39,37 @@ trait Filterable
     /** {@inheritDoc} */
     public function prefixes(array $prefixes): static
     {
-        $this->filters['prefixes'] = array_values(array_unique(array_intersect($prefixes, LaravelIconifyApiFacade::prefixes())));
+        $this->filters['prefixes'] = [];
+        $this->processPrefixes($prefixes);
 
         return $this;
+    }
+
+    /**
+     * @param  TPrefixes  $prefixes
+     */
+    public function processPrefixes(array $prefixes): bool
+    {
+        $prefixList = LaravelIconifyApiFacade::prefixes();
+        $matchedPrefixes = array_intersect($prefixes, $prefixList);
+        $unmatchedPrefixes = array_diff($prefixes, $prefixList);
+
+        $hasNewPrefixes = false;
+        $hasPartialPrefixes = false;
+
+        if (count($matchedPrefixes) > 0) {
+            $hasNewPrefixes = $this->addPrefixes($matchedPrefixes);
+        }
+
+        if (count($unmatchedPrefixes) > 0) {
+            $hasPartialPrefixes = $this->addPartialPrefixes($unmatchedPrefixes);
+        }
+
+        if ($hasNewPrefixes || $hasPartialPrefixes) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

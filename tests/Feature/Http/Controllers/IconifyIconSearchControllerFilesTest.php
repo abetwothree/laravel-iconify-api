@@ -26,11 +26,11 @@ it('can search for icons files', function (
     [
         'query' => 'arrows-horizontal',
     ],
-    // [
-    //     'query' => 'prefix:bxl prefix:bitcoin-* home silly cat',
-    //     'prefixes' => 'bx,mdi,heroicons,bx,billiardcon',
-    //     'category' => 'Material',
-    // ],
+    [
+        'query' => 'prefix:bxl prefix:bitcoin-* home silly cat',
+        'prefixes' => 'bx,mdi,heroicons,bx,billiardcon',
+        'category' => 'Material',
+    ],
     // [
     //     'query' => 'activity',
     //     'prefixes' => 'bytesize,cbi,cil',

@@ -30,21 +30,21 @@ class SearchFilesDriver implements SearchDriver
         $this->filters['query'] = $query;
         $this->filters['keywords'] = $this->parseQuery($query);
 
-        $prefixes = ! empty($this->filters['prefixes']) ? $this->filters['prefixes'] : LaravelIconifyApiFacade::prefixes();
+        $results = [];
+        if ($this->filters['keywords']) {
+            $prefixes = ! empty($this->filters['prefixes']) ? $this->filters['prefixes'] : LaravelIconifyApiFacade::prefixes();
 
-        /** @var TPrefixes */
-        $ignoredPrefixes = config()->array('iconify-api.search.ignored_prefixes');
-        $prefixes = array_filter($prefixes, function ($prefix) use ($ignoredPrefixes) {
-            return ! in_array($prefix, $ignoredPrefixes);
-        });
+            /** @var TPrefixes */
+            $ignoredPrefixes = config()->array('iconify-api.search.ignored_prefixes');
+            $prefixes = array_filter($prefixes, fn ($prefix) => ! in_array($prefix, $ignoredPrefixes));
 
-        $prefixes = $this->filterByInfoValues($prefixes);
-
-        // $results = $this->searchIcons($prefixes);
+            $prefixes = $this->filterByInfoValues($prefixes);
+            // $results = $this->searchIcons($prefixes);
+        }
 
         return [
-            'query' => $query,
             'driver' => 'files',
+            'results' => $results,
             'filters' => $this->filters,
         ];
     }

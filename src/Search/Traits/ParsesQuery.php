@@ -5,14 +5,15 @@ namespace AbeTwoThree\LaravelIconifyApi\Search\Traits;
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi as LaravelIconifyApiFacade;
 use Exception;
 
+/**
+ * @phpstan-import-type TKeywordResults from ParsesKeywords
+ */
 trait ParsesQuery
 {
     /**
-     * @return array<int,string>
-     *
-     * @throws Exception
+     * @return TKeywordResults|array<void>|null
      */
-    protected function parseQuery(string $query, bool $allowPartial = true): array
+    protected function parseQuery(string $query, bool $allowPartial = true): ?array
     {
         // Split by space, check for prefixes and reserved keywords
         $keywordsChunks = explode(' ', trim(strtolower($query)));
@@ -37,16 +38,7 @@ trait ParsesQuery
 
                 if (! $isKeyword) {
                     $prefixes = explode(',', $keyword);
-                    $unmatchedPrefixes = array_diff($prefixes, $prefixList);
-                    $prefixes = array_intersect($prefixes, $prefixList);
-
-                    if (count($prefixes) > 0) {
-                        $hasPrefixes = $this->addPrefixes($prefixes);
-                    }
-
-                    if (count($unmatchedPrefixes) > 0) {
-                        $hasPrefixes = $this->addPartialPrefixes($unmatchedPrefixes);
-                    }
+                    $hasPrefixes = $this->processPrefixes($prefixes);
 
                     if ($value) {
                         $keywords[] = $value;
@@ -86,8 +78,6 @@ trait ParsesQuery
             'prefix' => ! $hasPrefixes && empty($this->filters['prefixes'] ?? []),
             'partial' => $checkPartial,
         ]);
-
-        dd($keywords);
 
         return $keywords;
     }
@@ -131,16 +121,7 @@ trait ParsesQuery
             case 'prefix':
             case 'prefixes':
                 $prefixes = explode(',', $value);
-                $unmatchedPrefixes = array_diff($prefixes, $prefixList);
-                $prefixes = array_intersect($prefixes, $prefixList);
-
-                if (count($prefixes) > 0) {
-                    $isKeyword = $hasPrefixes = $this->addPrefixes($prefixes);
-                }
-
-                if (count($unmatchedPrefixes) > 0) {
-                    $isKeyword = $hasPrefixes = $this->addPartialPrefixes($unmatchedPrefixes);
-                }
+                $isKeyword = $hasPrefixes = $this->processPrefixes($prefixes);
                 break;
         }
     }
