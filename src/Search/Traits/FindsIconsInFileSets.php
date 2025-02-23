@@ -7,7 +7,9 @@ use Throwable;
 trait FindsIconsInFileSets
 {
     private array $addedIcons = [];
+
     private array $allMatches = [];
+
     private int $allMatchesLength = 0;
 
     protected function findIcons(): ?array
@@ -19,13 +21,15 @@ trait FindsIconsInFileSets
             }
         } catch (Throwable $throwable) {
             report($throwable);
+
             return null;
         }
 
         return $this->generateResults();
     }
 
-    private function runAllSearches(bool $isExact): void {
+    private function runAllSearches(bool $isExact): void
+    {
         foreach ($this->keywords->searches as $search) {
             $partial = $search->partial;
             if ($partial) {
@@ -42,17 +46,20 @@ trait FindsIconsInFileSets
                     }
                 }
             } else {
-                if (!$isExact) continue;
+                if (! $isExact) {
+                    continue;
+                }
                 $this->runSearch($search, true);
             }
 
-            if (!$isExact && $this->allMatchesLength >= $this->limit) {
+            if (! $isExact && $this->allMatchesLength >= $this->limit) {
                 return;
             }
         }
     }
 
-    private function runSearch(SearchKeywordsEntry $search, bool $isExact, ?string $partial = null): void {
+    private function runSearch(SearchKeywordsEntry $search, bool $isExact, ?string $partial = null): void
+    {
         $filteredPrefixes = $this->getFilteredPrefixes($search, $partial);
         if (empty($filteredPrefixes)) {
             return;
@@ -66,7 +73,8 @@ trait FindsIconsInFileSets
         }
     }
 
-    private function getFilteredPrefixes(SearchKeywordsEntry $search, ?string $partial): array {
+    private function getFilteredPrefixes(SearchKeywordsEntry $search, ?string $partial): array
+    {
         if (isset($search->filteredPrefixes)) {
             return $search->filteredPrefixes;
         }
@@ -78,18 +86,19 @@ trait FindsIconsInFileSets
         foreach ($search->keywords as $keyword) {
             $filteredPrefixes = array_filter(
                 $filteredPrefixes,
-                fn($p) => isset($this->data->keywords[$keyword][$p])
+                fn ($p) => isset($this->data->keywords[$keyword][$p])
             );
         }
 
         if ($partial) {
             $filteredPrefixes = array_filter(
                 $filteredPrefixes,
-                fn($p) => isset($this->data->keywords[$partial][$p])
+                fn ($p) => isset($this->data->keywords[$partial][$p])
             );
         }
 
         $search->filteredPrefixes = $filteredPrefixes;
+
         return $filteredPrefixes;
     }
 
@@ -105,12 +114,12 @@ trait FindsIconsInFileSets
         $iconSetIcons = $iconSet->icons;
         $iconSetKeywords = $iconSetIcons->keywords ?? null;
 
-        if (!$iconSetKeywords) {
+        if (! $iconSetKeywords) {
             return;
         }
 
         $matches = $this->getKeywordMatches($testKeywords, $iconSetKeywords);
-        if (!$matches) {
+        if (! $matches) {
             return;
         }
 
@@ -119,10 +128,11 @@ trait FindsIconsInFileSets
         }
     }
 
-    private function getKeywordMatches(array $testKeywords, object $iconSetKeywords): ?array {
+    private function getKeywordMatches(array $testKeywords, object $iconSetKeywords): ?array
+    {
         $matches = null;
         foreach ($testKeywords as $keyword) {
-            if (!isset($iconSetKeywords->$keyword)) {
+            if (! isset($iconSetKeywords->$keyword)) {
                 return null;
             }
 
@@ -131,6 +141,7 @@ trait FindsIconsInFileSets
                 ? $keywordMatches
                 : array_intersect($matches, $keywordMatches);
         }
+
         return $matches;
     }
 
@@ -155,14 +166,16 @@ trait FindsIconsInFileSets
         }
     }
 
-    private function shouldSkipByStyle(object $item, string $prefix): bool {
+    private function shouldSkipByStyle(object $item, string $prefix): bool
+    {
         return $this->fullParams['style'] &&
             $this->appConfig->allowFilterIconsByStyle &&
             $this->iconSets[$prefix]->item->icons->iconStyle === 'mixed' &&
             $item->_is !== $this->fullParams['style'];
     }
 
-    private function findMatchingName(object $item, array $testMatches, string $prefix): ?string {
+    private function findMatchingName(object $item, array $testMatches, string $prefix): ?string
+    {
         foreach ($item as $index => $name) {
             foreach ($testMatches as $match) {
                 if (strpos($name, $match) === false) {
@@ -171,12 +184,15 @@ trait FindsIconsInFileSets
             }
 
             $length = $this->calculateNameLength($name, $item, $index, $prefix);
+
             return ['name' => $name, 'length' => $length];
         }
+
         return null;
     }
 
-    private function calculateNameLength(string $name, object $item, int $index, string $prefix): int {
+    private function calculateNameLength(string $name, object $item, int $index, string $prefix): int
+    {
         if ($index === 0) {
             return $item->_l ?? strlen($name);
         }
@@ -188,6 +204,7 @@ trait FindsIconsInFileSets
                 }
             }
         }
+
         return strlen($name);
     }
 
@@ -201,16 +218,17 @@ trait FindsIconsInFileSets
         $prefixAddedIcons[spl_object_hash($item)] = true;
         $this->addedIcons[$prefix] = $prefixAddedIcons;
 
-        $list = $this->getMatchResult($found['length'], !$isExact);
+        $list = $this->getMatchResult($found['length'], ! $isExact);
         $list->names[] = "$prefix:{$found['name']}";
         $this->allMatchesLength++;
 
-        if (!$isExact && $this->allMatchesLength >= $this->limit) {
+        if (! $isExact && $this->allMatchesLength >= $this->limit) {
             return;
         }
     }
 
-    private function getMatchResult(int $length, bool $partial): TemporaryResultItem {
+    private function getMatchResult(int $length, bool $partial): TemporaryResultItem
+    {
         foreach ($this->allMatches as $item) {
             if ($item->length === $length && $item->partial === $partial) {
                 return $item;
@@ -218,12 +236,13 @@ trait FindsIconsInFileSets
         }
         $newItem = new TemporaryResultItem($length, $partial);
         $this->allMatches[] = $newItem;
+
         return $newItem;
     }
 
-    private function generateResults(): array {
-        usort($this->allMatches, fn($a, $b) =>
-            $a->partial !== $b->partial
+    private function generateResults(): array
+    {
+        usort($this->allMatches, fn ($a, $b) => $a->partial !== $b->partial
                 ? ($a->partial ? 1 : -1)
                 : $a->length - $b->length
         );
@@ -232,7 +251,9 @@ trait FindsIconsInFileSets
         $prefixes = [];
         foreach ($this->allMatches as $match) {
             foreach ($match->names as $name) {
-                if (!$this->softLimit && count($results) >= $this->limit) break 2;
+                if (! $this->softLimit && count($results) >= $this->limit) {
+                    break 2;
+                }
                 $results[] = $name;
                 $prefixes[explode(':', $name)[0]] = true;
             }

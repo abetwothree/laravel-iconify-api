@@ -3,14 +3,15 @@
 namespace AbeTwoThree\LaravelIconifyApi\Search\Traits;
 
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi as LaravelIconifyApiFacade;
-use Exception;
 use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApi;
+use Exception;
 
 /**
  * @phpstan-import-type TPrefixes from LaravelIconifyApi
  * @phpstan-import-type TKeywordResults from ParsesKeywords
  * @phpstan-import-type TKeywords from ParsesKeywords
  * @phpstan-import-type TTest from ParsesKeywords
+ *
  * @phpstan-type TSearchKeywordsEntry = array{
  *   keywords:TKeywords,
  *   prefixes:TPrefixes|array<void>,
@@ -89,7 +90,7 @@ trait ParsesQuery
             'partial' => $checkPartial,
         ]);
 
-        if(empty($entries)){
+        if (empty($entries)) {
             return null;
         }
 
@@ -113,14 +114,16 @@ trait ParsesQuery
         }
 
         /** @var TSearchKeywords $searches */
-        $searches = array_map(function ($item) use ($prefixes): array {
-            return [
-                'keywords' => $item['keywords'] ?? [],
-                'prefixes' => isset($item['prefix']) ? array_merge($prefixes, [$item['prefix']]) : $prefixes,
-                'test' => $item['test'] ?? null,
-                'partial' => $item['partial'] ?? null
-            ];
-        }, $entries);
+        $searches = collect($entries)
+            ->filter(fn ($entry): bool => is_array($entry) && ! empty($entry))
+            ->map(fn ($entry): array => [
+                ...$entry,
+                'prefixes' => isset($entry['prefix'])
+                ? array_merge($prefixes, [$entry['prefix']])
+                : $prefixes,
+            ])
+            ->values()
+            ->toArray();
 
         return $searches;
     }

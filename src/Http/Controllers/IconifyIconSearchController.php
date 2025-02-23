@@ -2,11 +2,10 @@
 
 namespace AbeTwoThree\LaravelIconifyApi\Http\Controllers;
 
+use AbeTwoThree\LaravelIconifyApi\Http\Requests\SearchRequest;
 use AbeTwoThree\LaravelIconifyApi\Search\Contracts\SearchDriver;
 use AbeTwoThree\LaravelIconifyApi\Search\SearchManager;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use AbeTwoThree\LaravelIconifyApi\Http\Requests\SearchRequest;
 
 class IconifyIconSearchController
 {
