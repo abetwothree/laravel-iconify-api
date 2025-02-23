@@ -7,18 +7,21 @@ use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApi;
 
 /**
  * @phpstan-import-type TPrefixes from LaravelIconifyApi
- * @phpstan-import-type TKeywordResults from ParsesKeywords
+ * @phpstan-import-type TSearchKeywords from ParsesQuery
  *
  * @phpstan-type TTags = array<int,string>
  * @phpstan-type TFilters = array{
  *  query: string,
  *  search?: string,
- *  keywords: TKeywordResults|array<void>|null,
+ *  keywords: TSearchKeywords|array<void>|null,
  *  page: int,
  *  limit: int,
+ *  soft_limit?: bool,
  *  prefixes?: TPrefixes,
+ *  matched_prefixes?: TPrefixes|array<void>,
  *  category?: string,
  *  similar?: bool,
+ *  partial?: bool,
  *  tags?: TTags,
  *  palette?: bool,
  *  style?: string,
@@ -123,6 +126,7 @@ trait Filterable
     public function limit(int $limit): static
     {
         $this->filters['limit'] = $limit;
+        $this->filters['soft_limit'] = true;
 
         return $this;
     }

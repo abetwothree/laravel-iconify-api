@@ -7,8 +7,10 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetIn
 use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\Search\Contracts\SearchDriver;
 use AbeTwoThree\LaravelIconifyApi\Search\Traits\Filterable;
+use AbeTwoThree\LaravelIconifyApi\Search\Traits\FilterPrefixes;
 use AbeTwoThree\LaravelIconifyApi\Search\Traits\ParsesKeywords;
 use AbeTwoThree\LaravelIconifyApi\Search\Traits\ParsesQuery;
+use AbeTwoThree\LaravelIconifyApi\Search\Traits\FindsIconsInFileSets;
 
 /**
  * @phpstan-import-type TPrefixes from LaravelIconifyApi
@@ -17,8 +19,10 @@ use AbeTwoThree\LaravelIconifyApi\Search\Traits\ParsesQuery;
 class SearchFilesDriver implements SearchDriver
 {
     use Filterable;
+    use FilterPrefixes;
     use ParsesKeywords;
     use ParsesQuery;
+    use FindsIconsInFileSets;
 
     public function __construct(
         protected IconSetInfoFinderContract $iconSetInfoFinder,
@@ -28,81 +32,21 @@ class SearchFilesDriver implements SearchDriver
     public function search(string $query): array
     {
         $this->filters['query'] = $query;
-        $this->filters['keywords'] = $this->parseQuery($query);
+        $this->filters['keywords'] = $this->parseQuery(
+            $query,
+            $this->filters['partial'] = $this->filters['similar'] ?? true
+        );
 
-        $results = [];
+        $icons = null;
         if ($this->filters['keywords']) {
-            $prefixes = ! empty($this->filters['prefixes']) ? $this->filters['prefixes'] : LaravelIconifyApiFacade::prefixes();
-
-            /** @var TPrefixes */
-            $ignoredPrefixes = config()->array('iconify-api.search.ignored_prefixes');
-            $prefixes = array_filter($prefixes, fn ($prefix) => ! in_array($prefix, $ignoredPrefixes));
-
-            $prefixes = $this->filterByInfoValues($prefixes);
-            // $results = $this->searchIcons($prefixes);
+            $icons = $this->findIcons();
         }
 
         return [
             'driver' => 'files',
-            'results' => $results,
-            'filters' => $this->filters,
+            'icons' => $icons,
+            'request' => $this->filters,
         ];
-    }
-
-    /**
-     * @param  TPrefixes  $prefixes
-     * @return array<int,string>
-     */
-    protected function filterByInfoValues(array $prefixes): array
-    {
-        $infoColumns = ['category', 'palette', 'tags'];
-        $searchInfo = false;
-
-        foreach ($infoColumns as $column) {
-            if (isset($this->filters[$column]) && ! empty($this->filters[$column])) {
-                $searchInfo = true;
-                break;
-            }
-        }
-
-        if ($searchInfo === false) {
-            return $prefixes;
-        }
-
-        $filteredPrefixes = [];
-        foreach ($prefixes as $prefix) {
-            if ($this->searchIconSetInfo($prefix)) {
-                $filteredPrefixes[] = $prefix;
-            }
-        }
-
-        return $filteredPrefixes;
-    }
-
-    protected function searchIconSetInfo(string $prefix): bool
-    {
-        $info = $this->iconSetInfoFinder->find($prefix);
-
-        if (isset($this->filters['category']) && ! empty($this->filters['category'])) {
-
-            if ($info['category'] !== $this->filters['category']) {
-                return false;
-            }
-        }
-
-        if (isset($this->filters['palette']) && ! empty($this->filters['palette'])) {
-            if ($info['palette'] !== $this->filters['palette']) {
-                return false;
-            }
-        }
-
-        if (isset($this->filters['tags']) && ! empty($this->filters['tags'])) {
-            if (! in_array($info['tags'], $this->filters['tags'])) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**

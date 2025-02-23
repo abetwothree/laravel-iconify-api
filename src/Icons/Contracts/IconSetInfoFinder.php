@@ -18,7 +18,7 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  *      },
  *      height: int,
  *      category: string,
- *      tags: array<int,string>,
+ *      tags?: array<int,string>,
  *      palette: bool,
  *      prefix?: string,
  *      samples?: array<int,string>,

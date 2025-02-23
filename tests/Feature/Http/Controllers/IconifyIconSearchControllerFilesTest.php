@@ -21,20 +21,21 @@ it('can search for icons files', function (
 
     $response = test()->get(route('iconify-api.search.index', $params));
 
+    $response->assertOk();
+
     dump($response->json());
 })->with([
     [
-        'query' => 'arrows-horizontal',
+        'query' => 'arrows-horizontal tags:arrow',
     ],
     [
         'query' => 'prefix:bxl prefix:bitcoin-* home silly cat',
         'prefixes' => 'bx,mdi,heroicons,bx,billiardcon',
         'category' => 'Material',
     ],
-    // [
-    //     'query' => 'activity',
-    //     'prefixes' => 'bytesize,cbi,cil',
-    // ],
+    [
+        'query' => 'bookmark style:fill palette:true',
+    ],
     // [
     //     'query' => 'alert',
     //     'prefixes' => 'bytesize,ei',

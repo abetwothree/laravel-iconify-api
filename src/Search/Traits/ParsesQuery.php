@@ -4,14 +4,25 @@ namespace AbeTwoThree\LaravelIconifyApi\Search\Traits;
 
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi as LaravelIconifyApiFacade;
 use Exception;
+use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApi;
 
 /**
+ * @phpstan-import-type TPrefixes from LaravelIconifyApi
  * @phpstan-import-type TKeywordResults from ParsesKeywords
+ * @phpstan-import-type TKeywords from ParsesKeywords
+ * @phpstan-import-type TTest from ParsesKeywords
+ * @phpstan-type TSearchKeywordsEntry = array{
+ *   keywords:TKeywords,
+ *   prefixes:TPrefixes|array<void>,
+ *   test:TTest|null,
+ *   partial:string|null
+ * }
+ * @phpstan-type TSearchKeywords = array<int, TSearchKeywordsEntry>
  */
 trait ParsesQuery
 {
     /**
-     * @return TKeywordResults|array<void>|null
+     * @return TSearchKeywords|array<void>|null
      */
     protected function parseQuery(string $query, bool $allowPartial = true): ?array
     {
@@ -21,7 +32,6 @@ trait ParsesQuery
 
         $hasPrefixes = false;
         $checkPartial = false;
-        $prefixList = LaravelIconifyApiFacade::prefixes();
 
         foreach ($keywordsChunks as $chunk) {
             $prefixChunks = explode(':', $chunk);
@@ -74,12 +84,45 @@ trait ParsesQuery
             continue;
         }
 
-        $keywords = $this->splitKeywordEntries($keywords, [
+        $entries = $this->splitKeywordEntries($keywords, [
             'prefix' => ! $hasPrefixes && empty($this->filters['prefixes'] ?? []),
             'partial' => $checkPartial,
         ]);
 
-        return $keywords;
+        if(empty($entries)){
+            return null;
+        }
+
+        $prefixes = ! empty($this->filters['prefixes'])
+            ? $this->filters['prefixes']
+            : LaravelIconifyApiFacade::prefixes();
+
+        /** @var TPrefixes */
+        $ignoredPrefixes = config()->array('iconify-api.search.ignored_prefixes');
+        $prefixes = array_filter(
+            $prefixes,
+            fn ($prefix) => ! in_array($prefix, $ignoredPrefixes)
+        );
+
+        $prefixes = $this->filterPrefixesByInfoValues($prefixes);
+
+        $this->filters['matched_prefixes'] = $prefixes;
+
+        if (empty($prefixes)) {
+            return null;
+        }
+
+        /** @var TSearchKeywords $searches */
+        $searches = array_map(function ($item) use ($prefixes): array {
+            return [
+                'keywords' => $item['keywords'] ?? [],
+                'prefixes' => isset($item['prefix']) ? array_merge($prefixes, [$item['prefix']]) : $prefixes,
+                'test' => $item['test'] ?? null,
+                'partial' => $item['partial'] ?? null
+            ];
+        }, $entries);
+
+        return $searches;
     }
 
     protected function parseKeywordValues(
@@ -88,8 +131,6 @@ trait ParsesQuery
         bool &$isKeyword,
         bool &$hasPrefixes
     ): void {
-        $prefixList = LaravelIconifyApiFacade::prefixes();
-
         switch ($keyword) {
             case 'palette':
                 $palette = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
@@ -122,6 +163,15 @@ trait ParsesQuery
             case 'prefixes':
                 $prefixes = explode(',', $value);
                 $isKeyword = $hasPrefixes = $this->processPrefixes($prefixes);
+                break;
+            case 'category':
+                $this->filters['category'] = $value;
+                $isKeyword = true;
+                break;
+            case 'tags':
+                $tags = explode(',', $value);
+                $this->filters['tags'] = $tags;
+                $isKeyword = true;
                 break;
         }
     }

@@ -3,11 +3,13 @@
 namespace AbeTwoThree\LaravelIconifyApi\Search\Traits;
 
 /**
+ * @phpstan-type TKeywords = array<int|string, int|string|true>|null
+ * @phpstan-type TTest = non-empty-array<int|non-falsy-string, int|string|true>|null
  * @phpstan-type TKeywordsSet = array{
- *  keywords?:array<int|string, int|string|true>|null,
+ *  keywords?:TKeywords,
  *  partial?:string|null,
  *  prefix?:string|null,
- *  test?:non-empty-array<int|non-falsy-string, int|string|true>|null,
+ *  test?:TTest,
  * }
  * @phpstan-type TKeywordEntry = array{value:string, empty:bool}
  * @phpstan-type TKeywordResults = non-empty-array<string|int, TKeywordsSet>
@@ -16,7 +18,7 @@ trait ParsesKeywords
 {
     /**
      * @param  array<int,string>  $values
-     * @param  array<string,bool>  $options
+     * @param  array<string,bool|int|string>  $options
      * @return TKeywordResults|array<void>|null
      */
     protected function splitKeywordEntries(array $values, array $options): ?array
@@ -165,7 +167,10 @@ trait ParsesKeywords
 
         $prefixes = array_values(array_map(
             fn ($result) => $result['prefix'],
-            array_filter($results, fn ($result) => isset($result['prefix']) && ! empty($result['prefix']))
+            array_filter(
+                $results,
+                fn ($result) => isset($result['prefix']) && ! empty($result['prefix'])
+            )
         ));
 
         if (! empty($prefixes)) {
@@ -176,7 +181,7 @@ trait ParsesKeywords
     }
 
     /**
-     * @param  array<int,array{value: string, empty: bool}>  $entries
+     * @param  array<int,TKeywordEntry>  $entries
      */
     protected function keywordValuesToString(array $entries): ?string
     {
