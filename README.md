@@ -16,7 +16,7 @@ On demand icons work great whether you use Livewire, Inertia, or just plain Blad
 ## Requirements
 
 - PHP 8.4
-- Laravel 11.x
+- Laravel 12.x or 11.x
 
 ## How To Use
 
