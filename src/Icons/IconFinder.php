@@ -4,9 +4,14 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons;
 
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
+use pcrov\JsonReader\JsonReader;
 
 /**
  * @phpstan-import-type TIconSetData from IconFinderContract
+ * @phpstan-import-type TIcon from IconFinderContract
+ * @phpstan-import-type TIcons from IconFinderContract
+ * @phpstan-import-type TAlias from IconFinderContract
+ * @phpstan-import-type TAliases from IconFinderContract
  */
 class IconFinder implements IconFinderContract
 {
@@ -37,13 +42,19 @@ class IconFinder implements IconFinderContract
             }
 
             if (! isset($iconsData['icons'][$icon])) {
-                $iconsResponse[$icon]['not_found'][] = $icon;
+
+                // if not found, check if it's an alias, add the alias to the response
+                if(isset($iconsData['aliases'][$icon])) {
+                    $parentIconName = $iconsData['aliases'][$icon]['parent'];
+                    $iconsResponse[$icon]['icons'][$parentIconName] = $iconsData['icons'][$parentIconName];
+                }else{
+                    $iconsResponse[$icon]['not_found'][] = $icon;
+                }
 
                 continue;
             }
 
             $iconsResponse[$icon]['icons'][$icon] = $iconsData['icons'][$icon];
-
         }
 
         unset($iconsData);
