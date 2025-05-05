@@ -8,10 +8,6 @@ use pcrov\JsonReader\JsonReader;
 
 /**
  * @phpstan-import-type TIconSetData from IconFinderContract
- * @phpstan-import-type TIcon from IconFinderContract
- * @phpstan-import-type TIcons from IconFinderContract
- * @phpstan-import-type TAlias from IconFinderContract
- * @phpstan-import-type TAliases from IconFinderContract
  */
 class IconFinder implements IconFinderContract
 {
@@ -47,9 +43,11 @@ class IconFinder implements IconFinderContract
                 if(isset($iconsData['aliases'][$icon])) {
                     $parentIconName = $iconsData['aliases'][$icon]['parent'];
                     $iconsResponse[$icon]['icons'][$parentIconName] = $iconsData['icons'][$parentIconName];
-                }else{
-                    $iconsResponse[$icon]['not_found'][] = $icon;
+
+                    continue;
                 }
+
+                $iconsResponse[$icon]['not_found'][] = $icon;
 
                 continue;
             }

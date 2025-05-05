@@ -8,15 +8,18 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoSummaryFinder as Ic
 /**
  * @phpstan-import-type TIconSetInfoSummary from IconSetInfoSummaryFinderContract
  * @phpstan-import-type TIconData from IconFinderContract
+ * @phpstan-import-type TIcons from IconFinderContract
+ * @phpstan-import-type TAliases from IconFinderContract
+ * @phpstan-import-type TNotFound from IconFinderContract
  *
  * @phpstan-type TIconResponse = array{
  *      prefix: string,
  *      lastModified: int,
  *      width?: int,
  *      height?: int,
- *      aliases: array<string, array<string,string>>,
- *      icons: array<string, array<string,string>>,
- *      not_found?: array<int,string>,
+ *      aliases: TAliases,
+ *      icons: TIcons,
+ *      not_found?: TNotFound,
  * }
  */
 class IconDataResponse

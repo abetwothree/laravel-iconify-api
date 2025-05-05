@@ -17,6 +17,7 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  * @phpstan-type TIcons = array<string, TIcon>
  * @phpstan-type TAlias = array<string,string>
  * @phpstan-type TAliases = array<string, TAlias>
+ * @phpstan-type TNotFound = array<int, string>
  * @phpstan-type TIconSetData = array{
  *      prefix: string,
  *      lastModified: int,
@@ -28,7 +29,7 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  * @phpstan-type TIconData = array{
  *      icons: TIcons,
  *      aliases: TAliases,
- *      not_found?: array<int, string>,
+ *      not_found?: TNotFound,
  * }
  */
 interface IconFinder
