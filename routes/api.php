@@ -3,6 +3,11 @@
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use Illuminate\Support\Facades\Route;
 
+/**
+ * @todo:
+ * - list-icons route listing icons in a set
+ * - list-icons-categorized
+ */
 Route::group([
     'domain' => LaravelIconifyApi::domain(),
     'prefix' => LaravelIconifyApi::path(),
