@@ -4,6 +4,10 @@ namespace AbeTwoThree\LaravelIconifyApi\Search\Traits;
 
 use Throwable;
 
+/**
+ * @phpstan-import-type TSearchKeywords from ParsesQuery
+ * @phpstan-import-type TSearchKeywordsEntry from ParsesQuery
+ */
 trait FindsIconsInFileSets
 {
     private array $addedIcons = [];
@@ -30,20 +34,21 @@ trait FindsIconsInFileSets
 
     private function runAllSearches(bool $isExact): void
     {
-        foreach ($this->keywords->searches as $search) {
-            $partial = $search->partial;
+        foreach ($this->filters['keywords'] as $search) {
+            $partial = $search['partial'] ?? false;
             if ($partial) {
                 if ($isExact) {
                     if (isset($this->data->keywords[$partial])) {
                         $this->runSearch($search, true, $partial);
                     }
                 } else {
-                    $keywordsList = getPartialKeywords($partial, true, $this->data);
-                    if ($keywordsList) {
-                        foreach ($keywordsList as $keyword) {
-                            $this->runSearch($search, false, $keyword);
-                        }
-                    }
+                    // TODO: Implement partial keywords
+                    // $keywordsList = getPartialKeywords($partial, true, $this->data);
+                    // if ($keywordsList) {
+                    //     foreach ($keywordsList as $keyword) {
+                    //         $this->runSearch($search, false, $keyword);
+                    //     }
+                    // }
                 }
             } else {
                 if (! $isExact) {
@@ -58,32 +63,38 @@ trait FindsIconsInFileSets
         }
     }
 
-    private function runSearch(SearchKeywordsEntry $search, bool $isExact, ?string $partial = null): void
+    /**
+     * @param  TSearchKeywordsEntry  $search
+     */
+    private function runSearch(array $search, bool $isExact, ?string $partial = null): void
     {
         $filteredPrefixes = $this->getFilteredPrefixes($search, $partial);
         if (empty($filteredPrefixes)) {
             return;
         }
 
-        $testKeywords = $partial ? array_merge($search->keywords, [$partial]) : $search->keywords;
-        $testMatches = $search->test ? array_merge($search->test, $testKeywords) : $testKeywords;
+        $testKeywords = $partial ? array_merge($search['keywords'], [$partial]) : $search['keywords'];
+        $testMatches = ($search['test'] ?? false) ? array_merge($search['test'], $testKeywords) : $testKeywords;
 
         foreach ($filteredPrefixes as $prefix) {
             $this->processPrefixIcons($prefix, $search, $testKeywords, $testMatches, $isExact);
         }
     }
 
-    private function getFilteredPrefixes(SearchKeywordsEntry $search, ?string $partial): array
+    /**
+     * @param  TSearchKeywordsEntry  $search
+     */
+    private function getFilteredPrefixes(array $search, ?string $partial): array
     {
-        if (isset($search->filteredPrefixes)) {
-            return $search->filteredPrefixes;
+        if (isset($search['filteredPrefixes'])) {
+            return $search['filteredPrefixes'];
         }
 
-        $filteredPrefixes = $search->prefixes
-            ? filterSearchPrefixesList($this->basePrefixes, $search->prefixes)
+        $filteredPrefixes = $search['prefixes']
+            ? filterSearchPrefixesList($this->basePrefixes, $search['prefixes'])
             : $this->basePrefixes;
 
-        foreach ($search->keywords as $keyword) {
+        foreach ($search['keywords'] as $keyword) {
             $filteredPrefixes = array_filter(
                 $filteredPrefixes,
                 fn ($p) => isset($this->data->keywords[$keyword][$p])
@@ -97,14 +108,17 @@ trait FindsIconsInFileSets
             );
         }
 
-        $search->filteredPrefixes = $filteredPrefixes;
+        $search['filteredPrefixes'] = $filteredPrefixes;
 
         return $filteredPrefixes;
     }
 
+    /**
+     * @param  TSearchKeywordsEntry  $search
+     */
     private function processPrefixIcons(
         string $prefix,
-        SearchKeywordsEntry $search,
+        array $search,
         array $testKeywords,
         array $testMatches,
         bool $isExact

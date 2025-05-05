@@ -125,6 +125,17 @@ trait ParsesQuery
             ->values()
             ->toArray();
 
+       $prefixes = collect($searches)
+                ->map(fn ($search) => $search['prefixes'])
+                ->flatten()
+                ->merge($prefixes)
+                ->unique()
+                ->sort()
+                ->values()
+                ->toArray();
+
+        $this->filters['prefixes'] = $prefixes;
+
         return $searches;
     }
 
