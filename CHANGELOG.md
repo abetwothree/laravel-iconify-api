@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-iconify-api` will be documented in this file.
 
+## v1.2.0 - 2025-05-05
+
+Fix finding icons by aliased parent component
+
+**Full Changelog**: https://github.com/abetwothree/laravel-iconify-api/compare/v1.1.0...v1.2.0
+
 ## v1.1.0 - 2025-02-25
 
 Support Laravel 12
