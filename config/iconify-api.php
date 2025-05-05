@@ -106,29 +106,4 @@ return [
     */
 
     'cache_key_prefix' => 'iconify-icons',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Search Settings
-    |--------------------------------------------------------------------------
-    | Iconify API will use the search settings to determine how to search for
-    | icons. You can change the default search settings here.
-    |
-    */
-
-    'search' => [
-        'enabled' => true,
-
-        'default' => 'files',
-
-        'ignored_prefixes' => [],
-
-        'drivers' => [
-            'files' => [],
-
-            'database' => [
-                'connection' => null,
-            ],
-        ],
-    ],
 ];

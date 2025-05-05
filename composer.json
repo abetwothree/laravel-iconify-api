@@ -33,9 +33,6 @@
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0"
     },
-    "suggest": {
-        "laravel/scout": "Used to search icons with a scout driver (e.g. Algolia, Meilisearch, Typesense, Database, etc)"
-    },
     "autoload": {
         "psr-4": {
             "AbeTwoThree\\LaravelIconifyApi\\": "src/",
