@@ -13,9 +13,9 @@ it('can find single file for individual icon set installed', function () {
         ->not->toContain('@iconify/json/json');
 });
 
-it('can find icon set file for aws in all sets, not individual', function () {
+it('can find icon set file for lucide in all sets, not individual', function () {
     $finder = resolve(IconSetsFileFinder::class);
-    $file = $finder->find('aws');
+    $file = $finder->find('lucide');
 
     expect($file)
         ->toBeString()
