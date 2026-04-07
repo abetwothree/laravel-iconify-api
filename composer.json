@@ -17,7 +17,7 @@
     "require": {
         "php": "^8.4",
         "ext-json": "*",
-        "illuminate/contracts": "^12||^11.0",
+        "illuminate/contracts": "^13||^12||^11.0",
         "spatie/laravel-package-tools": "^1.16",
         "pcrov/jsonreader": "^1.0"
     },
@@ -25,7 +25,7 @@
         "larastan/larastan": "^3.1",
         "laravel/pint": "^1.21",
         "nunomaduro/collision": "^8.1.1||^7.10.0",
-        "orchestra/testbench": "^10.0.0||^9.0.0",
+        "orchestra/testbench": "^11.0||^10.0.0||^9.0.0",
         "pestphp/pest": "^4.1.6||^3.0.0",
         "pestphp/pest-plugin-arch": "^4.0.0||^3.0.0",
         "pestphp/pest-plugin-laravel": "^4.0.0||^3.0.0",
