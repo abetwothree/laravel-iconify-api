@@ -56,6 +56,96 @@ You also need icon set data to be available in your application. You'll need to 
 
 We recommend installing individual icon sets instead of the entire Iconify JSON set to keep your application lightweight. However, you can install the entire set if you wish and this package will work with either approach.
 
+## Real-Time Inline Icon Rendering
+
+In addition to the HTTP API, this package can render icons directly to SVG in PHP for places where you want immediate server-side output.
+
+The icon finding and caching goes through the same process as the HTTP API, ensuring consistent behavior and performance.
+
+### Helper function
+
+Use the global helper to render an icon string:
+
+```php
+$svg = icon('heroicons:clock');
+```
+
+Apply SVG attributes:
+
+```php
+$svg = icon('heroicons:clock', [
+	'class' => 'w-6 h-6',
+	'data-slot' => 'icon',
+]);
+```
+
+### Blade component
+
+Use the Blade component for direct rendering in views:
+
+```blade
+<x-icon name="heroicons:clock" />
+<x-icon name="heroicons:clock" class="w-6 h-6" />
+<x-icon name="heroicons:clock" data-slot="icon" />
+```
+
+### Naming and collision safety
+
+If your app already has a global helper or component with the same name, this package will skip registration and leave existing behavior untouched.
+
+You can also customize or disable each one in `config/iconify-api.php`:
+
+```php
+'inline' => [
+	'enabled' => true,
+
+	'defaults' => [
+		'class' => '',
+		// Any default SVG attributes are supported.
+		// Examples:
+		// 'data-source' => 'iconify-api',
+		// 'style' => 'vertical-align: middle;',
+	],
+
+	'helper' => [
+		'enabled' => true,
+		'name' => 'icon',
+	],
+
+	'component' => [
+		'enabled' => true,
+		'name' => 'icon',
+	],
+],
+```
+
+Values from `defaults` are applied to every rendered icon. Per-icon options (helper or Blade attributes) override matching keys, except `class`, which is merged.
+
+### PHPStan support
+
+This package ships a PHPStan stub for the default helper name `icon`, so static analysis can recognize `icon()` calls out of the box.
+
+If you rename the helper function (for example to `iconify_svg`), add a small project-level stub so PHPStan can recognize the custom function name:
+
+```php
+<?php
+
+if (! function_exists('iconify_svg')) {
+	/**
+	 * @param  array<string, mixed>  $options
+	 */
+	function iconify_svg(string $name, array $options = []): string {}
+}
+```
+
+Then include that stub in your `phpstan.neon`:
+
+```neon
+parameters:
+	stubFiles:
+		- stubs/icon-helper.stub.php
+```
+
 ## Advanced Configuration
 
 To configure the package, you can publish the config file using the following command:

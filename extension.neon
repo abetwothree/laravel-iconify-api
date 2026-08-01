@@ -1,0 +1,3 @@
+parameters:
+    stubFiles:
+        - stubs/iconify-api-helper.stub.php
