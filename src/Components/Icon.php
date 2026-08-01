@@ -19,8 +19,10 @@ class Icon extends Component
         return function (array $data): string {
             /** @var ComponentAttributeBag $attributes */
             $attributes = $data['attributes'];
+            /** @var array<string, mixed> $componentAttributes */
+            $componentAttributes = $attributes->getAttributes();
 
-            return $this->renderer->render($this->name, $attributes->getAttributes());
+            return $this->renderer->render($this->name, $componentAttributes);
         };
     }
 }

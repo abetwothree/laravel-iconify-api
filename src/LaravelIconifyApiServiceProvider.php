@@ -150,10 +150,6 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
 
         $bladeCompiler = app('blade.compiler');
 
-        if (! method_exists($bladeCompiler, 'getClassComponentAliases')) {
-            return false;
-        }
-
         /** @var array<string, string> $aliases */
         $aliases = $bladeCompiler->getClassComponentAliases();
 

@@ -5,6 +5,11 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
 
+/**
+ * @phpstan-import-type TIcon from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
+ * @phpstan-import-type TAlias from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
+ * @phpstan-import-type TIconData from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
+ */
 class IconSvgRenderer
 {
     public function __construct(
@@ -12,6 +17,9 @@ class IconSvgRenderer
         protected IconSetInfoFinderContract $iconSetInfoFinder,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $options
+     */
     public function render(string $name, array $options = []): string
     {
         [$prefix, $iconName] = $this->splitName($name);
@@ -26,6 +34,7 @@ class IconSvgRenderer
             return '';
         }
 
+        /** @var TIconData $iconData */
         $iconData = $foundIcons[$iconName];
 
         if (! empty($iconData['not_found'])) {
@@ -58,14 +67,14 @@ class IconSvgRenderer
     }
 
     /**
-     * @param  array<string, mixed>  $iconData
-     * @return array<string, mixed>|null
+        * @param  TIconData  $iconData
+        * @return TIcon|null
      */
     protected function resolveIcon(string $iconName, array $iconData): ?array
     {
         $resolved = $this->resolveIconRecursive($iconName, $iconData, []);
 
-        if ($resolved === null || ! isset($resolved['body'])) {
+        if ($resolved === null) {
             return null;
         }
 
@@ -73,9 +82,9 @@ class IconSvgRenderer
     }
 
     /**
-     * @param  array<string, mixed>  $iconData
+        * @param  TIconData  $iconData
      * @param  array<int, string>  $visited
-     * @return array<string, mixed>|null
+        * @return TIcon|null
      */
     protected function resolveIconRecursive(string $iconName, array $iconData, array $visited): ?array
     {
@@ -93,12 +102,8 @@ class IconSvgRenderer
 
         $visited[] = $iconName;
 
-        /** @var array{parent?: string, rotate?: int|string, hFlip?: bool, vFlip?: bool, width?: int, height?: int, left?: int, top?: int} $alias */
+        /** @var TAlias $alias */
         $alias = $iconData['aliases'][$iconName];
-
-        if (! isset($alias['parent'])) {
-            return null;
-        }
 
         $parent = $this->resolveIconRecursive($alias['parent'], $iconData, $visited);
 
@@ -110,9 +115,9 @@ class IconSvgRenderer
     }
 
     /**
-     * @param  array<string, mixed>  $icon
-     * @param  array{parent?: string, rotate?: int|string, hFlip?: bool, vFlip?: bool, width?: int, height?: int, left?: int, top?: int}  $alias
-     * @return array<string, mixed>
+    * @param  TIcon  $icon
+    * @param  TAlias  $alias
+    * @return TIcon
      */
     protected function mergeAliasIntoIcon(array $icon, array $alias): array
     {
@@ -123,7 +128,7 @@ class IconSvgRenderer
         }
 
         if (isset($alias['rotate'])) {
-            $icon['rotate'] = $this->normalizeRotate(($icon['rotate'] ?? 0), $alias['rotate']);
+            $icon['rotate'] = $this->normalizeRotate($this->safeRotateValue($icon['rotate'] ?? 0), $alias['rotate']);
         }
 
         if (isset($alias['hFlip'])) {
@@ -144,10 +149,10 @@ class IconSvgRenderer
      */
     protected function buildSvg(array $icon, array $iconSetInfo, array $options): string
     {
-        $left = (int) ($icon['left'] ?? 0);
-        $top = (int) ($icon['top'] ?? 0);
-        $width = (int) ($icon['width'] ?? $iconSetInfo['width'] ?? 16);
-        $height = (int) ($icon['height'] ?? $iconSetInfo['height'] ?? 16);
+        $left = $this->safeInt($icon['left'] ?? 0, 0);
+        $top = $this->safeInt($icon['top'] ?? 0, 0);
+        $width = $this->safeInt($icon['width'] ?? $iconSetInfo['width'] ?? 16, 16);
+        $height = $this->safeInt($icon['height'] ?? $iconSetInfo['height'] ?? 16, 16);
 
         $options = $this->mergeDefaultAttributes($options);
 
@@ -174,8 +179,8 @@ class IconSvgRenderer
     {
         $defaults = config()->array('iconify-api.inline.defaults', []);
 
-        $defaultClass = trim((string) ($defaults['class'] ?? ''));
-        $optionClass = trim((string) ($options['class'] ?? ''));
+        $defaultClass = trim($this->safeString($defaults['class'] ?? '', ''));
+        $optionClass = trim($this->safeString($options['class'] ?? '', ''));
 
         $classes = trim(implode(' ', array_filter([$defaultClass, $optionClass])));
 
@@ -187,7 +192,10 @@ class IconSvgRenderer
             unset($defaults['class']);
         }
 
-        return array_merge($defaults, $options);
+        /** @var array<string, mixed> $merged */
+        $merged = array_merge($defaults, $options);
+
+        return $merged;
     }
 
     /**
@@ -203,7 +211,7 @@ class IconSvgRenderer
             }
 
             $escapedKey = htmlspecialchars((string) $key, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-            $escapedValue = htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+              $escapedValue = htmlspecialchars($this->safeString($value, ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
             $parts[] = $escapedKey.'="'.$escapedValue.'"';
         }
@@ -226,7 +234,7 @@ class IconSvgRenderer
             $transformations[] = 'translate('.(-$left).' '.($top + $height).') scale(1 -1)';
         }
 
-        $rotate = $this->normalizeRotate($icon['rotate'] ?? 0, 0);
+        $rotate = $this->normalizeRotate($this->safeRotateValue($icon['rotate'] ?? 0), 0);
 
         if ($rotate !== 0) {
             $degrees = $rotate * 90;
@@ -237,10 +245,10 @@ class IconSvgRenderer
         }
 
         if (count($transformations) === 0) {
-            return (string) $icon['body'];
+            return $this->safeString($icon['body'] ?? '', '');
         }
 
-        return '<g transform="'.implode(' ', $transformations).'">'.$icon['body'].'</g>';
+        return '<g transform="'.implode(' ', $transformations).'">'.$this->safeString($icon['body'] ?? '', '').'</g>';
     }
 
     protected function normalizeRotate(int|string $parentRotate, int|string $aliasRotate): int
@@ -272,5 +280,36 @@ class IconSvgRenderer
         }
 
         return 0;
+    }
+
+    protected function safeRotateValue(mixed $value): int|string
+    {
+        if (is_int($value) || is_string($value)) {
+            return $value;
+        }
+
+        return 0;
+    }
+
+    protected function safeInt(mixed $value, int $default = 0): int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return (int) $value;
+        }
+
+        return $default;
+    }
+
+    protected function safeString(mixed $value, string $default = ''): string
+    {
+        if (is_string($value) || is_numeric($value) || is_bool($value)) {
+            return (string) $value;
+        }
+
+        return $default;
     }
 }
