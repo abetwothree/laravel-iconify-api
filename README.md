@@ -16,6 +16,11 @@ On demand icons work great whether you use Livewire, Inertia, or just plain Blad
 
 Additionally, this package provides a convenient way to render Iconify icons inline as SVGs within PHP files or in your Blade views.
 
+## Also By Me
+
+- [Laravel TypeScript Publish Package](https://github.com/abetwothree/laravel-ts-publish)
+- [Tolki JS NPM packages](https://github.com/abetwothree/tolki)
+
 ## Requirements
 
 - PHP 8.5, 8.4
