@@ -6,7 +6,7 @@ use Illuminate\View\Component;
 
 class ExistingIconComponent extends Component
 {
-    public function render(): \Closure
+    public function render(): Closure
     {
         return fn (): string => '<span>existing-component</span>';
     }
