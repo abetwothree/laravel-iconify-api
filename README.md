@@ -1,4 +1,4 @@
-# Laravel Iconify API
+# Laravel Iconify API & Icon Rendering
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/abetwothree/laravel-iconify-api.svg?style=flat-square)](https://packagist.org/packages/abetwothree/laravel-iconify-api)
 [![Laravel Compatibility](https://badge.laravel.cloud/badge/abetwothree/laravel-iconify-api)](https://packagist.org/packages/abetwothree/laravel-iconify-api)
@@ -13,6 +13,8 @@ This Laravel package creates a few API routes for the [Iconify](https://iconify.
 It works similarly to the [Node Iconify API](https://github.com/iconify/api) and is a spiritual successor to their [PHP implementation](https://github.com/iconify/api.php).
 
 On demand icons work great whether you use Livewire, Inertia, or just plain Blade views to render your Laravel application and want to render icons dynamically using a single component.
+
+Additionally, this package provides a convenient way to render Iconify icons inline as SVGs within PHP files or in your Blade views.
 
 ## Requirements
 
@@ -48,13 +50,13 @@ The following routes are currently available:
 - `/iconify/api/collections` - Returns a list of icon collections available in your application.
 - `/iconify/api/collection?prefix={prefix}` - Returns the information for a specific icon collection.
 
-### How To Display Icons
+### How To Display Dynamic On-Demand Icons
 
-To displays icons follow the instructions on the [Iconify](https://iconify.design/docs/icon-components/) on demand docs and use any of their component libraries in your Laravel Application.
+To display on-demand icons follow the instructions on the [Iconify](https://iconify.design/docs/icon-components/) on demand docs and use any of their component libraries in your Laravel Application.
 
 You also need icon set data to be available in your application. You'll need to install the icon set data using NPM. See more [info here](https://iconify.design/docs/icons/icon-data.html#sources).
 
-We recommend installing individual icon sets instead of the entire Iconify JSON set to keep your application lightweight. However, you can install the entire set if you wish and this package will work with either approach.
+It is recommended to install individual icon sets instead of the entire Iconify JSON set to keep your application lightweight. However, you can install the entire set if you wish and this package will work with either approach.
 
 ## Real-Time Inline Icon Rendering
 
