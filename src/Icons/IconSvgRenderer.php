@@ -67,8 +67,8 @@ class IconSvgRenderer
     }
 
     /**
-        * @param  TIconData  $iconData
-        * @return TIcon|null
+     * @param  TIconData  $iconData
+     * @return TIcon|null
      */
     protected function resolveIcon(string $iconName, array $iconData): ?array
     {
@@ -82,9 +82,9 @@ class IconSvgRenderer
     }
 
     /**
-        * @param  TIconData  $iconData
+     * @param  TIconData  $iconData
      * @param  array<int, string>  $visited
-        * @return TIcon|null
+     * @return TIcon|null
      */
     protected function resolveIconRecursive(string $iconName, array $iconData, array $visited): ?array
     {
@@ -115,9 +115,9 @@ class IconSvgRenderer
     }
 
     /**
-    * @param  TIcon  $icon
-    * @param  TAlias  $alias
-    * @return TIcon
+     * @param  TIcon  $icon
+     * @param  TAlias  $alias
+     * @return TIcon
      */
     protected function mergeAliasIntoIcon(array $icon, array $alias): array
     {
@@ -211,7 +211,7 @@ class IconSvgRenderer
             }
 
             $escapedKey = htmlspecialchars((string) $key, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-              $escapedValue = htmlspecialchars($this->safeString($value, ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $escapedValue = htmlspecialchars($this->safeString($value, ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
             $parts[] = $escapedKey.'="'.$escapedValue.'"';
         }
