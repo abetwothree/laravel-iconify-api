@@ -1,5 +1,6 @@
 <?php
 
+use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconFinder;
 
 it('can find multiple icons', function (
@@ -67,3 +68,42 @@ it('returns proper response but fails to find icon', function (
     ['mdi', ['not-an-icon']],
     ['heroicons', ['not-an-icon']],
 ]);
+
+it('marks alias as not found when alias parent icon is missing', function () {
+    $tempFile = sys_get_temp_dir().'/iconfinder-'.uniqid('', true).'.json';
+
+    $written = file_put_contents($tempFile, json_encode([
+        'prefix' => 'test',
+        'lastModified' => time(),
+        'icons' => [],
+        'aliases' => [
+            'broken-alias' => [
+                'parent' => 'missing-parent',
+            ],
+        ],
+    ], JSON_THROW_ON_ERROR));
+
+    if ($written === false) {
+        throw new RuntimeException('Unable to write temporary test file.');
+    }
+
+    $fileFinder = new class($tempFile) implements IconSetsFileFinderContract
+    {
+        public function __construct(private string $path) {}
+
+        public function find(string $prefix, string $type = 'icons'): string
+        {
+            return $this->path;
+        }
+    };
+
+    $finder = new IconFinder($fileFinder);
+    $result = $finder->find('test', ['broken-alias']);
+
+    expect($result)->toHaveKey('broken-alias');
+    expect($result['broken-alias']['aliases'])->toHaveKey('broken-alias');
+    expect($result['broken-alias']['icons'])->toBe([]);
+    expect($result['broken-alias']['not_found'] ?? [])->toBe(['broken-alias']);
+
+    @unlink($tempFile);
+});

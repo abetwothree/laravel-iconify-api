@@ -2,10 +2,12 @@
 
 namespace AbeTwoThree\LaravelIconifyApi\Tests;
 
+use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApiServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as Orchestra;
+use ReflectionClass;
 
 class TestCase extends Orchestra
 {
@@ -14,6 +16,11 @@ class TestCase extends Orchestra
     protected function setUp(): void
     {
         parent::setUp();
+
+        $reflection = new ReflectionClass(LaravelIconifyApi::class);
+        $property = $reflection->getProperty('prefixes');
+        $property->setAccessible(true);
+        $property->setValue([]);
 
         Factory::guessFactoryNamesUsing(
             fn (string $modelName) => 'AbeTwoThree\\LaravelIconifyApi\\Database\\Factories\\'.class_basename($modelName).'Factory'

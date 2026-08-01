@@ -15,7 +15,9 @@ use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoSummaryFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoSummaryFinderCached;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinderCached;
+use AbeTwoThree\LaravelIconifyApi\Support\IconHelperRegistrar;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Str;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -53,6 +55,12 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         $this->registerBladeDirective();
+
+        if (config()->boolean('iconify-api.inline.enabled', true)) {
+            $this->registerIconHelper();
+            $this->registerIconComponent();
+        }
+
         $this->registerServicesBindings();
     }
 
@@ -98,5 +106,62 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
 
             return resolve(IconSetInfoFinder::class);
         });
+    }
+
+    protected function registerIconHelper(): void
+    {
+        if (! config()->boolean('iconify-api.inline.helper.enabled', true)) {
+            return;
+        }
+
+        $name = config()->string('iconify-api.inline.helper.name');
+
+        if (! $this->isValidPhpFunctionName($name) || function_exists($name)) {
+            return;
+        }
+
+        IconHelperRegistrar::register($name);
+    }
+
+    protected function registerIconComponent(): void
+    {
+        if (! config()->boolean('iconify-api.inline.component.enabled', true)) {
+            return;
+        }
+
+        $name = config()->string('iconify-api.inline.component.name');
+
+        if (blank($name) || $this->componentAliasExists($name)) {
+            return;
+        }
+
+        Blade::component(Components\Icon::class, $name);
+    }
+
+    protected function componentAliasExists(string $name): bool
+    {
+        if (view()->exists('components.'.$name)) {
+            return true;
+        }
+
+        if (view()->exists('components.'.str_replace('-', '.', $name))) {
+            return true;
+        }
+
+        $bladeCompiler = app('blade.compiler');
+
+        /** @var array<string, string> $aliases */
+        $aliases = $bladeCompiler->getClassComponentAliases();
+
+        return array_key_exists($name, $aliases);
+    }
+
+    protected function isValidPhpFunctionName(string $name): bool
+    {
+        if (blank($name)) {
+            return false;
+        }
+
+        return Str::match('/^[A-Za-z_\\x80-\\xff][A-Za-z0-9_\\x80-\\xff]*$/', $name) !== '';
     }
 }

@@ -15,7 +15,17 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  *     hidden?:bool,
  * }
  * @phpstan-type TIcons = array<string, TIcon>
- * @phpstan-type TAlias = array<string,string>
+ * @phpstan-type TAlias = array{
+ *     parent: string,
+ *     rotate?:int|string,
+ *     hFlip?:bool,
+ *     vFlip?:bool,
+ *     left?:int,
+ *     top?:int,
+ *     width?:int,
+ *     height?:int,
+ *     hidden?:bool,
+ * }
  * @phpstan-type TAliases = array<string, TAlias>
  * @phpstan-type TNotFound = array<int, string>
  * @phpstan-type TIconSetData = array{

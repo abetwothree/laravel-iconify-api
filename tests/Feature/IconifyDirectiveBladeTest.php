@@ -2,8 +2,15 @@
 
 use Illuminate\Support\Facades\Blade;
 
+function renderIconifyDirective(): string
+{
+    $nonce = uniqid('iconify-', true);
+
+    return Blade::render("@iconify\n{{-- {$nonce} --}}", [], true);
+}
+
 it('can render the iconify directive', function () {
-    $directive = Blade::render('@iconify', [], true);
+    $directive = renderIconifyDirective();
 
     expect($directive)->toBeString()
         ->toContain('window.IconifyProviders')
@@ -29,7 +36,7 @@ it('can render the iconify directive with custom providers', function () {
         ],
     ]);
 
-    $directive = Blade::render('@iconify', [], true);
+    $directive = renderIconifyDirective();
 
     expect($directive)->toBeString()
         ->toContain('window.IconifyProviders')

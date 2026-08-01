@@ -84,6 +84,38 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Inline Icon Rendering
+    |--------------------------------------------------------------------------
+    | Configure the optional helper function and Blade component for rendering
+    | Iconify icons directly to SVG without an HTTP request.
+    | Defaults support any SVG attributes (for example class, data-*, style).
+    |
+    */
+
+    'inline' => [
+        'enabled' => true,
+
+        'defaults' => [
+            'class' => '',
+            // Any default SVG attributes are supported.
+            // Examples:
+            // 'data-source' => 'iconify-api',
+            // 'style' => 'vertical-align: middle;',
+        ],
+
+        'helper' => [
+            'enabled' => true,
+            'name' => 'icon',
+        ],
+
+        'component' => [
+            'enabled' => true,
+            'name' => 'icon',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Cache driver
     |--------------------------------------------------------------------------
     | Cache driver to use for storing the icon set caches. Indices are used to speed up

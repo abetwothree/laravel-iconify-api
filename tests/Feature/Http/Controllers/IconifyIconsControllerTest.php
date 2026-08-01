@@ -51,6 +51,30 @@ it('tests loading multiple icons', function (string $route) {
     ['iconify-api.set-json.show'],
 ]);
 
+it('tests loading icons returns multiple not found icons', function (string $route) {
+    $response = test()->get(route($route, ['set' => 'bytesize', 'icons' => 'activity,missing-one,missing-two']));
+    $response->assertStatus(200);
+
+    $response->assertJsonStructure([
+        'prefix',
+        'lastModified',
+        'aliases',
+        'width',
+        'height',
+        'icons' => [
+            'activity' => [
+                'body',
+            ],
+        ],
+        'not_found',
+    ]);
+
+    expect($response->json('not_found'))->toBe(['missing-one', 'missing-two']);
+})->with([
+    ['iconify-api.set-icons-json.show'],
+    ['iconify-api.set-json.show'],
+]);
+
 it('tests getting an error if icons are not specified', function (string $route) {
     $response = test()->get(route($route, ['set' => 'mdi-light']));
     $response->assertStatus(404);
