@@ -2,6 +2,7 @@
 
 use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApiServiceProvider;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 use Illuminate\View\Component;
 
 class ExistingIconComponent extends Component
@@ -101,4 +102,19 @@ it('skips component registration when inline rendering is disabled', function ()
     $aliases = app('blade.compiler')->getClassComponentAliases();
 
     expect($aliases['inline-disabled-icon'])->toBe(ExistingIconComponent::class);
+});
+
+it('does not override an existing anonymous component with a hyphenated name', function () {
+    View::shouldReceive('exists')
+        ->once()
+        ->with('components.existing-icon')
+        ->andReturn(true);
+
+    config()->set('iconify-api.inline.component.name', 'existing-icon');
+    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
+
+    /** @var array<string, string> $aliases */
+    $aliases = app('blade.compiler')->getClassComponentAliases();
+
+    expect(array_key_exists('existing-icon', $aliases))->toBeFalse();
 });

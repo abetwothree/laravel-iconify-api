@@ -13,24 +13,51 @@ class IconHelperRegistrar
         }
 
         $rendererClass = IconSvgRenderer::class;
-        $helperName = preg_replace('/[^A-Za-z0-9_]/', '_', $name) ?? 'icon';
-        $helperFile = sys_get_temp_dir().'/iconify-api-helper-'.$helperName.'.php';
+        $helperFile = self::createHelperFilePath();
 
-        if (! file_exists($helperFile)) {
-            $content = <<<PHP
-                <?php
-
-                if (! function_exists('{$name}')) {
-                    function {$name}(string \$name, array \$options = []): string
-                    {
-                        return app('{$rendererClass}')->render(\$name, \$options);
-                    }
-                }
-                PHP;
-
-            file_put_contents($helperFile, $content);
+        if ($helperFile === null) {
+            return;
         }
 
-        require_once $helperFile;
+        $content = <<<PHP
+            <?php
+
+            if (! function_exists('{$name}')) {
+                function {$name}(string \$name, array \$options = []): string
+                {
+                    return app('{$rendererClass}')->render(\$name, \$options);
+                }
+            }
+            PHP;
+
+        if (file_put_contents($helperFile, $content, LOCK_EX) === false) {
+            @unlink($helperFile);
+
+            return;
+        }
+
+        require $helperFile;
+
+        @unlink($helperFile);
+    }
+
+    protected static function createHelperFilePath(): ?string
+    {
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $suffix = bin2hex(random_bytes(16));
+            $path = sys_get_temp_dir().'/iconify-api-helper-'.$suffix.'.php';
+
+            $handle = @fopen($path, 'x');
+
+            if ($handle === false) {
+                continue;
+            }
+
+            fclose($handle);
+
+            return $path;
+        }
+
+        return null;
     }
 }

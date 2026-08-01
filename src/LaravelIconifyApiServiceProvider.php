@@ -140,6 +140,10 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
 
     protected function componentAliasExists(string $name): bool
     {
+        if (view()->exists('components.'.$name)) {
+            return true;
+        }
+
         if (view()->exists('components.'.str_replace('-', '.', $name))) {
             return true;
         }

@@ -46,6 +46,23 @@ it('applies arbitrary configured defaults and allows per-call overrides', functi
         ->toContain('style="color: red;"');
 });
 
+it('prefers per-call width and height over configured defaults', function () {
+    config()->set('iconify-api.inline.defaults', [
+        'width' => '2em',
+        'height' => '2em',
+    ]);
+
+    $helper = 'icon';
+    $svg = $helper('heroicons:clock', [
+        'width' => '24',
+        'height' => '32',
+    ]);
+
+    expect($svg)
+        ->toContain('width="24"')
+        ->toContain('height="32"');
+});
+
 it('returns empty string for unknown icon in helper', function () {
     $helper = 'icon';
 

@@ -149,6 +149,8 @@ class IconSvgRenderer
         $width = (int) ($icon['width'] ?? $iconSetInfo['width'] ?? 16);
         $height = (int) ($icon['height'] ?? $iconSetInfo['height'] ?? 16);
 
+        $options = $this->mergeDefaultAttributes($options);
+
         $attributes = [
             'xmlns' => 'http://www.w3.org/2000/svg',
             'viewBox' => "{$left} {$top} {$width} {$height}",
@@ -157,8 +159,6 @@ class IconSvgRenderer
         ];
 
         unset($options['width'], $options['height']);
-
-        $options = $this->mergeDefaultAttributes($options);
         $attributes = array_merge($attributes, $options);
 
         $attributeString = $this->stringifyAttributes($attributes);
