@@ -3,7 +3,6 @@
 namespace AbeTwoThree\LaravelIconifyApi\Icons;
 
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
-use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconDataResolver;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconifySvgBuilder;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
@@ -23,7 +22,6 @@ class IconSvgRenderer
 
     public function __construct(
         protected IconFinderContract $iconFinder,
-        protected IconSetInfoFinderContract $iconSetInfoFinder,
         ?IconifySvgBuilder $svgBuilder = null,
         ?SvgIdReplacer $svgIdReplacer = null,
         ?IconDataResolver $iconDataResolver = null,
@@ -60,15 +58,16 @@ class IconSvgRenderer
             return '';
         }
 
-        $resolvedIcon = $this->iconDataResolver->resolve($iconData, $iconName);
+        /** @var array<string, mixed> $setDefaults */
+        $setDefaults = $iconData['defaults'];
+
+        $resolvedIcon = $this->iconDataResolver->resolve($iconData, $iconName, $setDefaults);
 
         if ($resolvedIcon === null) {
             return '';
         }
 
-        $iconSetInfo = $this->iconSetInfoFinder->find($prefix);
-
-        return $this->buildSvg($resolvedIcon, $iconSetInfo, $options, $parsedName);
+        return $this->buildSvg($resolvedIcon, $options, $parsedName);
     }
 
     /**
@@ -167,14 +166,13 @@ class IconSvgRenderer
     }
 
     /**
-     * @param  array<string, mixed>  $iconSetInfo
      * @param  array<string, mixed>  $icon
      * @param  array<string, mixed>  $options
      * @param  array{provider: string, prefix: string, name: string}|null  $parsedName
      */
-    protected function buildSvg(array $icon, array $iconSetInfo, array $options, ?array $parsedName = null): string
+    protected function buildSvg(array $icon, array $options, ?array $parsedName = null): string
     {
-        $buildResult = $this->svgBuilder->build($icon, $iconSetInfo, $this->extractCustomisations($options));
+        $buildResult = $this->svgBuilder->build($icon, [], $this->extractCustomisations($options));
         $renderAttributes = $buildResult['attributes'];
         $renderBody = $this->svgIdReplacer->replace($buildResult['body']);
 

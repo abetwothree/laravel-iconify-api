@@ -1,13 +1,11 @@
 <?php
 
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder;
-use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSvgRenderer;
 
 it('parses iconify icon name formats', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
 
     $parse = new ReflectionMethod($renderer, 'parseIconName');
     $parse->setAccessible(true);
@@ -50,9 +48,8 @@ it('parses iconify icon name formats', function () {
 
 it('covers render early returns for invalid names and not-found icons', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
 
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
 
     expect($renderer->render('invalidname'))->toBe('');
 
@@ -60,19 +57,17 @@ it('covers render early returns for invalid names and not-found icons', function
     expect($renderer->render('mdi:home'))->toBe('');
 
     $finder2 = Mockery::mock(IconFinder::class);
-    $infoFinder2 = Mockery::mock(IconSetInfoFinder::class);
 
     $finder2->shouldReceive('find')->with('mdi', ['home'])->once()->andReturn([
-        'home' => ['icons' => [], 'aliases' => [], 'not_found' => ['home']],
+        'home' => ['icons' => [], 'aliases' => [], 'defaults' => [], 'not_found' => ['home']],
     ]);
 
-    $renderer2 = new IconSvgRenderer($finder2, $infoFinder2);
+    $renderer2 = new IconSvgRenderer($finder2);
     expect($renderer2->render('mdi:home'))->toBe('');
 });
 
 it('covers alias resolution edge cases and transformed output', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
 
     $finder->shouldReceive('find')->with('mdi', ['home'])->once()->andReturn([
         'home' => [
@@ -91,13 +86,8 @@ it('covers alias resolution edge cases and transformed output', function () {
                     'rotate' => 1,
                 ],
             ],
+            'defaults' => [],
         ],
-    ]);
-
-    $infoFinder->shouldReceive('find')->with('mdi')->once()->andReturn([
-        'prefix' => 'mdi',
-        'width' => 16,
-        'height' => 16,
     ]);
 
     config()->set('iconify-api.inline.defaults', [
@@ -106,7 +96,7 @@ it('covers alias resolution edge cases and transformed output', function () {
         'height' => '2em',
     ]);
 
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
     $svg = $renderer->render('mdi:home', [
         'class' => 'w-6',
         'width' => '32',
@@ -122,7 +112,6 @@ it('covers alias resolution edge cases and transformed output', function () {
 
 it('adds iconify classes for provider and prefix formats', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
 
     $finder->shouldReceive('find')->with('mdi', ['home'])->twice()->andReturn([
         'home' => [
@@ -134,16 +123,11 @@ it('adds iconify classes for provider and prefix formats', function () {
                 ],
             ],
             'aliases' => [],
+            'defaults' => [],
         ],
     ]);
 
-    $infoFinder->shouldReceive('find')->with('mdi')->twice()->andReturn([
-        'prefix' => 'mdi',
-        'width' => 16,
-        'height' => 16,
-    ]);
-
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
 
     $svgWithProvider = $renderer->render('@custom:mdi:home');
     expect($svgWithProvider)->toContain('class="iconify iconify--custom iconify--mdi"');
@@ -154,7 +138,6 @@ it('adds iconify classes for provider and prefix formats', function () {
 
 it('covers unresolved alias parent and non-transform output branch', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
 
     $finder->shouldReceive('find')->with('mdi', ['home'])->once()->andReturn([
         'home' => [
@@ -162,14 +145,14 @@ it('covers unresolved alias parent and non-transform output branch', function ()
             'aliases' => [
                 'home' => ['parent' => 'missing-parent'],
             ],
+            'defaults' => [],
         ],
     ]);
 
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
     expect($renderer->render('mdi:home'))->toBe('');
 
     $finder2 = Mockery::mock(IconFinder::class);
-    $infoFinder2 = Mockery::mock(IconSetInfoFinder::class);
 
     $finder2->shouldReceive('find')->with('mdi', ['flat'])->once()->andReturn([
         'flat' => [
@@ -179,20 +162,15 @@ it('covers unresolved alias parent and non-transform output branch', function ()
                 ],
             ],
             'aliases' => [],
+            'defaults' => ['width' => 16, 'height' => 16],
         ],
-    ]);
-
-    $infoFinder2->shouldReceive('find')->with('mdi')->once()->andReturn([
-        'prefix' => 'mdi',
-        'width' => 16,
-        'height' => 16,
     ]);
 
     config()->set('iconify-api.inline.defaults', [
         'class' => '',
     ]);
 
-    $renderer2 = new IconSvgRenderer($finder2, $infoFinder2);
+    $renderer2 = new IconSvgRenderer($finder2);
     $svg = $renderer2->render('mdi:flat', [
         'data-value' => ['array-is-stringified-via-safeString'],
     ]);
@@ -203,7 +181,6 @@ it('covers unresolved alias parent and non-transform output branch', function ()
 
 it('covers cycle detection, alias dimensions, numeric and fallback parsing branches', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
 
     $finder->shouldReceive('find')->with('mdi', ['loop'])->once()->andReturn([
         'loop' => [
@@ -213,14 +190,14 @@ it('covers cycle detection, alias dimensions, numeric and fallback parsing branc
                     'parent' => 'loop',
                 ],
             ],
+            'defaults' => [],
         ],
     ]);
 
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
     expect($renderer->render('mdi:loop'))->toBe('');
 
     $finder2 = Mockery::mock(IconFinder::class);
-    $infoFinder2 = Mockery::mock(IconSetInfoFinder::class);
 
     $finder2->shouldReceive('find')->with('mdi', ['mixed'])->once()->andReturn([
         'mixed' => [
@@ -239,13 +216,8 @@ it('covers cycle detection, alias dimensions, numeric and fallback parsing branc
                     'rotate' => -1,
                 ],
             ],
+            'defaults' => ['width' => 16, 'height' => 16],
         ],
-    ]);
-
-    $infoFinder2->shouldReceive('find')->with('mdi')->once()->andReturn([
-        'prefix' => 'mdi',
-        'width' => 16,
-        'height' => 16,
     ]);
 
     config()->set('iconify-api.inline.defaults', [
@@ -255,7 +227,7 @@ it('covers cycle detection, alias dimensions, numeric and fallback parsing branc
         'data-keep' => 'ok',
     ]);
 
-    $renderer2 = new IconSvgRenderer($finder2, $infoFinder2);
+    $renderer2 = new IconSvgRenderer($finder2);
     $svg = $renderer2->render('mdi:mixed');
 
     expect($svg)->toContain('viewBox="0 1 16 48"');
@@ -268,8 +240,7 @@ it('covers cycle detection, alias dimensions, numeric and fallback parsing branc
 
 it('covers protected parse and safe helpers via reflection', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
 
     $parse = new ReflectionMethod($renderer, 'parseRotateValue');
     $parse->setAccessible(true);
@@ -283,7 +254,6 @@ it('covers protected parse and safe helpers via reflection', function () {
 
 it('matches iconify dimension keywords for auto and unset values', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
 
     $finder->shouldReceive('find')->with('mdi', ['sized'])->once()->andReturn([
         'sized' => [
@@ -295,16 +265,11 @@ it('matches iconify dimension keywords for auto and unset values', function () {
                 ],
             ],
             'aliases' => [],
+            'defaults' => [],
         ],
     ]);
 
-    $infoFinder->shouldReceive('find')->with('mdi')->once()->andReturn([
-        'prefix' => 'mdi',
-        'width' => 16,
-        'height' => 16,
-    ]);
-
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
     $svg = $renderer->render('mdi:sized', [
         'width' => 'auto',
         'height' => 'unset',
@@ -317,7 +282,6 @@ it('matches iconify dimension keywords for auto and unset values', function () {
 
 it('adds iconify svg defaults and protects generated viewBox', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
 
     $finder->shouldReceive('find')->with('mdi', ['attrs'])->once()->andReturn([
         'attrs' => [
@@ -329,16 +293,11 @@ it('adds iconify svg defaults and protects generated viewBox', function () {
                 ],
             ],
             'aliases' => [],
+            'defaults' => [],
         ],
     ]);
 
-    $infoFinder->shouldReceive('find')->with('mdi')->once()->andReturn([
-        'prefix' => 'mdi',
-        'width' => 16,
-        'height' => 16,
-    ]);
-
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
     $svg = $renderer->render('mdi:attrs', [
         'viewBox' => '0 0 1 1',
     ]);
@@ -352,7 +311,6 @@ it('adds iconify svg defaults and protects generated viewBox', function () {
 
 it('removes aria-hidden default when explicitly disabled', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
 
     $finder->shouldReceive('find')->with('mdi', ['aria'])->once()->andReturn([
         'aria' => [
@@ -364,16 +322,11 @@ it('removes aria-hidden default when explicitly disabled', function () {
                 ],
             ],
             'aliases' => [],
+            'defaults' => [],
         ],
     ]);
 
-    $infoFinder->shouldReceive('find')->with('mdi')->once()->andReturn([
-        'prefix' => 'mdi',
-        'width' => 16,
-        'height' => 16,
-    ]);
-
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
     $svg = $renderer->render('mdi:aria', [
         'aria-hidden' => 'false',
     ]);
@@ -383,7 +336,6 @@ it('removes aria-hidden default when explicitly disabled', function () {
 
 it('adds xmlns:xlink when svg body references xlink namespace', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
 
     $finder->shouldReceive('find')->with('mdi', ['xlink'])->once()->andReturn([
         'xlink' => [
@@ -395,16 +347,11 @@ it('adds xmlns:xlink when svg body references xlink namespace', function () {
                 ],
             ],
             'aliases' => [],
+            'defaults' => [],
         ],
     ]);
 
-    $infoFinder->shouldReceive('find')->with('mdi')->once()->andReturn([
-        'prefix' => 'mdi',
-        'width' => 16,
-        'height' => 16,
-    ]);
-
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
     $svg = $renderer->render('mdi:xlink');
 
     expect($svg)->toContain('xmlns:xlink="http://www.w3.org/1999/xlink"');
@@ -412,7 +359,6 @@ it('adds xmlns:xlink when svg body references xlink namespace', function () {
 
 it('replaces svg ids to avoid collisions across renders', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
 
     $finder->shouldReceive('find')->with('mdi', ['ids'])->twice()->andReturn([
         'ids' => [
@@ -424,16 +370,11 @@ it('replaces svg ids to avoid collisions across renders', function () {
                 ],
             ],
             'aliases' => [],
+            'defaults' => [],
         ],
     ]);
 
-    $infoFinder->shouldReceive('find')->with('mdi')->twice()->andReturn([
-        'prefix' => 'mdi',
-        'width' => 16,
-        'height' => 16,
-    ]);
-
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
 
     $svgFirst = $renderer->render('mdi:ids');
     $svgSecond = $renderer->render('mdi:ids');
@@ -446,8 +387,7 @@ it('replaces svg ids to avoid collisions across renders', function () {
 
 it('covers remaining parser and helper branches', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
 
     $parse = new ReflectionMethod($renderer, 'parseIconName');
     $parse->setAccessible(true);
@@ -507,7 +447,6 @@ it('covers remaining parser and helper branches', function () {
 
 it('maps ariaHidden to aria-hidden and removes default when false', function () {
     $finder = Mockery::mock(IconFinder::class);
-    $infoFinder = Mockery::mock(IconSetInfoFinder::class);
 
     $finder->shouldReceive('find')->with('mdi', ['aria-camel'])->once()->andReturn([
         'aria-camel' => [
@@ -519,16 +458,11 @@ it('maps ariaHidden to aria-hidden and removes default when false', function () 
                 ],
             ],
             'aliases' => [],
+            'defaults' => [],
         ],
     ]);
 
-    $infoFinder->shouldReceive('find')->with('mdi')->once()->andReturn([
-        'prefix' => 'mdi',
-        'width' => 16,
-        'height' => 16,
-    ]);
-
-    $renderer = new IconSvgRenderer($finder, $infoFinder);
+    $renderer = new IconSvgRenderer($finder);
     $svg = $renderer->render('mdi:aria-camel', [
         'ariaHidden' => false,
     ]);
