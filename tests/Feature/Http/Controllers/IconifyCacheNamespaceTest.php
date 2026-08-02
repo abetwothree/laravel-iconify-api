@@ -49,7 +49,9 @@ it('does not let a crafted icon name overwrite the icon set summary', function (
         ->and($icons->json())->not->toHaveKey('defaults');
 });
 
-it('rejects icon names that upstream matchIconName would not accept', function () {
+it('looks up icon names that upstream matchIconName would not accept', function () {
+    // A set reached through a custom `icons_location` may be hand-authored, so names
+    // are not filtered up front: every one goes through the finder like any other.
     $response = test()->get(route('iconify-api.set-json.show', [
         'set' => 'bytesize',
         'icons' => 'activity,info:summary:2,../../etc/passwd,UPPER',
@@ -60,16 +62,54 @@ it('rejects icon names that upstream matchIconName would not accept', function (
     expect($response->json('icons'))->toHaveKey('activity')
         ->and($response->json('not_found'))->toBe(['info:summary:2', '../../etc/passwd', 'UPPER']);
 
-    // A rejected name must never reach the cache key builder at all.
     $keys = array_keys(Cache::store('array')->getStore()->all());
 
-    expect($keys)->toContain('iconify-icons:bytesize:icon:2:activity');
+    // A name a cache key can hold is written verbatim; one carrying the key separator
+    // or a path separator is replaced by a hash of the whole name.
+    expect($keys)->toContain('iconify-icons:bytesize:icon:2:activity')
+        ->and($keys)->toContain('iconify-icons:bytesize:icon:2:UPPER')
+        ->and($keys)->toContain('iconify-icons:bytesize:icon:2:h:'.hash('sha256', 'info:summary:2'))
+        ->and($keys)->toContain('iconify-icons:bytesize:icon:2:h:'.hash('sha256', '../../etc/passwd'))
+        ->and($keys)->not->toContain('iconify-icons:bytesize:icon:2:info:summary:2')
+        ->and($keys)->not->toContain('iconify-icons:bytesize:icon:2:../../etc/passwd');
 
-    foreach ($keys as $key) {
-        expect($key)->not->toContain('summary:2:')
-            ->and($key)->not->toContain('passwd')
-            ->and($key)->not->toContain('UPPER');
-    }
+    // And the icon set metadata this request also cached is untouched by any of them.
+    expect(Cache::store('array')->get('iconify-icons:bytesize:meta:summary'))
+        ->toHaveKey('prefix')
+        ->and(Cache::store('array')->get('iconify-icons:bytesize:meta:file:icons'))
+        ->toBeString();
+});
+
+it('keeps the icon set metadata intact for names that spell a metadata key', function () {
+    // With no name filter in front of it, the key builder is the only thing standing
+    // between these names and the metadata keys they are written to imitate. `info` is
+    // the name the original bug used; the rest spell the other three key builders.
+    $response = test()->get(route('iconify-api.set-json.show', [
+        'set' => 'codicon',
+        'icons' => 'info,meta:info,meta:summary,meta:file:icons',
+    ]));
+
+    $response->assertStatus(200);
+
+    expect($response->json('icons.info.body'))->toBeString()
+        ->and($response->json('not_found'))->toBe(['meta:info', 'meta:summary', 'meta:file:icons']);
+
+    $collection = test()->get(route('iconify-api.collections.show', ['prefix' => 'codicon']));
+    $collection->assertStatus(200);
+
+    expect($collection->json())
+        ->toHaveKeys(['name', 'total', 'author', 'license'])
+        ->and($collection->json('name'))->toBe('Codicons')
+        ->and($collection->json())->not->toHaveKey('body');
+
+    $collections = test()->get(route('iconify-api.collections.index'));
+    $collections->assertStatus(200);
+
+    expect($collections->json('codicon.name'))->toBe('Codicons');
+
+    expect(Cache::store('array')->get('iconify-icons:codicon:meta:info'))->toHaveKey('name')
+        ->and(Cache::store('array')->get('iconify-icons:codicon:meta:summary'))->toHaveKey('prefix')
+        ->and(Cache::store('array')->get('iconify-icons:codicon:meta:file:icons'))->toBeString();
 });
 
 it('rejects a request that asks for more icons than the configured limit', function () {

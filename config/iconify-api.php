@@ -142,6 +142,11 @@ return [
     | addressing a metadata key, and the shape version retires entries whose cached
     | array shape has changed.
     |
+    | Icon names are not filtered, so a name a cache key cannot hold — one carrying a
+    | space, a control character, a ":" or a "/", or longer than 128 bytes — is
+    | replaced in that last segment by "h:" and a SHA-256 of the whole name. No icon
+    | set published through @iconify/json contains such a name.
+    |
     */
 
     'cache_key_prefix' => 'iconify-icons',
