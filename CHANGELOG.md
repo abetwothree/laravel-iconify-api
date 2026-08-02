@@ -131,12 +131,13 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
     `build(array $icon, array $customisations = [])`, matching upstream `iconToSVG()`.
     `normaliseIcon()` lost the same parameter.
   - `IconifySvgBuilder::normaliseRotate()`, `parseRotateValue()` and `safeInt()` were
-    removed, and `calculateDimensions()` widened its return from `int` to `int|float`,
-    which an override typed `int` no longer satisfies.
+    removed, and `calculateDimensions()` widened its `$boxWidth` / `$boxHeight`
+    parameters from `int` to `int|float`, which an override still typed `int` no longer
+    satisfies under contravariance.
 - The published PHPStan shapes now describe what an icon set file can actually hold.
   `TIconSetData` gained the root `rotate`, `hFlip` and `vFlip` it has always been read
-  for, and the dimension unions on `TIconSetData`, `TIconDefaults` and
-  `TIconSetInfoSummary` widened from `int` to `int|float|string`: these values are copied
+  for, and the dimension unions on `TIconSetData`, `TIconDefaults`, `TIconSetInfoSummary`
+  and `TIconResponse` widened from `int` to `int|float|string`: these values are copied
   verbatim out of an unvalidated JSON file, so a root written `{"width": "24"}` really
   does reach a consumer as the string `'24'`.
 - **Cache keys changed shape.** Icons are now stored at

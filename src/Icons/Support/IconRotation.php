@@ -26,8 +26,8 @@ final class IconRotation
      *
      * Strings go through rotateFromString(), which is what the framework components do
      * to a `rotate` prop before it ever reaches iconToSVG(). This is the customisation
-     * grammar only — icon data uses fromIconData() instead, where upstream applies no
-     * such parsing.
+     * grammar only — icon data goes through mergeIconData() instead, where upstream
+     * applies no such parsing.
      */
     public static function parse(mixed $value): int|float
     {
