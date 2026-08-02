@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
+import { getIconData } from "@iconify/utils/lib/icon-set/get-icon";
 import { iconToSVG } from "@iconify/utils/lib/svg/build";
 import { clearIDCache, replaceIDs } from "@iconify/utils/lib/svg/id";
 
@@ -91,6 +92,48 @@ for (const vector of vectors.ids) {
             name: vector.name,
             expected: expectedOutputs,
             actual: actual.outputs,
+        });
+    }
+}
+
+for (const vector of vectors.iconData ?? []) {
+    checks++;
+
+    const resolved = getIconData(vector.iconSet, vector.name);
+    const expected =
+        resolved === null
+            ? null
+            : (() => {
+                  const built = iconToSVG(resolved, vector.customisations ?? {});
+                  return {
+                      attributes: normalizeAttributes(built.attributes),
+                      viewBox: built.viewBox,
+                      body: built.body,
+                  };
+              })();
+
+    const raw = callPhp({
+        mode: "icon-data",
+        iconSet: vector.iconSet,
+        name: vector.name,
+        customisations: vector.customisations ?? {},
+    });
+
+    const actual =
+        raw === null
+            ? null
+            : {
+                  attributes: normalizeAttributes(raw.attributes),
+                  viewBox: raw.viewBox,
+                  body: raw.body,
+              };
+
+    if (JSON.stringify(expected) !== JSON.stringify(actual)) {
+        failures.push({
+            type: "iconData",
+            name: vector.name,
+            expected,
+            actual,
         });
     }
 }

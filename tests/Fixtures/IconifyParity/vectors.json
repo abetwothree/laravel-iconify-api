@@ -67,6 +67,30 @@
             "customisations": {
                 "hFlip": true
             }
+        },
+        {
+            "name": "fractional-dimensions",
+            "icon": {
+                "body": "<path d=\"...\" />",
+                "width": 20.5,
+                "height": 16
+            },
+            "iconSetInfo": {},
+            "customisations": {}
+        },
+        {
+            "name": "fractional-offsets-rotated",
+            "icon": {
+                "body": "<path d=\"...\" />",
+                "left": 0.5,
+                "top": 1.5,
+                "width": 24,
+                "height": 25
+            },
+            "iconSetInfo": {},
+            "customisations": {
+                "rotate": 1
+            }
         }
     ],
     "ids": [
@@ -79,6 +103,156 @@
             "name": "animation-begin-reference",
             "body": "<path id=\"spinner_a\" d=\"M0 0\"><animate begin=\"0;spinner_a.end\"/></path>",
             "times": 2
+        }
+    ],
+    "iconData": [
+        {
+            "name": "clock",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "clock": { "body": "<path d=\"M12 6v6h4.5\"/>" }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "offset-icon",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "left": 2,
+                "top": 3,
+                "width": 20,
+                "height": 16,
+                "icons": {
+                    "offset-icon": { "body": "<path d=\"M0 0\"/>" }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "set-rotated",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "rotate": 1,
+                "icons": {
+                    "set-rotated": { "body": "<path d=\"M0 0\"/>" }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "set-rotated-icon-rotated",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "rotate": 1,
+                "icons": {
+                    "set-rotated-icon-rotated": { "body": "<path d=\"M0 0\"/>", "rotate": 2 }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "set-flipped-icon-flipped",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "hFlip": true,
+                "icons": {
+                    "set-flipped-icon-flipped": { "body": "<path d=\"M0 0\"/>", "hFlip": true }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "icon-overrides-set-size",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "icon-overrides-set-size": { "body": "<path d=\"M0 0\"/>", "width": 32, "height": 12 }
+                },
+                "aliases": {}
+            },
+            "customisations": { "height": "2em" }
+        },
+        {
+            "name": "deep-alias",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "base": { "body": "<path d=\"M0 0\"/>" }
+                },
+                "aliases": {
+                    "second": { "parent": "base", "rotate": 1 },
+                    "deep-alias": { "parent": "second", "hFlip": true, "width": 48 }
+                }
+            },
+            "customisations": {}
+        },
+        {
+            "name": "alias-body-override",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "base": { "body": "<path d=\"parent\"/>" }
+                },
+                "aliases": {
+                    "alias-body-override": { "parent": "base", "body": "<path d=\"child\"/>" }
+                }
+            },
+            "customisations": {}
+        },
+        {
+            "name": "fractional-set-width",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 20.5,
+                "height": 16,
+                "icons": {
+                    "fractional-set-width": { "body": "<path d=\"M0 0\"/>" }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "no-set-defaults",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "icons": {
+                    "no-set-defaults": { "body": "<path d=\"M0 0\"/>" }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
         }
     ]
 }
