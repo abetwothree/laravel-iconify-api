@@ -171,3 +171,31 @@ it('covers build output with unset keywords', function () {
     expect($result['attributes'])->not->toHaveKey('width');
     expect($result['attributes'])->not->toHaveKey('height');
 });
+
+it('preserves fractional icon dimensions', function () {
+    $builder = new IconifySvgBuilder;
+
+    $result = $builder->build([
+        'body' => '<path/>',
+        'width' => 20.5,
+        'height' => 16,
+    ], [], []);
+
+    expect($result['attributes']['viewBox'])->toBe('0 0 20.5 16');
+    expect($result['attributes']['width'])->toBe('1.29em');
+    expect($result['viewBox'])->toBe([0, 0, 20.5, 16]);
+});
+
+it('preserves fractional offsets through a rotation', function () {
+    $builder = new IconifySvgBuilder;
+
+    $result = $builder->build([
+        'body' => '<path/>',
+        'left' => 0.5,
+        'top' => 1.5,
+        'width' => 24,
+        'height' => 25,
+    ], [], ['rotate' => 1]);
+
+    expect($result['attributes']['viewBox'])->toBe('1.5 0.5 25 24');
+});

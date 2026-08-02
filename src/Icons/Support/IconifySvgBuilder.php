@@ -10,7 +10,7 @@ class IconifySvgBuilder
      * @param  array<string, mixed>  $customisations
      * @return array{
      *     attributes: array{viewBox:string, width?:string, height?:string},
-     *     viewBox: array{0:int,1:int,2:int,3:int},
+     *     viewBox: array{0:int|float,1:int|float,2:int|float,3:int|float},
      *     body:string,
      * }
      */
@@ -71,15 +71,15 @@ class IconifySvgBuilder
     /**
      * @param  array<string, mixed>  $icon
      * @param  array<string, mixed>  $iconSetInfo
-     * @return array{left:int, top:int, width:int, height:int, rotate:int, hFlip:bool, vFlip:bool, body:string}
+     * @return array{left:int|float, top:int|float, width:int|float, height:int|float, rotate:int, hFlip:bool, vFlip:bool, body:string}
      */
     protected function normaliseIcon(array $icon, array $iconSetInfo): array
     {
         return [
-            'left' => $this->safeInt($icon['left'] ?? 0, 0),
-            'top' => $this->safeInt($icon['top'] ?? 0, 0),
-            'width' => $this->safeInt($icon['width'] ?? $iconSetInfo['width'] ?? 16, 16),
-            'height' => $this->safeInt($icon['height'] ?? $iconSetInfo['height'] ?? 16, 16),
+            'left' => $this->safeNumber($icon['left'] ?? 0, 0),
+            'top' => $this->safeNumber($icon['top'] ?? 0, 0),
+            'width' => $this->safeNumber($icon['width'] ?? $iconSetInfo['width'] ?? 16, 16),
+            'height' => $this->safeNumber($icon['height'] ?? $iconSetInfo['height'] ?? 16, 16),
             'rotate' => $this->normaliseRotate($icon['rotate'] ?? 0),
             'hFlip' => $this->toBool($icon['hFlip'] ?? false),
             'vFlip' => $this->toBool($icon['vFlip'] ?? false),
@@ -114,9 +114,9 @@ class IconifySvgBuilder
     }
 
     /**
-     * @param  array{left:int, top:int, width:int, height:int}  $box
+     * @param  array{left:int|float, top:int|float, width:int|float, height:int|float}  $box
      * @param  array{rotate:int, hFlip:bool, vFlip:bool}  $props
-     * @return array{body:string, box:array{left:int, top:int, width:int, height:int}}
+     * @return array{body:string, box:array{left:int|float, top:int|float, width:int|float, height:int|float}}
      */
     protected function applyTransformPass(string $body, array $box, array $props): array
     {
@@ -191,7 +191,7 @@ class IconifySvgBuilder
      * @param  array{width:int|float|string|null, height:int|float|string|null, rotate:int, hFlip:bool, vFlip:bool}  $customisations
      * @return array{0:int|float|string, 1:int|float|string}
      */
-    protected function calculateDimensions(array $customisations, int $boxWidth, int $boxHeight): array
+    protected function calculateDimensions(array $customisations, int|float $boxWidth, int|float $boxHeight): array
     {
         $customWidth = $customisations['width'];
         $customHeight = $customisations['height'];
@@ -374,14 +374,14 @@ class IconifySvgBuilder
         return $value === true || $value === 'true' || $value === 1;
     }
 
-    protected function safeInt(mixed $value, int $default = 0): int
+    protected function safeNumber(mixed $value, int|float $default = 0): int|float
     {
-        if (is_int($value)) {
+        if (is_int($value) || is_float($value)) {
             return $value;
         }
 
         if (is_numeric($value)) {
-            return (int) $value;
+            return $value + 0;
         }
 
         return $default;
