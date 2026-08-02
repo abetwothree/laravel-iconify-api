@@ -12,6 +12,8 @@ use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoSummaryFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoSummaryFinderCached;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinderCached;
+use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconifySvgBuilder;
+use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
 use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApiServiceProvider;
 use Illuminate\Support\Facades\View;
 
@@ -111,4 +113,12 @@ it('covers blank helper name validation branch', function () {
 
     // If no exception occurs, the blank-name guard branch was safely handled.
     expect(true)->toBeTrue();
+});
+
+it('registers the svg support services as singletons', function () {
+    expect(app(SvgIdReplacer::class))
+        ->toBe(app(SvgIdReplacer::class));
+
+    expect(app(IconifySvgBuilder::class))
+        ->toBe(app(IconifySvgBuilder::class));
 });
