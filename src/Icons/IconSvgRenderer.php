@@ -456,7 +456,7 @@ class IconSvgRenderer
         if (array_key_exists('color', $options)) {
             $color = trim($this->safeString($options['color'], ''));
 
-            if ($color !== '') {
+            if ($color !== '' && $this->isSafeCssDeclarationValue($color)) {
                 $parts[] = 'color: '.$color.';';
             }
 
@@ -493,5 +493,28 @@ class IconSvgRenderer
     protected function narrowTruthy(mixed $value): bool
     {
         return $value === true || $value === 'true' || $value === 1;
+    }
+
+    /**
+     * Reject values that could terminate a CSS declaration or open a new block.
+     *
+     * Upstream sets `color` via a CSSOM property assignment (`style.color = value`),
+     * which the browser parses as a single property value: anything containing a
+     * declaration separator is invalid and the assignment is silently dropped, so
+     * nothing is set. Our renderer instead concatenates `color` into a raw CSS
+     * string, so we must reject the same class of value ourselves rather than
+     * emitting it — a value is dropped entirely, never partially sanitised.
+     */
+    protected function isSafeCssDeclarationValue(string $value): bool
+    {
+        if (str_contains($value, ';') || str_contains($value, '{') || str_contains($value, '}')) {
+            return false;
+        }
+
+        if (str_contains($value, '/*') || str_contains($value, '*/')) {
+            return false;
+        }
+
+        return true;
     }
 }

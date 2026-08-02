@@ -573,3 +573,55 @@ it('swallows framework control props instead of emitting them', function () {
     expect($svg)->not->toContain('_ref=');
     expect($svg)->toContain('data-keep="yes"');
 });
+
+it('drops a color value that injects a second css declaration via a semicolon', function () {
+    $svg = makeParityRenderer('color-injection-semicolon')->render('mdi:color-injection-semicolon', [
+        'color' => 'red; background:url(javascript:alert(1))',
+    ]);
+
+    expect($svg)->not->toContain('background:url');
+    expect($svg)->not->toContain('color:');
+});
+
+it('drops a color value that opens a css block via a brace', function () {
+    $svg = makeParityRenderer('color-injection-open-brace')->render('mdi:color-injection-open-brace', [
+        'color' => 'red{background:url(javascript:alert(1))',
+    ]);
+
+    expect($svg)->not->toContain('background:url');
+    expect($svg)->not->toContain('color:');
+});
+
+it('drops a color value that closes a css block via a brace', function () {
+    $svg = makeParityRenderer('color-injection-close-brace')->render('mdi:color-injection-close-brace', [
+        'color' => 'red} .evil{background:url(javascript:alert(1))',
+    ]);
+
+    expect($svg)->not->toContain('background:url');
+    expect($svg)->not->toContain('.evil');
+    expect($svg)->not->toContain('color:');
+});
+
+it('drops a color value containing a css comment sequence', function () {
+    $svg = makeParityRenderer('color-injection-comment')->render('mdi:color-injection-comment', [
+        'color' => 'red/*comment*/',
+    ]);
+
+    expect($svg)->not->toContain('color:');
+});
+
+it('still emits a legitimate rgb color value with parentheses and commas', function () {
+    $svg = makeParityRenderer('color-rgb')->render('mdi:color-rgb', [
+        'color' => 'rgb(1,2,3)',
+    ]);
+
+    expect($svg)->toContain('style="color: rgb(1,2,3);"');
+});
+
+it('still emits a legitimate css custom property color value', function () {
+    $svg = makeParityRenderer('color-var')->render('mdi:color-var', [
+        'color' => 'var(--x)',
+    ]);
+
+    expect($svg)->toContain('style="color: var(--x);"');
+});
