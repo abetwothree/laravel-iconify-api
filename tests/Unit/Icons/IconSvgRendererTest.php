@@ -734,6 +734,18 @@ it('skips an attribute name that smuggles a second attribute', function () {
         ->toContain('data-keep="yes"');
 });
 
+it('renders a well-formed onclick key while still skipping a malformed name', function () {
+    $svg = makeParityRenderer('attr-name-onclick')->render('mdi:attr-name-onclick', [
+        'onclick' => 'alert(1)',
+        'x onload=alert(1)' => 'v',
+    ]);
+
+    expect($svg)
+        ->toContain('onclick="alert(1)"')
+        ->not->toContain('x onload')
+        ->not->toContain('="v"');
+});
+
 it('skips attribute names that are not valid xml names', function (string $name) {
     $svg = makeParityRenderer('attr-name-'.md5($name))->render('mdi:attr-name-'.md5($name), [
         $name => 'v',
@@ -800,10 +812,8 @@ it('does not fatal when the icon set root declares a zero dimension', function (
         ->toContain('height="1em"');
 });
 
-it('swallows a lowercase onload option, going beyond what iconify ignores', function () {
+it('renders a lowercase onload option like any other attribute', function () {
     $svg = makeParityRenderer('onload')->render('mdi:onload', ['onload' => 'init()']);
 
-    expect($svg)
-        ->not->toContain('onload')
-        ->not->toContain('init()');
+    expect($svg)->toContain('onload="init()"');
 });

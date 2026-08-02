@@ -127,11 +127,8 @@ A `style` you supply yourself is always emitted last, so it overrides the `color
 
 The framework-only props Iconify's React/Vue/Svelte components accept — `icon`, `mode`,
 `ssr`, `onLoad`, `children`, `fallback`, `customise`, `_ref` — are accepted and ignored
-rather than emitted as attributes. The lowercase `onload` is ignored too, which goes
-beyond what Iconify does: an inline event handler assembled from icon options is more
-often an injection vector than an intent, so it is dropped rather than rendered. Attach
-the listener to a wrapping element instead. Alternate render modes (`mode="bg"`,
-`mode="mask"`) are not implemented; icons always render as inline `<svg>`.
+rather than emitted as attributes. Alternate render modes (`mode="bg"`, `mode="mask"`)
+are not implemented; icons always render as inline `<svg>`.
 
 ### Naming and collision safety
 

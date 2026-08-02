@@ -33,7 +33,6 @@ class IconSvgRenderer
         'mode',
         'ssr',
         'onLoad',
-        'onload',
         'children',
         'fallback',
         'customise',
@@ -54,6 +53,14 @@ class IconSvgRenderer
      * Escaping the name is not enough on its own: a key such as `x onload=alert(1)`
      * contains no HTML special character, so it survives htmlspecialchars() intact
      * and would emit a second, live attribute. Names that do not match are skipped.
+     *
+     * This is a well-formedness check on the attribute *name* — it rejects names
+     * that would break out of the attribute syntax (a space or `=` opening a second
+     * attribute, a quote closing the value early) — not a sanitiser for attribute
+     * *semantics*. Option keys are trusted developer input here, exactly as they are
+     * in a Blade attribute bag: a literal `onclick` key is a well-formed name and
+     * renders `onclick`, by design. Nothing in this class blocks event-handler-shaped
+     * attribute names.
      *
      * The leading `@` is an addition on top of plain XML: Alpine.js's `@click` /
      * `@submit.prevent` shorthand survives Laravel's ComponentAttributeBag and is a

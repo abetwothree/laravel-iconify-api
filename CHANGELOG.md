@@ -43,9 +43,10 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
   `ssr`, `onLoad`, `children`, `fallback`, `customise`, `_ref` — are no longer emitted as
   raw, invalid SVG attributes (for example `mode="mask"` used to leak through).
 - Attribute names are validated, not just escaped. An option key that is not a valid XML
-  name is skipped instead of emitted, so a key such as `'x onload=alert(1)'` can no longer
-  smuggle a live event handler onto the `<svg>` element — escaping alone did not help,
-  because the key contains no HTML special character.
+  name — such as `'x onload=alert(1)'` — is skipped instead of emitted; escaping alone did
+  not help, because the key contains no HTML special character. This is a well-formedness
+  check on the name only: a well-formed key such as `onclick` still renders as an
+  attribute, same as any other Blade attribute bag.
 - The `color` option rejects values that could inject an extra CSS declaration (containing
   `;`, `{`, `}`, or a CSS comment marker). Such a value is dropped entirely rather than
   emitted; legitimate values like `rgb(1,2,3)`, `hsl(210 100% 50%)`, `var(--x, red)`,
@@ -62,14 +63,6 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
 
 ### Changed
 
-- **A lowercase `onload` is no longer rendered.** `<x-icon onload="init()" />` and
-  `icon('mdi:home', ['onload' => 'init()'])` used to emit `onload="init()"` on the
-  `<svg>`; the attribute is now silently dropped. This is a behaviour removal, not only
-  a fix: Iconify's React component ignores the camelCase `onLoad` prop and never had a
-  lowercase `onload` to ignore, so there is no upstream behaviour to match here. Dropping
-  it is a deliberate choice — an inline event handler assembled from icon options is far
-  more often an injection vector than an intent. If you relied on it, attach the listener
-  to a wrapping element instead.
 - `IconSvgRenderer::__construct()` no longer takes an `IconSetInfoFinder`. It was reading
   the icon set's `info` metadata block, which carries no `width` and only a
   sample-display `height`.
