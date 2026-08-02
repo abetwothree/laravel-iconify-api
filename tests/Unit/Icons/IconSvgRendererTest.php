@@ -353,7 +353,7 @@ it('adds iconify svg defaults and protects generated viewBox', function () {
     ]);
 
     expect($svg)->toContain('xmlns="http://www.w3.org/2000/svg"');
-    expect($svg)->toContain('aria-hidden="1"');
+    expect($svg)->toContain('aria-hidden="true"');
     expect($svg)->toContain('role="img"');
     expect($svg)->toContain('viewBox="0 0 24 24"');
     expect($svg)->not->toContain('viewBox="0 0 1 1"');

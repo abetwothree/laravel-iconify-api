@@ -268,7 +268,7 @@ class IconSvgRenderer
 
         $attributes = [
             'xmlns' => 'http://www.w3.org/2000/svg',
-            'aria-hidden' => true,
+            'aria-hidden' => 'true',
             'role' => 'img',
             'viewBox' => $renderAttributes['viewBox'],
         ];
