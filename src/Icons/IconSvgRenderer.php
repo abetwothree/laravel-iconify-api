@@ -43,6 +43,13 @@ class IconSvgRenderer
     ];
 
     /**
+     * Both spellings of the aria-hidden opt-out.
+     *
+     * @var array<int, string>
+     */
+    protected const ARIA_HIDDEN_KEYS = ['ariaHidden', 'aria-hidden'];
+
+    /**
      * Conservative XML attribute name: a letter, underscore or colon followed by
      * name characters.
      *
@@ -253,9 +260,10 @@ class IconSvgRenderer
 
         $options = $this->buildStyleAttribute($options, $inline);
 
-        if (array_key_exists('ariaHidden', $options)) {
-            $options['aria-hidden'] = $options['ariaHidden'];
-            unset($options['ariaHidden']);
+        $removeAriaHidden = $this->shouldRemoveAriaHidden($options);
+
+        foreach (self::ARIA_HIDDEN_KEYS as $key) {
+            unset($options[$key]);
         }
 
         $attributes = [
@@ -277,12 +285,8 @@ class IconSvgRenderer
             $attributes['height'] = $renderAttributes['height'];
         }
 
-        if (array_key_exists('aria-hidden', $options)) {
-            if ($options['aria-hidden'] !== true && $options['aria-hidden'] !== 'true') {
-                unset($attributes['aria-hidden']);
-            }
-
-            unset($options['aria-hidden']);
+        if ($removeAriaHidden) {
+            unset($attributes['aria-hidden']);
         }
 
         $attributes = array_merge($attributes, $options);
@@ -290,6 +294,33 @@ class IconSvgRenderer
         $attributeString = $this->stringifyAttributes($attributes);
 
         return '<svg '.$attributeString.'>'.$renderBody.'</svg>';
+    }
+
+    /**
+     * Decide whether the default `aria-hidden="true"` should be dropped.
+     *
+     * Upstream handles both spellings inside one `switch` in a single pass over the
+     * props: either key holding a value that is not `true`/`'true'` deletes the
+     * attribute, and nothing ever puts it back, so the two keys compose rather than
+     * clobber each other. See components/react/src/render.ts:175-181.
+     *
+     * @param  array<string, mixed>  $options
+     */
+    protected function shouldRemoveAriaHidden(array $options): bool
+    {
+        foreach (self::ARIA_HIDDEN_KEYS as $key) {
+            if (! array_key_exists($key, $options)) {
+                continue;
+            }
+
+            $value = $options[$key];
+
+            if ($value !== true && $value !== 'true') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -346,8 +377,14 @@ class IconSvgRenderer
             }
         }
 
-        if (isset($customisations['rotate']) && (is_string($customisations['rotate']) || is_int($customisations['rotate']))) {
-            $customisations['rotate'] = $this->parseRotateValue($customisations['rotate']);
+        if (isset($customisations['rotate'])) {
+            $rotate = $customisations['rotate'];
+
+            if (is_string($rotate) || is_int($rotate)) {
+                $customisations['rotate'] = $this->parseRotateValue($rotate);
+            } elseif (is_float($rotate)) {
+                $customisations['rotate'] = $this->normaliseFloatRotate($rotate);
+            }
         }
 
         return $customisations;
@@ -492,6 +529,30 @@ class IconSvgRenderer
         }
 
         return $cleanup((int) $num);
+    }
+
+    /**
+     * Normalise a float rotation the way JavaScript's single number type does.
+     *
+     * `iconToSVG()` reduces the rotation with `%= 4` and then feeds it to a `switch`,
+     * so a non-integral value such as `1.5` matches no case and rotates nothing.
+     * Casting to int, as PHP would, turns that into a 90 degree rotation instead.
+     * Reducing in float space also keeps a huge value away from an out-of-range
+     * `(int)` cast. See packages/utils/src/svg/build.ts.
+     */
+    protected function normaliseFloatRotate(float $value): int
+    {
+        if (! is_finite($value) || fmod($value, 1.0) !== 0.0) {
+            return 0;
+        }
+
+        $rotation = fmod($value, 4.0);
+
+        if ($rotation < 0) {
+            $rotation += 4;
+        }
+
+        return (int) $rotation;
     }
 
     protected function safeString(mixed $value, string $default = ''): string

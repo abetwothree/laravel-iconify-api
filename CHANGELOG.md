@@ -29,6 +29,13 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
 - Passing `aria-hidden => null` now removes the default `aria-hidden="true"` attribute,
   matching Iconify's presence-based (rather than truthiness-based) handling of `null`;
   previously the explicit `null` was silently ignored and the default was kept.
+- `aria-hidden` and `ariaHidden` now compose the way Iconify's single prop loop does:
+  either key holding a value that is not `true` decides the attribute is removed.
+  Previously `ariaHidden` overwrote an explicit `aria-hidden`, so
+  `['aria-hidden' => false, 'ariaHidden' => true]` still emitted `aria-hidden="true"`.
+- A `rotate` given as a fraction such as `1.5` no longer rotates the icon. PHP cast it to
+  an int and rotated 90 degrees; JavaScript's `switch` matches no case and applies no
+  rotation. Whole-number floats such as `2.0` still rotate.
 - Framework-only props Iconify's React/Vue/Svelte components swallow — `icon`, `mode`,
   `ssr`, `onLoad`/`onload`, `children`, `fallback`, `customise`, `_ref` — are no longer
   emitted as raw, invalid SVG attributes (for example `mode="mask"` used to leak through).

@@ -670,6 +670,54 @@ it('supports the vue style flip aliases', function (string $attribute, string $e
     ['verticalFlip', 'scale(1 -1)'],
 ]);
 
+it('removes the aria-hidden default when either spelling opts out', function (array $options) {
+    $svg = makeParityRenderer('aria-compose-'.md5(serialize($options)))
+        ->render('mdi:aria-compose-'.md5(serialize($options)), $options);
+
+    expect($svg)
+        ->not->toContain('aria-hidden=')
+        ->not->toContain('ariaHidden=');
+})->with([
+    'camel wins over kebab' => [['aria-hidden' => false, 'ariaHidden' => true]],
+    'kebab wins over camel' => [['ariaHidden' => false, 'aria-hidden' => true]],
+    'both opt out' => [['ariaHidden' => false, 'aria-hidden' => false]],
+]);
+
+it('keeps the aria-hidden default when both spellings are true', function () {
+    $svg = makeParityRenderer('aria-compose-true')->render('mdi:aria-compose-true', [
+        'aria-hidden' => true,
+        'ariaHidden' => 'true',
+    ]);
+
+    expect($svg)
+        ->toContain('aria-hidden="true"')
+        ->not->toContain('ariaHidden=');
+});
+
+it('ignores a rotate that is not a whole number', function (float $rotate) {
+    $svg = makeParityRenderer('rotate-float-'.md5((string) $rotate))
+        ->render('mdi:rotate-float-'.md5((string) $rotate), ['rotate' => $rotate]);
+
+    expect($svg)
+        ->not->toContain('<g transform=')
+        ->not->toContain('rotate(');
+})->with([
+    [1.5],
+    [0.5],
+    [3.7],
+    [-1.5],
+]);
+
+it('applies a rotate written as a whole float', function (float $rotate, string $expected) {
+    $svg = makeParityRenderer('rotate-whole-'.md5((string) $rotate))
+        ->render('mdi:rotate-whole-'.md5((string) $rotate), ['rotate' => $rotate]);
+
+    expect($svg)->toContain($expected);
+})->with([
+    [2.0, 'rotate(180'],
+    [-1.0, 'rotate(-90'],
+]);
+
 it('skips an attribute name that smuggles a second attribute', function () {
     $svg = makeParityRenderer('attr-name-injection')->render('mdi:attr-name-injection', [
         'x onload=alert(1)' => 'v',
