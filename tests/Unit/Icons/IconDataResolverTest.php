@@ -97,6 +97,55 @@ it('xors flips across an alias chain', function () {
     expect($result['hFlip'] ?? false)->toBeFalse();
 });
 
+it('treats a float zero flip as falsy, the way JavaScript does', function (string $property) {
+    $resolver = new IconDataResolver;
+
+    // JSON decodes a literal `0.0` to a PHP float, and `0.0 !== 0` is true, so a
+    // type-strict falsy list would read it as truthy and mirror the icon.
+    $onIcon = $resolver->resolve([
+        'icons' => ['home' => ['body' => '<path/>', $property => 0.0]],
+        'aliases' => [],
+    ], 'home');
+
+    expect($onIcon)->not->toHaveKey($property);
+
+    $onAlias = $resolver->resolve([
+        'icons' => ['base' => ['body' => '<path/>']],
+        'aliases' => ['zeroed' => ['parent' => 'base', $property => 0.0]],
+    ], 'zeroed');
+
+    expect($onAlias)->not->toHaveKey($property);
+
+    // Upstream leaves the key present but false here, because the root declared it:
+    // `if (key in parent && !(key in result)) result[key] = defaultIconTransformations[key]`.
+    $onRoot = $resolver->resolve(
+        ['icons' => ['home' => ['body' => '<path/>']], 'aliases' => []],
+        'home',
+        [$property => 0.0],
+    );
+
+    expect($onRoot[$property])->toBeFalse();
+
+    // A float zero must not cancel a real flip either.
+    $withRealFlip = $resolver->resolve([
+        'icons' => ['base' => ['body' => '<path/>', $property => true]],
+        'aliases' => ['zeroed' => ['parent' => 'base', $property => 0.0]],
+    ], 'zeroed');
+
+    expect($withRealFlip[$property])->toBeTrue();
+})->with([['hFlip'], ['vFlip']]);
+
+it('treats a NAN flip as falsy, the way JavaScript does', function () {
+    $resolver = new IconDataResolver;
+
+    $result = $resolver->resolve([
+        'icons' => ['home' => ['body' => '<path/>', 'hFlip' => NAN]],
+        'aliases' => [],
+    ], 'home');
+
+    expect($result)->not->toHaveKey('hFlip');
+});
+
 it('lets the child alias win for dimensions', function () {
     $resolver = new IconDataResolver;
 

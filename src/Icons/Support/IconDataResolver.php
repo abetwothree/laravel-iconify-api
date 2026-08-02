@@ -187,8 +187,29 @@ class IconDataResolver
         return $result;
     }
 
+    /**
+     * JavaScript's `!!value`, which the flip merge above depends on.
+     *
+     * The strict comparisons below are type-sensitive, so `0.0 !== 0` is true and a
+     * float zero would read as truthy. JSON decodes a literal `0.0` to a PHP float, so
+     * an icon set written `"hFlip": 0.0` rather than `"hFlip": 0` would mirror an icon
+     * upstream leaves alone. `NAN` is falsy in JavaScript and passes every strict
+     * comparison here, so it needs the same branch. Negative zero needs no special
+     * case: `-0.0 !== 0.0` is false.
+     *
+     * Loose comparison is not the fix: `'0' != 0` is false in PHP 8, but `'0'` is
+     * truthy in JavaScript, which would introduce the opposite bug.
+     *
+     * The parity harness cannot cover this: it sends its fixture through
+     * `JSON.stringify`, which emits a float zero as `0`, so the PHP side never sees a
+     * float. Only a hand-written icon set file can carry one.
+     */
     protected function truthy(mixed $value): bool
     {
+        if (is_float($value)) {
+            return $value !== 0.0 && ! is_nan($value);
+        }
+
         return $value !== null && $value !== false && $value !== 0 && $value !== '';
     }
 }

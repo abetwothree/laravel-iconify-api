@@ -31,6 +31,10 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
   raises an uncaught `DivisionByZeroError` (an HTTP 500 on the API routes). The icon is
   rendered with a 1:1 aspect ratio instead. No published icon set is affected.
 - Aliases that override `body` or `hidden` are now honoured.
+- An `hFlip` or `vFlip` written as the float `0.0` no longer mirrors the icon. The
+  JavaScript falsiness port compared types strictly, and `0.0 !== 0` is true in PHP, so a
+  float zero read as truthy where JavaScript reads it as falsy. Only a hand-written icon
+  set can carry one — `JSON.stringify` emits a float zero as `0`.
 - `width` / `height` values of `0` or `""` are ignored and fall back to `1em`, matching
   Iconify's `mergeCustomisations`; the string `"0"` is kept, matching JavaScript
   truthiness.
