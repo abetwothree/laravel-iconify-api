@@ -43,30 +43,156 @@ final class IconRotation
     }
 
     /**
-     * Coerce a rotation that came from icon data — an icon, an alias or an icon set
-     * root — into the number mergeIconTransformations() would add.
+     * Merge two rotations that came from icon data — an icon, an alias or an icon set
+     * root — the way mergeIconTransformations() does.
      *
-     * Deliberately not parse(): upstream never runs rotateFromString() on icon data, it
-     * just adds the raw value. A `'90deg'` there is `'90deg' + 0`, the string
-     * `'90deg0'`, whose `% 4` is NaN, whose `if (rotate)` is false — no rotation. See
-     * packages/utils/src/icon/transformations.ts:8 and icon-set/get-icon.ts:12-20.
-     * Reading it as a quarter turn instead would rotate icons upstream leaves alone.
+     * Port of `((obj1.rotate || 0) + (obj2.rotate || 0)) % 4` plus the `if (rotate)`
+     * that follows it, packages/utils/src/icon/transformations.ts:6-11. Null is
+     * returned for a merged rotation JavaScript would treat as falsy, i.e. one the
+     * caller must leave out so the transformation default applies.
      *
-     * A numeric string is truncated rather than dropped. Upstream would make NaN of
-     * that too, but this package's icon types have always allowed `rotate` to be a
-     * string and have always read a numeric one, so it is left as it was.
+     * Upstream never parses a rotation that came from icon data: no rotateFromString(),
+     * no Number(), it just adds the two raw values. A string operand therefore makes
+     * `+` *concatenation*, and only the trailing `% 4` converts. So `'2' + 0` is the
+     * string `'20'`, whose `% 4` is 0 — an icon written `"rotate": "2"` is not rotated
+     * at all — while `'1' + 0` is `'10'`, whose `% 4` is 2, making `"rotate": "1"` a
+     * half turn rather than a quarter one. Only a unit-suffixed string such as
+     * `'90deg'` genuinely makes NaN. Reading a numeric string as a number, as an
+     * earlier version of this class did, both rotates icons upstream leaves alone and
+     * under-rotates the ones it turns.
+     *
+     * The customisation grammar (parse()/rotateFromString()) deliberately does not
+     * apply here — it belongs to the component prop layer, not to icon data.
      */
-    public static function fromIconData(mixed $value): int|float
+    public static function mergeIconData(mixed $parent, mixed $child): int|float|null
     {
-        if (is_int($value) || is_float($value)) {
+        $sum = self::add(self::orZero($parent), self::orZero($child));
+
+        if (is_float($sum) && is_nan($sum)) {
+            return null;
+        }
+
+        $rotate = self::modulo($sum);
+
+        if ($rotate === 0 || $rotate === 0.0) {
+            return null;
+        }
+
+        return $rotate;
+    }
+
+    /**
+     * JavaScript's `value || 0`, keeping the operand's type so that add() below knows
+     * whether it is adding or concatenating.
+     */
+    private static function orZero(mixed $value): int|float|string|bool
+    {
+        if (is_int($value)) {
             return $value;
         }
 
-        if (is_string($value) && is_numeric($value)) {
-            return (int) $value;
+        if (is_float($value)) {
+            // `NaN || 0` and `±0 || 0` are both the number 0. Folding negative zero in
+            // here also keeps `-0` from stringifying as `'-0'`, which JavaScript never
+            // does.
+            return is_nan($value) || $value === 0.0 ? 0 : $value;
         }
 
+        if (is_string($value)) {
+            return $value === '' ? 0 : $value;
+        }
+
+        if (is_bool($value)) {
+            return $value ? true : 0;
+        }
+
+        // Anything else contributes nothing. json_decode() maps both a JSON array and
+        // a JSON object onto a PHP array, so the two cannot be told apart well enough
+        // to reproduce `String(value)` exactly — and it does not matter: upstream's own
+        // quicklyValidateIconSet() rejects an icon whose `rotate` is not a number, so
+        // such a set never reaches a renderer at all.
         return 0;
+    }
+
+    /**
+     * JavaScript's `+`: concatenation when either operand is a string, numeric
+     * addition otherwise.
+     */
+    private static function add(int|float|string|bool $left, int|float|string|bool $right): int|float
+    {
+        if (is_string($left) || is_string($right)) {
+            return self::toNumber(self::toJsString($left).self::toJsString($right));
+        }
+
+        return self::toJsNumber($left) + self::toJsNumber($right);
+    }
+
+    /**
+     * JavaScript's `String(value)` for the operand types a decoded icon set can hold.
+     */
+    private static function toJsString(int|float|string|bool $value): string
+    {
+        if (is_string($value)) {
+            return $value;
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        if (is_float($value)) {
+            if (is_nan($value)) {
+                return 'NaN';
+            }
+
+            if (is_infinite($value)) {
+                return $value > 0 ? 'Infinity' : '-Infinity';
+            }
+
+            // JavaScript prints a whole float without its fraction; PHP's default
+            // precision would also round long fractions, so json_encode() (shortest
+            // round-trip, like JavaScript) does the rest.
+            if ($value === floor($value) && abs($value) < 1.0e15) {
+                return (string) (int) $value;
+            }
+
+            $encoded = json_encode($value);
+
+            return is_string($encoded) ? $encoded : (string) $value;
+        }
+
+        return (string) $value;
+    }
+
+    /**
+     * JavaScript's `Number(value)` for a non-string operand.
+     */
+    private static function toJsNumber(int|float|bool $value): int|float
+    {
+        if (is_bool($value)) {
+            return $value ? 1 : 0;
+        }
+
+        return $value;
+    }
+
+    /**
+     * JavaScript's `Number(string)`: whitespace is trimmed, an empty string is 0, and
+     * anything else that is not a number is NaN.
+     */
+    private static function toNumber(string $value): int|float
+    {
+        $trimmed = trim($value);
+
+        if ($trimmed === '') {
+            return 0;
+        }
+
+        if (! is_numeric($trimmed)) {
+            return NAN;
+        }
+
+        return $trimmed + 0;
     }
 
     /**

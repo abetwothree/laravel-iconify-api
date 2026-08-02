@@ -141,7 +141,9 @@
                 "width": 24,
                 "height": 24,
                 "icons": {
-                    "clock": { "body": "<path d=\"M12 6v6h4.5\"/>" }
+                    "clock": {
+                        "body": "<path d=\"M12 6v6h4.5\"/>"
+                    }
                 },
                 "aliases": {}
             },
@@ -157,7 +159,9 @@
                 "width": 20,
                 "height": 16,
                 "icons": {
-                    "offset-icon": { "body": "<path d=\"M0 0\"/>" }
+                    "offset-icon": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
                 },
                 "aliases": {}
             },
@@ -172,7 +176,9 @@
                 "height": 24,
                 "rotate": 1,
                 "icons": {
-                    "set-rotated": { "body": "<path d=\"M0 0\"/>" }
+                    "set-rotated": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
                 },
                 "aliases": {}
             },
@@ -187,7 +193,10 @@
                 "height": 24,
                 "rotate": 1,
                 "icons": {
-                    "set-rotated-icon-rotated": { "body": "<path d=\"M0 0\"/>", "rotate": 2 }
+                    "set-rotated-icon-rotated": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": 2
+                    }
                 },
                 "aliases": {}
             },
@@ -202,7 +211,10 @@
                 "height": 24,
                 "hFlip": true,
                 "icons": {
-                    "set-flipped-icon-flipped": { "body": "<path d=\"M0 0\"/>", "hFlip": true }
+                    "set-flipped-icon-flipped": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "hFlip": true
+                    }
                 },
                 "aliases": {}
             },
@@ -216,11 +228,17 @@
                 "width": 24,
                 "height": 24,
                 "icons": {
-                    "icon-overrides-set-size": { "body": "<path d=\"M0 0\"/>", "width": 32, "height": 12 }
+                    "icon-overrides-set-size": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "width": 32,
+                        "height": 12
+                    }
                 },
                 "aliases": {}
             },
-            "customisations": { "height": "2em" }
+            "customisations": {
+                "height": "2em"
+            }
         },
         {
             "name": "deep-alias",
@@ -230,11 +248,20 @@
                 "width": 24,
                 "height": 24,
                 "icons": {
-                    "base": { "body": "<path d=\"M0 0\"/>" }
+                    "base": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
                 },
                 "aliases": {
-                    "second": { "parent": "base", "rotate": 1 },
-                    "deep-alias": { "parent": "second", "hFlip": true, "width": 48 }
+                    "second": {
+                        "parent": "base",
+                        "rotate": 1
+                    },
+                    "deep-alias": {
+                        "parent": "second",
+                        "hFlip": true,
+                        "width": 48
+                    }
                 }
             },
             "customisations": {}
@@ -247,10 +274,15 @@
                 "width": 24,
                 "height": 24,
                 "icons": {
-                    "base": { "body": "<path d=\"parent\"/>" }
+                    "base": {
+                        "body": "<path d=\"parent\"/>"
+                    }
                 },
                 "aliases": {
-                    "alias-body-override": { "parent": "base", "body": "<path d=\"child\"/>" }
+                    "alias-body-override": {
+                        "parent": "base",
+                        "body": "<path d=\"child\"/>"
+                    }
                 }
             },
             "customisations": {}
@@ -263,7 +295,9 @@
                 "width": 20.5,
                 "height": 16,
                 "icons": {
-                    "fractional-set-width": { "body": "<path d=\"M0 0\"/>" }
+                    "fractional-set-width": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
                 },
                 "aliases": {}
             },
@@ -275,7 +309,9 @@
                 "prefix": "test",
                 "lastModified": 1,
                 "icons": {
-                    "no-set-defaults": { "body": "<path d=\"M0 0\"/>" }
+                    "no-set-defaults": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
                 },
                 "aliases": {}
             },
@@ -289,7 +325,10 @@
                 "width": 24,
                 "height": 24,
                 "icons": {
-                    "icon-fractional-rotate": { "body": "<path d=\"M0 0\"/>", "rotate": 1.5 }
+                    "icon-fractional-rotate": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": 1.5
+                    }
                 },
                 "aliases": {}
             },
@@ -304,7 +343,9 @@
                 "height": 24,
                 "rotate": 1.5,
                 "icons": {
-                    "set-fractional-rotate": { "body": "<path d=\"M0 0\"/>" }
+                    "set-fractional-rotate": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
                 },
                 "aliases": {}
             },
@@ -318,10 +359,16 @@
                 "width": 24,
                 "height": 24,
                 "icons": {
-                    "base": { "body": "<path d=\"M0 0\"/>", "rotate": 0.5 }
+                    "base": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": 0.5
+                    }
                 },
                 "aliases": {
-                    "alias-fractional-rotates-sum-to-whole": { "parent": "base", "rotate": 0.5 }
+                    "alias-fractional-rotates-sum-to-whole": {
+                        "parent": "base",
+                        "rotate": 0.5
+                    }
                 }
             },
             "customisations": {}
@@ -334,7 +381,10 @@
                 "width": 24,
                 "height": 24,
                 "icons": {
-                    "icon-string-rotate": { "body": "<path d=\"M0 0\"/>", "rotate": "90deg" }
+                    "icon-string-rotate": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": "90deg"
+                    }
                 },
                 "aliases": {}
             },
@@ -349,7 +399,10 @@
                 "height": 24,
                 "rotate": 1,
                 "icons": {
-                    "icon-string-rotate-over-set-rotate": { "body": "<path d=\"M0 0\"/>", "rotate": "90deg" }
+                    "icon-string-rotate-over-set-rotate": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": "90deg"
+                    }
                 },
                 "aliases": {}
             },
@@ -363,10 +416,15 @@
                 "width": 24,
                 "height": 24,
                 "icons": {
-                    "base": { "body": "<path d=\"M0 0\"/>" }
+                    "base": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
                 },
                 "aliases": {
-                    "alias-string-rotate": { "parent": "base", "rotate": "90deg" }
+                    "alias-string-rotate": {
+                        "parent": "base",
+                        "rotate": "90deg"
+                    }
                 }
             },
             "customisations": {}
@@ -380,9 +438,364 @@
                 "height": 24,
                 "rotate": 0.5,
                 "icons": {
-                    "set-and-icon-fractional-rotates-sum-to-whole": { "body": "<path d=\"M0 0\"/>", "rotate": 0.5 }
+                    "set-and-icon-fractional-rotates-sum-to-whole": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": 0.5
+                    }
                 },
                 "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "icon-string-rotate-one",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "icon-string-rotate-one": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": "1"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "alias-string-rotate-one",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "base": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {
+                    "alias-string-rotate-one": {
+                        "parent": "base",
+                        "rotate": "1"
+                    }
+                }
+            },
+            "customisations": {}
+        },
+        {
+            "name": "set-string-rotate-one",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "rotate": "1",
+                "icons": {
+                    "set-string-rotate-one": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "icon-string-rotate-two",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "icon-string-rotate-two": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": "2"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "alias-string-rotate-two",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "base": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {
+                    "alias-string-rotate-two": {
+                        "parent": "base",
+                        "rotate": "2"
+                    }
+                }
+            },
+            "customisations": {}
+        },
+        {
+            "name": "set-string-rotate-two",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "rotate": "2",
+                "icons": {
+                    "set-string-rotate-two": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "icon-string-rotate-one-and-a-half",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "icon-string-rotate-one-and-a-half": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": "1.5"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "alias-string-rotate-one-and-a-half",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "base": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {
+                    "alias-string-rotate-one-and-a-half": {
+                        "parent": "base",
+                        "rotate": "1.5"
+                    }
+                }
+            },
+            "customisations": {}
+        },
+        {
+            "name": "set-string-rotate-one-and-a-half",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "rotate": "1.5",
+                "icons": {
+                    "set-string-rotate-one-and-a-half": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "icon-string-rotate-minus-one",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "icon-string-rotate-minus-one": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": "-1"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "alias-string-rotate-minus-one",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "base": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {
+                    "alias-string-rotate-minus-one": {
+                        "parent": "base",
+                        "rotate": "-1"
+                    }
+                }
+            },
+            "customisations": {}
+        },
+        {
+            "name": "set-string-rotate-minus-one",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "rotate": "-1",
+                "icons": {
+                    "set-string-rotate-minus-one": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "icon-string-rotate-90deg",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "icon-string-rotate-90deg": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": "90deg"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "alias-string-rotate-90deg",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "base": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {
+                    "alias-string-rotate-90deg": {
+                        "parent": "base",
+                        "rotate": "90deg"
+                    }
+                }
+            },
+            "customisations": {}
+        },
+        {
+            "name": "set-string-rotate-90deg",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "rotate": "90deg",
+                "icons": {
+                    "set-string-rotate-90deg": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "icon-string-rotate-25pct",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "icon-string-rotate-25pct": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": "25%"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "alias-string-rotate-25pct",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "base": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {
+                    "alias-string-rotate-25pct": {
+                        "parent": "base",
+                        "rotate": "25%"
+                    }
+                }
+            },
+            "customisations": {}
+        },
+        {
+            "name": "set-string-rotate-25pct",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "rotate": "25%",
+                "icons": {
+                    "set-string-rotate-25pct": {
+                        "body": "<path d=\"M0 0\"/>"
+                    }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "alias-string-rotate-over-numeric-icon-rotate",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "base": {
+                        "body": "<path d=\"M0 0\"/>",
+                        "rotate": 1
+                    }
+                },
+                "aliases": {
+                    "alias-string-rotate-over-numeric-icon-rotate": {
+                        "parent": "base",
+                        "rotate": "1"
+                    }
+                }
             },
             "customisations": {}
         }

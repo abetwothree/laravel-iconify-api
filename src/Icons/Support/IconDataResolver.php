@@ -70,36 +70,56 @@ class IconDataResolver
     }
 
     /**
+     * Fold an alias chain the way internalGetIconData() does.
+     *
+     * Upstream seeds the accumulator with `mergeIconData(self, {})` and then folds each
+     * ancestor in nearest-first, always as the *parent* operand — see
+     * packages/utils/src/icon-set/get-icon.ts:6-14 and the `[parent].concat(value)`
+     * ordering of getIconsTree(). That first merge against an empty object is not a
+     * no-op: it is what turns a string `rotate` of `'1'` into `'1' + 0`, i.e. `'10'`,
+     * i.e. a half turn. Nesting the merges the other way round would make it `0 + '1'`,
+     * i.e. `'01'`, i.e. a quarter turn.
+     *
      * @param  TIconData  $iconData
      * @param  array<int, string>  $visited
      * @return array<string, mixed>|null
      */
     protected function resolveChain(array $iconData, string $name, array $visited): ?array
     {
-        if (in_array($name, $visited, true)) {
-            return null;
+        /** @var array<int, array<string, mixed>> $chain */
+        $chain = [];
+        $current = $name;
+
+        while (true) {
+            if (in_array($current, $visited, true)) {
+                return null;
+            }
+
+            $visited[] = $current;
+
+            if (isset($iconData['icons'][$current])) {
+                $chain[] = $iconData['icons'][$current];
+
+                break;
+            }
+
+            if (! isset($iconData['aliases'][$current])) {
+                return null;
+            }
+
+            /** @var TAlias $alias */
+            $alias = $iconData['aliases'][$current];
+            $chain[] = $alias;
+            $current = $alias['parent'];
         }
 
-        if (isset($iconData['icons'][$name])) {
-            return $iconData['icons'][$name];
+        $resolved = [];
+
+        foreach ($chain as $entry) {
+            $resolved = $this->mergeIconData($entry, $resolved);
         }
 
-        if (! isset($iconData['aliases'][$name])) {
-            return null;
-        }
-
-        $visited[] = $name;
-
-        /** @var TAlias $alias */
-        $alias = $iconData['aliases'][$name];
-
-        $parent = $this->resolveChain($iconData, $alias['parent'], $visited);
-
-        if ($parent === null) {
-            return null;
-        }
-
-        return $this->mergeIconData($parent, $alias);
+        return $resolved;
     }
 
     /**
@@ -151,18 +171,16 @@ class IconDataResolver
             $result['vFlip'] = true;
         }
 
-        // The rotations are added as numbers and only reduced by `% 4`, exactly as
-        // upstream does. A fraction is carried through rather than collapsed here:
-        // `rotate: 0.5` on an icon plus `rotate: 0.5` on its alias is a whole 1 and
-        // must rotate 90 degrees. Only the SVG builder collapses, at the `switch`.
-        // fromIconData(), not parse(): upstream runs no rotateFromString() on icon data.
-        $rotate = IconRotation::modulo(
-            IconRotation::fromIconData($parent['rotate'] ?? 0) + IconRotation::fromIconData($child['rotate'] ?? 0)
-        );
+        // The rotations are added and reduced by `% 4` exactly as upstream does, with
+        // JavaScript's `+` — which concatenates when either side is a string. A
+        // fraction is carried through rather than collapsed here: `rotate: 0.5` on an
+        // icon plus `rotate: 0.5` on its alias is a whole 1 and must rotate 90 degrees.
+        // Only the SVG builder collapses, at the `switch`. Null means the merged
+        // rotation is falsy, so `if (rotate)` skips it and mergeIconData() falls back
+        // to the transformation default.
+        $rotate = IconRotation::mergeIconData($parent['rotate'] ?? null, $child['rotate'] ?? null);
 
-        // JavaScript's `if (rotate)`: a zero rotation is left out so that
-        // mergeIconData() falls back to the transformation default.
-        if ($rotate !== 0 && $rotate !== 0.0) {
+        if ($rotate !== null) {
             $result['rotate'] = $rotate;
         }
 

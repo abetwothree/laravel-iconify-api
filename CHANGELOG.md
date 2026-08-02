@@ -67,6 +67,14 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
 - A custom `IconFinder` that omits the optional `defaults` key is cached again. The
   staleness check read that key's presence, so such a finder got a 0% cache hit rate and
   re-read the icon set JSON on every request.
+- A `rotate` written as a string in icon set data — on an icon, an alias or the icon set
+  root — now produces what Iconify produces. Upstream never parses such a value; it adds
+  it with JavaScript's `+`, which *concatenates*, and only the trailing `% 4` converts. So
+  `"rotate": "2"` applies no rotation at all (`'2' + 0` is `'20'`), `"rotate": "1"` is a
+  half turn (`'10'`), and `"rotate": "-1"` is also a half turn (`'-10'`). This package
+  read the numeric part instead, so `"1"` rotated 90 degrees and `"2"` rotated 180. Alias
+  chains are also folded in upstream's order, which matters for the same reason: `'1' + 0`
+  and `0 + '1'` are different rotations. No published icon set contains a string `rotate`.
 
 ### Added
 

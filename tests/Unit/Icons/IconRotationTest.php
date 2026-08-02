@@ -33,19 +33,48 @@ it('treats a rotation it cannot read as no rotation', function () {
 
 it('does not apply the customisation string grammar to icon data', function () {
     // Upstream adds the raw value, so '90deg' + 0 is '90deg0', whose % 4 is NaN.
-    expect(IconRotation::fromIconData('90deg'))->toBe(0);
-    expect(IconRotation::fromIconData('25%'))->toBe(0);
-    expect(IconRotation::fromIconData('bad-rotate'))->toBe(0);
-    expect(IconRotation::fromIconData([]))->toBe(0);
-    expect(IconRotation::fromIconData(null))->toBe(0);
+    expect(IconRotation::mergeIconData('90deg', null))->toBeNull();
+    expect(IconRotation::mergeIconData('25%', null))->toBeNull();
+    expect(IconRotation::mergeIconData('bad-rotate', null))->toBeNull();
+    expect(IconRotation::mergeIconData([], null))->toBeNull();
+    expect(IconRotation::mergeIconData(null, null))->toBeNull();
 });
 
-it('reads a numeric icon data rotation without collapsing a fraction', function () {
-    expect(IconRotation::fromIconData(1))->toBe(1);
-    expect(IconRotation::fromIconData(1.5))->toBe(1.5);
-    expect(IconRotation::fromIconData(0.5))->toBe(0.5);
-    expect(IconRotation::fromIconData('2'))->toBe(2);
-    expect(IconRotation::fromIconData('1.5'))->toBe(1);
+it('merges a numeric icon data rotation without collapsing a fraction', function () {
+    expect(IconRotation::mergeIconData(1, null))->toBe(1);
+    expect(IconRotation::mergeIconData(1.5, null))->toBe(1.5);
+    expect(IconRotation::mergeIconData(0.5, 0.5))->toBe(1.0);
+    expect(IconRotation::mergeIconData(1, 3))->toBeNull();
+    expect(IconRotation::mergeIconData(7, null))->toBe(3);
+    expect(IconRotation::mergeIconData(-1, null))->toBe(-1);
+});
+
+it('concatenates a string icon data rotation the way JavaScript does', function () {
+    // `'1' + 0` is the string '10', whose % 4 is 2 — a half turn, not a quarter one.
+    expect(IconRotation::mergeIconData('1', null))->toBe(2);
+    expect(IconRotation::mergeIconData('3', null))->toBe(2);
+    // `'2' + 0` is '20', whose % 4 is 0, so upstream applies no rotation at all.
+    expect(IconRotation::mergeIconData('2', null))->toBeNull();
+    expect(IconRotation::mergeIconData('0', null))->toBeNull();
+    expect(IconRotation::mergeIconData('1.5', null))->toBe(1.5);
+    expect(IconRotation::mergeIconData('-1', null))->toBe(-2);
+    // Which side the string sits on changes the result: `0 + '1'` is '01', i.e. 1.
+    expect(IconRotation::mergeIconData(null, '1'))->toBe(1);
+    expect(IconRotation::mergeIconData(null, '2'))->toBe(2);
+    // Two strings concatenate with each other: `'1' + '2'` is '12', whose % 4 is 0.
+    expect(IconRotation::mergeIconData('1', '2'))->toBeNull();
+    expect(IconRotation::mergeIconData('1', 1))->toBe(3);
+    expect(IconRotation::mergeIconData(1, '1'))->toBe(3);
+});
+
+it('applies JavaScript falsiness to an icon data rotation operand', function () {
+    expect(IconRotation::mergeIconData('', null))->toBeNull();
+    expect(IconRotation::mergeIconData(false, null))->toBeNull();
+    expect(IconRotation::mergeIconData(0.0, null))->toBeNull();
+    expect(IconRotation::mergeIconData(NAN, null))->toBeNull();
+    // `true` is truthy and numifies to 1, so upstream does rotate for it.
+    expect(IconRotation::mergeIconData(true, null))->toBe(1);
+    expect(IconRotation::mergeIconData(null, true))->toBe(1);
 });
 
 it('reduces a rotation to the switch case iconToSVG would take', function () {
