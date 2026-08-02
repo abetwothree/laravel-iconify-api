@@ -29,7 +29,7 @@ it('covers cache repository traits getters and setters', function () {
     $repo->setIconSetInfoSummary('mdi', $summary);
     expect($repo->getIconSetInfoSummary('mdi'))->toBe($summary);
 
-    Cache::store('array')->put('iconify-icons:mdi:info:summary', 'not-array');
+    Cache::store('array')->put('iconify-icons:mdi:info:summary:2', 'not-array');
     expect($repo->getIconSetInfoSummary('mdi'))->toBeNull();
 
     $repo->setFileSet('mdi', '/tmp/mdi.json', 'icons');

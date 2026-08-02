@@ -10,6 +10,11 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
   `height`, `left`, `top`, `rotate`, `hFlip` and `vFlip` were previously ignored, so a
   24×24 icon set such as `heroicons` rendered with `viewBox="0 0 16 16"` and drew at the
   wrong scale.
+- The icons API now returns the icon set root's `left`, `top` and `provider` alongside
+  `width` and `height`, matching the `propsToCopy` list Iconify's `getIcons()` uses.
+  Previously a set with a negative origin such as `jam` was served without its offsets,
+  so a browser-side Iconify client rebuilt every icon as `viewBox="0 0 24 24"` instead
+  of `viewBox="-2 -2 24 24"`.
 - SVG element IDs no longer collide between icons on the same page. The ID counter is now
   a shared singleton, matching Iconify's module-scoped counter.
 - Fractional icon dimensions are no longer truncated to whole numbers.
@@ -42,7 +47,9 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
 - `IconSvgRenderer::__construct()` no longer takes an `IconSetInfoFinder`. It was reading
   the icon set's `info` metadata block, which carries no `width` and only a
   sample-display `height`.
-- Icons cached before this release are treated as stale and transparently refreshed.
+- Icons cached before this release are treated as stale and transparently refreshed. The
+  cached icon set summary moved to a new cache key for the same reason, so a warm cache
+  does not keep serving responses without the root `left`/`top`.
 
 ### Breaking
 

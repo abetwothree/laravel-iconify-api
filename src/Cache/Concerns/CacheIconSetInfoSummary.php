@@ -35,6 +35,8 @@ trait CacheIconSetInfoSummary
 
     protected function iconSetInfoSummaryKey(string $prefix): string
     {
-        return "{$this->cachePrefix}:{$prefix}:info:summary";
+        // Summaries cached before the icon set root `left`/`top` were carried through
+        // would keep serving the old shape forever, so they get a fresh key instead.
+        return "{$this->cachePrefix}:{$prefix}:info:summary:2";
     }
 }
