@@ -215,6 +215,10 @@ This package uses Laravel's caching system to cache the icon data to make repeat
 
 You can set which cache store to use for this package in your `config/iconify-api.php` file. Otherwise, it will use your default cache store setting.
 
+A found icon is cached without an expiry — it cannot change while the icon set stays installed. A "this icon does not exist" result is cached only briefly, because any name a caller invents produces one; `not_found_cache_ttl` controls how long (300 seconds by default, `0` to skip caching misses entirely). The API routes also bound how many names one request may ask for, via `max_icons_per_request` (200 by default, `0` for no limit); a request above the limit is rejected with a `400`.
+
+Cache keys are `{cache_key_prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name}` for icons and `{cache_key_prefix}:{icon-set-prefix}:meta:…` for icon set metadata. The shape version changes when the cached array shape does, which orphans the older entries rather than migrating them — run `php artisan cache:clear` after upgrading if you want the space back straight away.
+
 ## Missing Features
 
 The MVP of this package was to provide an API for on demand icons in your Laravel Application. A few API endpoints that currently exist on the Node JS package that are missing in this package and will be added in future releases:

@@ -72,6 +72,56 @@ it('serves a cached icon written without the optional defaults key', function ()
     expect($result['not_found'])->toBe([]);
 });
 
+it('expires a cached miss but keeps a cached hit forever', function () {
+    config()->set('iconify-api.cache_store', 'array');
+    config()->set('cache.default', 'array');
+    config()->set('iconify-api.cache_key_prefix', 'iconify-icons');
+    config()->set('iconify-api.not_found_cache_ttl', 300);
+
+    $repo = new CacheRepository;
+
+    $repo->setIcon('test', 'junk', [
+        'icons' => [],
+        'aliases' => [],
+        'defaults' => [],
+        'not_found' => ['junk'],
+    ]);
+
+    $repo->setIcon('test', 'real', [
+        'icons' => ['real' => ['body' => '<path />']],
+        'aliases' => [],
+        'defaults' => [],
+    ]);
+
+    expect($repo->getIcons('test', ['junk', 'real'])['found'])->toHaveKeys(['junk', 'real']);
+
+    test()->travel(301)->seconds();
+
+    $after = $repo->getIcons('test', ['junk', 'real']);
+
+    expect($after['found'])->toHaveKey('real')
+        ->and($after['not_found'])->toBe(['junk']);
+});
+
+it('does not cache a miss at all when the ttl is zero', function () {
+    config()->set('iconify-api.cache_store', 'array');
+    config()->set('cache.default', 'array');
+    config()->set('iconify-api.cache_key_prefix', 'iconify-icons');
+    config()->set('iconify-api.not_found_cache_ttl', 0);
+
+    $repo = new CacheRepository;
+
+    $repo->setIcon('test', 'junk', [
+        'icons' => [],
+        'aliases' => [],
+        'defaults' => [],
+        'not_found' => ['junk'],
+    ]);
+
+    expect($repo->getIcons('test', ['junk'])['not_found'])->toBe(['junk']);
+    expect(array_keys(Cache::store('array')->getStore()->all()))->toBe([]);
+});
+
 it('treats an entry cached under an older shape version as a miss', function () {
     config()->set('iconify-api.cache_store', 'array');
     config()->set('cache.default', 'array');

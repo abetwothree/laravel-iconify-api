@@ -72,6 +72,43 @@ it('rejects icon names that upstream matchIconName would not accept', function (
     }
 });
 
+it('rejects a request that asks for more icons than the configured limit', function () {
+    config()->set('iconify-api.max_icons_per_request', 5);
+
+    $names = array_map(static fn (int $i): string => "junk-{$i}", range(0, 9));
+
+    $response = test()->get(route('iconify-api.set-json.show', [
+        'set' => 'bytesize',
+        'icons' => implode(',', $names),
+    ]));
+
+    $response->assertStatus(400);
+    expect($response->json('error'))->toContain('5');
+
+    // Nothing about a rejected request may reach the cache.
+    expect(array_keys(Cache::store('array')->getStore()->all()))->toBe([]);
+});
+
+it('does not leave permanent cache entries behind for names that do not exist', function () {
+    config()->set('iconify-api.not_found_cache_ttl', 300);
+
+    $names = array_map(static fn (int $i): string => "junk-{$i}", range(0, 9));
+
+    test()->get(route('iconify-api.set-json.show', [
+        'set' => 'bytesize',
+        'icons' => implode(',', $names),
+    ]))->assertStatus(200);
+
+    $before = array_keys(Cache::store('array')->getStore()->all());
+    expect($before)->toContain('iconify-icons:bytesize:icon:2:junk-0');
+
+    test()->travel(301)->seconds();
+
+    foreach ($names as $name) {
+        expect(Cache::store('array')->get("iconify-icons:bytesize:icon:2:{$name}"))->toBeNull();
+    }
+});
+
 it('never writes a cache key that another key builder could address', function () {
     test()->get(route('iconify-api.set-json.show', ['set' => 'codicon', 'icons' => 'info']));
     test()->get(route('iconify-api.collections.show', ['prefix' => 'codicon']));

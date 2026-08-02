@@ -87,6 +87,14 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
 
 ### Added
 
+- `not_found_cache_ttl` config option (default 300 seconds). A cached miss now expires
+  instead of living forever. `IconFinder::find()` returns an entry for every requested
+  name, misses included, and nothing in this package ever calls `forget()`, so a request
+  for names that do not exist used to leave a permanent cache entry behind for each one.
+  Set it to `0` to stop caching misses altogether.
+- `max_icons_per_request` config option (default 200). The `icons` query string was read
+  with no count cap; a request above the limit is now rejected with a `400`. Set it to `0`
+  to remove the limit.
 - `inline` option, adding `vertical-align: -0.125em`.
 - `color` option, folded into the `style` attribute.
 - Flip aliases `h-flip`, `horizontal-flip`, `horizontalFlip`, `v-flip`, `vertical-flip`

@@ -39,11 +39,30 @@ trait CachesIcons
     }
 
     /**
+     * Cache one icon entry.
+     *
+     * A hit is immutable for as long as the icon set stays installed, so it is stored
+     * without a TTL. A miss is not: `IconFinder::find()` returns an entry for every
+     * requested name, so one request can mint an entry per distinct name it asks for,
+     * and nothing in this package ever calls `forget()`. Negative entries therefore
+     * expire, which bounds what a request can leave behind. A TTL of zero disables
+     * negative caching altogether.
+     *
      * @param  TIconData  $iconData
      */
     public function setIcon(string $prefix, string $icon, array $iconData): void
     {
-        Cache::store($this->store)->put($this->iconKey($prefix, $icon), $iconData);
+        $key = $this->iconKey($prefix, $icon);
+
+        if (($iconData['not_found'] ?? []) !== []) {
+            if ($this->notFoundTtl > 0) {
+                Cache::store($this->store)->put($key, $iconData, $this->notFoundTtl);
+            }
+
+            return;
+        }
+
+        Cache::store($this->store)->put($key, $iconData);
     }
 
     /**

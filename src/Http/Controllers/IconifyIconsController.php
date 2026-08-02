@@ -23,10 +23,23 @@ class IconifyIconsController
             return response()->json(['error' => 'No icons specified'], 404);
         }
 
+        $requested = explode(',', $request->string('icons'));
+
+        // Every name in the list mints a cache entry, so the list is bounded. A zero
+        // limit disables the check. Iconify's own browser client splits its requests by
+        // URL length and never approaches the default.
+        $limit = max(0, config()->integer('iconify-api.max_icons_per_request', 200));
+
+        if ($limit > 0 && count($requested) > $limit) {
+            return response()->json([
+                'error' => "Too many icons requested; the limit is {$limit}",
+            ], 400);
+        }
+
         $icons = [];
         $rejected = [];
 
-        foreach (explode(',', $request->string('icons')) as $icon) {
+        foreach ($requested as $icon) {
             if (preg_match(self::ICON_NAME_PATTERN, $icon) === 1) {
                 $icons[] = $icon;
 

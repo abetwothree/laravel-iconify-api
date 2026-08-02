@@ -145,4 +145,29 @@ return [
     */
 
     'cache_key_prefix' => 'iconify-icons',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cached miss lifetime
+    |--------------------------------------------------------------------------
+    | How many seconds a "this icon does not exist" result stays cached. A found
+    | icon never expires — it cannot change while the icon set stays installed —
+    | but a miss can be minted for any name a caller invents, so it is kept only
+    | briefly. Set this to 0 to stop caching misses entirely.
+    |
+    */
+
+    'not_found_cache_ttl' => 300,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Maximum icons per API request
+    |--------------------------------------------------------------------------
+    | Upper bound on the number of names accepted in the `icons` query string of
+    | the icon set routes. Requests above it are rejected with a 400. Set this to
+    | 0 to remove the limit.
+    |
+    */
+
+    'max_icons_per_request' => 200,
 ];
