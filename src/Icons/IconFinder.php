@@ -9,9 +9,19 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSets
  * @phpstan-import-type TIconSetData from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
  * @phpstan-import-type TAlias from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
  * @phpstan-import-type TIconData from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
+ * @phpstan-import-type TIconDefaults from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
  */
 class IconFinder implements IconFinderContract
 {
+    /**
+     * Icon set root properties that act as defaults for every icon in the set.
+     *
+     * Mirrors packages/utils/src/icon-set/validate-basic.ts:12-17.
+     *
+     * @var array<int, string>
+     */
+    protected const ROOT_DEFAULT_PROPS = ['left', 'top', 'width', 'height', 'rotate', 'hFlip', 'vFlip'];
+
     public function __construct(
         protected IconSetsFileFinderContract $iconSetsFileFinder
     ) {}
@@ -28,6 +38,7 @@ class IconFinder implements IconFinderContract
         $iconsSetInfo = [
             'icons' => [],
             'aliases' => [],
+            'defaults' => $this->extractRootDefaults($iconsData),
         ];
 
         /** @var array<string, TIconData> $iconsResponse */
@@ -84,5 +95,23 @@ class IconFinder implements IconFinderContract
         }
 
         return $this->appendAliasChain($iconsData, $iconResponse, $parent, $visited);
+    }
+
+    /**
+     * @param  TIconSetData  $iconsData
+     * @return TIconDefaults
+     */
+    protected function extractRootDefaults(array $iconsData): array
+    {
+        /** @var TIconDefaults $defaults */
+        $defaults = [];
+
+        foreach (self::ROOT_DEFAULT_PROPS as $property) {
+            if (array_key_exists($property, $iconsData) && $iconsData[$property] !== null) {
+                $defaults[$property] = $iconsData[$property];
+            }
+        }
+
+        return $defaults;
     }
 }

@@ -22,10 +22,13 @@ trait CachesIcons
         ];
 
         foreach ($icons as $icon) {
-            /** @var TIconData|null $cachedIcon */
             $cachedIcon = Cache::store($this->store)->get($this->iconKey($prefix, $icon));
 
-            if ($cachedIcon) {
+            // Entries cached before icon set root defaults were carried through are
+            // stale: they would render with the wrong viewBox. Treat them as a miss
+            // so they are transparently refreshed.
+            if (is_array($cachedIcon) && array_key_exists('defaults', $cachedIcon)) {
+                /** @var TIconData $cachedIcon */
                 $cacheResponse['found'][$icon] = $cachedIcon;
             } else {
                 $cacheResponse['not_found'][] = $icon;

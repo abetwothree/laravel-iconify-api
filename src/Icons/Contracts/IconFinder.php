@@ -36,9 +36,19 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  *      width?: int|null,
  *      height?: int|null,
  * }
+ * @phpstan-type TIconDefaults = array{
+ *      left?:int|float,
+ *      top?:int|float,
+ *      width?:int|float,
+ *      height?:int|float,
+ *      rotate?:int,
+ *      hFlip?:bool,
+ *      vFlip?:bool,
+ * }
  * @phpstan-type TIconData = array{
  *      icons: TIcons,
  *      aliases: TAliases,
+ *      defaults: TIconDefaults,
  *      not_found?: TNotFound,
  * }
  */

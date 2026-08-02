@@ -41,6 +41,7 @@ it('covers cache repository traits getters and setters', function () {
     $iconData = [
         'icons' => ['home' => ['body' => '<path />']],
         'aliases' => [],
+        'defaults' => [],
     ];
 
     $repo->setIcon('mdi', 'home', $iconData);
@@ -48,4 +49,23 @@ it('covers cache repository traits getters and setters', function () {
     $icons = $repo->getIcons('mdi', ['home', 'missing']);
     expect($icons['found'])->toHaveKey('home');
     expect($icons['not_found'])->toBe(['missing']);
+});
+
+it('treats a cached icon without defaults as a cache miss', function () {
+    config()->set('iconify-api.cache_store', 'array');
+    config()->set('cache.default', 'array');
+    config()->set('iconify-api.cache_key_prefix', 'iconify-icons');
+
+    $repo = new CacheRepository;
+
+    // Simulate an entry written before the `defaults` key existed.
+    Cache::store('array')->put('iconify-icons:test:stale', [
+        'icons' => ['stale' => ['body' => '<path />']],
+        'aliases' => [],
+    ]);
+
+    $result = $repo->getIcons('test', ['stale']);
+
+    expect($result['found'])->toBe([]);
+    expect($result['not_found'])->toBe(['stale']);
 });
