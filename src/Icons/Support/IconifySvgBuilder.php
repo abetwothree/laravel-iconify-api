@@ -5,8 +5,9 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Support;
 class IconifySvgBuilder
 {
     /**
+     * Signature-compatible with upstream `iconToSVG(icon, customisations)`.
+     *
      * @param  array<string, mixed>  $icon
-     * @param  array<string, mixed>  $iconSetInfo
      * @param  array<string, mixed>  $customisations
      * @return array{
      *     attributes: array{viewBox:string, width?:string, height?:string},
@@ -14,9 +15,9 @@ class IconifySvgBuilder
      *     body:string,
      * }
      */
-    public function build(array $icon, array $iconSetInfo, array $customisations = []): array
+    public function build(array $icon, array $customisations = []): array
     {
-        $fullIcon = $this->normaliseIcon($icon, $iconSetInfo);
+        $fullIcon = $this->normaliseIcon($icon);
         $fullCustomisations = $this->normaliseCustomisations($customisations);
 
         $box = [
@@ -69,17 +70,22 @@ class IconifySvgBuilder
     }
 
     /**
+     * Mirrors `{ ...defaultIconProps, ...icon }`, packages/utils/src/svg/build.ts.
+     *
+     * Icon set root defaults are merged into the icon by IconDataResolver before it
+     * gets here, exactly as upstream's getIconData() does, so there is no second
+     * source of dimensions to fall back to.
+     *
      * @param  array<string, mixed>  $icon
-     * @param  array<string, mixed>  $iconSetInfo
      * @return array{left:int|float, top:int|float, width:int|float, height:int|float, rotate:int|float, hFlip:bool, vFlip:bool, body:string}
      */
-    protected function normaliseIcon(array $icon, array $iconSetInfo): array
+    protected function normaliseIcon(array $icon): array
     {
         return [
             'left' => $this->safeNumber($icon['left'] ?? 0, 0),
             'top' => $this->safeNumber($icon['top'] ?? 0, 0),
-            'width' => $this->safeNumber($icon['width'] ?? $iconSetInfo['width'] ?? 16, 16),
-            'height' => $this->safeNumber($icon['height'] ?? $iconSetInfo['height'] ?? 16, 16),
+            'width' => $this->safeNumber($icon['width'] ?? 16, 16),
+            'height' => $this->safeNumber($icon['height'] ?? 16, 16),
             'rotate' => IconRotation::parse($icon['rotate'] ?? 0),
             'hFlip' => $this->toBool($icon['hFlip'] ?? false),
             'vFlip' => $this->toBool($icon['vFlip'] ?? false),

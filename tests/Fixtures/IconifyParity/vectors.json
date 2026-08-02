@@ -7,11 +7,6 @@
                 "width": 20,
                 "height": 16
             },
-            "iconSetInfo": {
-                "prefix": "test",
-                "width": 16,
-                "height": 16
-            },
             "customisations": {
                 "height": "40px",
                 "rotate": 1
@@ -24,11 +19,6 @@
                 "width": 20,
                 "height": 16
             },
-            "iconSetInfo": {
-                "prefix": "test",
-                "width": 16,
-                "height": 16
-            },
             "customisations": {
                 "hFlip": true,
                 "rotate": 1
@@ -39,11 +29,6 @@
             "icon": {
                 "body": "<path d=\"...\" />",
                 "width": 20,
-                "height": 16
-            },
-            "iconSetInfo": {
-                "prefix": "test",
-                "width": 16,
                 "height": 16
             },
             "customisations": {
@@ -59,11 +44,6 @@
                 "height": 16,
                 "rotate": 1
             },
-            "iconSetInfo": {
-                "prefix": "test",
-                "width": 16,
-                "height": 16
-            },
             "customisations": {
                 "hFlip": true
             }
@@ -75,7 +55,6 @@
                 "width": 20.5,
                 "height": 16
             },
-            "iconSetInfo": {},
             "customisations": {}
         },
         {
@@ -87,7 +66,6 @@
                 "width": 24,
                 "height": 25
             },
-            "iconSetInfo": {},
             "customisations": {
                 "rotate": 1
             }
@@ -102,7 +80,6 @@
                 "hFlip": true,
                 "vFlip": true
             },
-            "iconSetInfo": {},
             "customisations": {}
         },
         {
@@ -112,7 +89,6 @@
                 "width": 20,
                 "height": 16
             },
-            "iconSetInfo": {},
             "customisations": {
                 "rotate": 1.5,
                 "hFlip": true,

@@ -73,7 +73,6 @@ for (const vector of section("build")) {
     const actual = callPhp({
         mode: "build",
         icon: vector.icon,
-        iconSetInfo: vector.iconSetInfo,
         customisations: vector.customisations,
     });
 

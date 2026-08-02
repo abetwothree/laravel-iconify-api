@@ -29,10 +29,9 @@ $mode = $payload['mode'];
 if ($mode === 'build') {
     $builder = new IconifySvgBuilder;
     $icon = is_array($payload['icon'] ?? null) ? $payload['icon'] : [];
-    $iconSetInfo = is_array($payload['iconSetInfo'] ?? null) ? $payload['iconSetInfo'] : [];
     $customisations = is_array($payload['customisations'] ?? null) ? $payload['customisations'] : [];
 
-    $result = $builder->build($icon, $iconSetInfo, $customisations);
+    $result = $builder->build($icon, $customisations);
     echo json_encode($result, JSON_THROW_ON_ERROR);
     exit(0);
 }
@@ -96,7 +95,7 @@ if ($mode === 'icon-data') {
         exit(0);
     }
 
-    echo json_encode((new IconifySvgBuilder)->build($icon, [], $customisations), JSON_THROW_ON_ERROR);
+    echo json_encode((new IconifySvgBuilder)->build($icon, $customisations), JSON_THROW_ON_ERROR);
     exit(0);
 }
 

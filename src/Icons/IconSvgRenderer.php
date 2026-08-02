@@ -256,7 +256,7 @@ class IconSvgRenderer
         // uniformly as it drives plain SVG attributes. Per-call options still win.
         $options = $this->mergeDefaultAttributes($options, $this->buildAutomaticClasses($parsedName));
 
-        $buildResult = $this->svgBuilder->build($icon, [], $this->extractCustomisations($options));
+        $buildResult = $this->svgBuilder->build($icon, $this->extractCustomisations($options));
         $renderAttributes = $buildResult['attributes'];
         $renderBody = $this->svgIdReplacer->replace($buildResult['body']);
 
