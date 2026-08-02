@@ -107,3 +107,91 @@ it('marks alias as not found when alias parent icon is missing', function () {
 
     @unlink($tempFile);
 });
+
+it('resolves multi-level alias chains to parent icon', function () {
+    $tempFile = sys_get_temp_dir().'/iconfinder-chain-'.uniqid('', true).'.json';
+
+    $written = file_put_contents($tempFile, json_encode([
+        'prefix' => 'test',
+        'lastModified' => time(),
+        'icons' => [
+            'base' => [
+                'body' => '<path d="M0 0"/>',
+                'width' => 24,
+                'height' => 24,
+            ],
+        ],
+        'aliases' => [
+            'second' => [
+                'parent' => 'base',
+                'rotate' => 1,
+            ],
+            'first' => [
+                'parent' => 'second',
+                'hFlip' => true,
+            ],
+        ],
+    ], JSON_THROW_ON_ERROR));
+
+    if ($written === false) {
+        throw new RuntimeException('Unable to write temporary test file.');
+    }
+
+    $fileFinder = new class($tempFile) implements IconSetsFileFinderContract
+    {
+        public function __construct(private string $path) {}
+
+        public function find(string $prefix, string $type = 'icons'): string
+        {
+            return $this->path;
+        }
+    };
+
+    $finder = new IconFinder($fileFinder);
+    $result = $finder->find('test', ['first']);
+
+    expect($result)->toHaveKey('first');
+    expect($result['first']['icons'])->toHaveKey('base');
+    expect($result['first']['aliases'])->toHaveKeys(['first', 'second']);
+    expect($result['first']['not_found'] ?? [])->toBe([]);
+
+    @unlink($tempFile);
+});
+
+it('marks alias chain cycles as not found', function () {
+    $tempFile = sys_get_temp_dir().'/iconfinder-cycle-'.uniqid('', true).'.json';
+
+    $written = file_put_contents($tempFile, json_encode([
+        'prefix' => 'test',
+        'lastModified' => time(),
+        'icons' => [],
+        'aliases' => [
+            'a' => ['parent' => 'b'],
+            'b' => ['parent' => 'a'],
+        ],
+    ], JSON_THROW_ON_ERROR));
+
+    if ($written === false) {
+        throw new RuntimeException('Unable to write temporary test file.');
+    }
+
+    $fileFinder = new class($tempFile) implements IconSetsFileFinderContract
+    {
+        public function __construct(private string $path) {}
+
+        public function find(string $prefix, string $type = 'icons'): string
+        {
+            return $this->path;
+        }
+    };
+
+    $finder = new IconFinder($fileFinder);
+    $result = $finder->find('test', ['a']);
+
+    expect($result)->toHaveKey('a');
+    expect($result['a']['icons'])->toBe([]);
+    expect($result['a']['aliases'])->toHaveKeys(['a', 'b']);
+    expect($result['a']['not_found'] ?? [])->toBe(['a']);
+
+    @unlink($tempFile);
+});

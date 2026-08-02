@@ -63,5 +63,8 @@ jobs:
         run: |
           npm ci
 
+      - name: Run Iconify parity check
+        run: npm run parity:check
+
       - name: Execute tests
         run: vendor/bin/pest --ci --coverage --coverage-clover clover.xml

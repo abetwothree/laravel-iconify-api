@@ -1,0 +1,84 @@
+{
+    "build": [
+        {
+            "name": "rotation-non-square",
+            "icon": {
+                "body": "<path d=\"...\" />",
+                "width": 20,
+                "height": 16
+            },
+            "iconSetInfo": {
+                "prefix": "test",
+                "width": 16,
+                "height": 16
+            },
+            "customisations": {
+                "height": "40px",
+                "rotate": 1
+            }
+        },
+        {
+            "name": "flip-and-rotation",
+            "icon": {
+                "body": "<path d=\"...\" />",
+                "width": 20,
+                "height": 16
+            },
+            "iconSetInfo": {
+                "prefix": "test",
+                "width": 16,
+                "height": 16
+            },
+            "customisations": {
+                "hFlip": true,
+                "rotate": 1
+            }
+        },
+        {
+            "name": "unset-height-auto-width",
+            "icon": {
+                "body": "<path d=\"...\" />",
+                "width": 20,
+                "height": 16
+            },
+            "iconSetInfo": {
+                "prefix": "test",
+                "width": 16,
+                "height": 16
+            },
+            "customisations": {
+                "width": "auto",
+                "height": "unset"
+            }
+        },
+        {
+            "name": "icon-default-rotate-custom-flip",
+            "icon": {
+                "body": "<path d=\"...\" />",
+                "width": 20,
+                "height": 16,
+                "rotate": 1
+            },
+            "iconSetInfo": {
+                "prefix": "test",
+                "width": 16,
+                "height": 16
+            },
+            "customisations": {
+                "hFlip": true
+            }
+        }
+    ],
+    "ids": [
+        {
+            "name": "simple-defs-use",
+            "body": "<defs><path id=\"test1\"/></defs><use fill=\"#FFA000\" xlink:href=\"#test1\"/>",
+            "times": 2
+        },
+        {
+            "name": "animation-begin-reference",
+            "body": "<path id=\"spinner_a\" d=\"M0 0\"><animate begin=\"0;spinner_a.end\"/></path>",
+            "times": 2
+        }
+    ]
+}

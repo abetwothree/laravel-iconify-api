@@ -21,7 +21,7 @@ it('applies helper options to rendered icon', function () {
     ]);
 
     expect($svg)
-        ->toContain('class="w-6 h-6"')
+        ->toContain('class="iconify iconify--heroicons w-6 h-6"')
         ->toContain('data-slot="icon"');
 });
 
@@ -40,7 +40,7 @@ it('applies arbitrary configured defaults and allows per-call overrides', functi
     ]);
 
     expect($svg)
-        ->toContain('class="size-5 w-6"')
+        ->toContain('class="iconify iconify--heroicons size-5 w-6"')
         ->toContain('data-source="override"')
         ->toContain('data-slot="icon"')
         ->toContain('style="color: red;"');

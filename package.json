@@ -1,9 +1,13 @@
 {
     "name": "@abetwothree/laravel-iconify-api",
     "private": true,
+    "scripts": {
+        "parity:check": "node tests/bin/iconify-parity-check.mjs"
+    },
     "devDependencies": {
         "@iconify-json/heroicons": "^1.2.3",
         "@iconify-json/mdi": "^1.2.3",
-        "@iconify/json": "^2.2.417"
+        "@iconify/json": "^2.2.417",
+        "@iconify/utils": "^3.1.4"
     }
 }

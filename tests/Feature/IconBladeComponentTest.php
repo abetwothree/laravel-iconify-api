@@ -27,7 +27,7 @@ it('forwards custom attributes and class to blade component', function () {
     $svg = Blade::render('<x-icon name="heroicons:clock" class="w-6 h-6" data-slot="icon" />', [], true);
 
     expect($svg)
-        ->toContain('class="w-6 h-6"')
+        ->toContain('class="iconify iconify--heroicons w-6 h-6"')
         ->toContain('data-slot="icon"');
 });
 
@@ -36,7 +36,7 @@ it('merges configured default class with component class', function () {
 
     $svg = Blade::render('<x-icon name="heroicons:clock" class="w-6" />', [], true);
 
-    expect($svg)->toContain('class="size-5 w-6"');
+    expect($svg)->toContain('class="iconify iconify--heroicons size-5 w-6"');
 });
 
 it('applies arbitrary configured defaults to blade component output', function () {
@@ -49,7 +49,7 @@ it('applies arbitrary configured defaults to blade component output', function (
     $svg = Blade::render('<x-icon name="heroicons:clock" />', [], true);
 
     expect($svg)
-        ->toContain('class="size-5"')
+        ->toContain('class="iconify iconify--heroicons size-5"')
         ->toContain('data-source="default"')
         ->toContain('style="color: red;"');
 });
@@ -64,7 +64,7 @@ it('allows blade attributes to override configured defaults while merging class'
     $svg = Blade::render('<x-icon name="heroicons:clock" class="w-6" data-source="override" data-slot="icon" style="color: blue;" />', [], true);
 
     expect($svg)
-        ->toContain('class="size-5 w-6"')
+        ->toContain('class="iconify iconify--heroicons size-5 w-6"')
         ->toContain('data-source="override"')
         ->toContain('data-slot="icon"')
         ->toContain('style="color: blue;"');

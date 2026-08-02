@@ -36,48 +36,53 @@ class IconFinder implements IconFinderContract
         foreach ($icons as $icon) {
             $iconsResponse[$icon] = $iconsSetInfo;
 
-            if (isset($iconsData['aliases'][$icon])) {
-                $iconsResponse[$icon]['aliases'][$icon] = $iconsData['aliases'][$icon];
-            }
-
-            if (! isset($iconsData['icons'][$icon])) {
-
-                // if not found, check if it's an alias, add the alias to the response
-                if (isset($iconsData['aliases'][$icon])) {
-                    /** @var TAlias $aliasData */
-                    $aliasData = $iconsData['aliases'][$icon];
-
-                    $parentIconName = $aliasData['parent'];
-
-                    if (! isset($iconsData['icons'][$parentIconName])) {
-                        if (! isset($iconsResponse[$icon]['not_found'])) {
-                            $iconsResponse[$icon]['not_found'] = [];
-                        }
-
-                        $iconsResponse[$icon]['not_found'][] = $icon;
-
-                        continue;
-                    }
-
-                    $iconsResponse[$icon]['icons'][$parentIconName] = $iconsData['icons'][$parentIconName];
-
-                    continue;
-                }
-
-                if (! isset($iconsResponse[$icon]['not_found'])) {
-                    $iconsResponse[$icon]['not_found'] = [];
-                }
-
-                $iconsResponse[$icon]['not_found'][] = $icon;
+            if (isset($iconsData['icons'][$icon])) {
+                $iconsResponse[$icon]['icons'][$icon] = $iconsData['icons'][$icon];
 
                 continue;
             }
 
-            $iconsResponse[$icon]['icons'][$icon] = $iconsData['icons'][$icon];
+            if ($this->appendAliasChain($iconsData, $iconsResponse[$icon], $icon, [])) {
+                continue;
+            }
+
+            if (! isset($iconsResponse[$icon]['not_found'])) {
+                $iconsResponse[$icon]['not_found'] = [];
+            }
+
+            $iconsResponse[$icon]['not_found'][] = $icon;
         }
 
         unset($iconsData);
 
         return $iconsResponse;
+    }
+
+    /**
+     * @param  TIconSetData  $iconsData
+     * @param  TIconData  $iconResponse
+     * @param  array<int, string>  $visited
+     */
+    protected function appendAliasChain(array $iconsData, array &$iconResponse, string $name, array $visited): bool
+    {
+        if (in_array($name, $visited, true) || ! isset($iconsData['aliases'][$name])) {
+            return false;
+        }
+
+        $visited[] = $name;
+
+        /** @var TAlias $alias */
+        $alias = $iconsData['aliases'][$name];
+        $iconResponse['aliases'][$name] = $alias;
+
+        $parent = $alias['parent'];
+
+        if (isset($iconsData['icons'][$parent])) {
+            $iconResponse['icons'][$parent] = $iconsData['icons'][$parent];
+
+            return true;
+        }
+
+        return $this->appendAliasChain($iconsData, $iconResponse, $parent, $visited);
     }
 }
