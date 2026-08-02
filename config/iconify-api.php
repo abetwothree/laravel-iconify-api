@@ -98,10 +98,12 @@ return [
 
         'defaults' => [
             'class' => '',
-            // Any default SVG attributes are supported.
+            // Any default SVG attribute or render option is supported.
             // Examples:
             // 'data-source' => 'iconify-api',
             // 'style' => 'vertical-align: middle;',
+            // 'width' => '1.5em',
+            // 'inline' => true,
         ],
 
         'helper' => [
