@@ -267,9 +267,29 @@ class IconSvgRenderer
     {
         $customisations = [];
 
-        foreach (['width', 'height', 'inline', 'hFlip', 'vFlip', 'flip', 'rotate'] as $key) {
+        foreach (['inline', 'hFlip', 'vFlip', 'flip', 'rotate'] as $key) {
             if (array_key_exists($key, $options)) {
                 $customisations[$key] = $options[$key];
+            }
+        }
+
+        // Dimensions follow mergeCustomisations(), packages/utils/src/customisations/merge.ts:25-32:
+        // null is copied, falsy values are dropped, and only strings/numbers are accepted.
+        foreach (['width', 'height'] as $key) {
+            if (! array_key_exists($key, $options)) {
+                continue;
+            }
+
+            $value = $options[$key];
+
+            if ($value === null) {
+                $customisations[$key] = null;
+
+                continue;
+            }
+
+            if ($this->jsTruthy($value) && (is_string($value) || is_int($value) || is_float($value))) {
+                $customisations[$key] = $value;
             }
         }
 
@@ -512,6 +532,28 @@ class IconSvgRenderer
         }
 
         if (str_contains($value, '/*') || str_contains($value, '*/')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * JavaScript truthiness, which differs from PHP's: the string "0" is truthy in JS.
+     *
+     * Needed so that a dimension of "0" behaves the way mergeCustomisations() does.
+     */
+    protected function jsTruthy(mixed $value): bool
+    {
+        if ($value === null || $value === false || $value === '') {
+            return false;
+        }
+
+        if (is_int($value) && $value === 0) {
+            return false;
+        }
+
+        if (is_float($value) && ($value === 0.0 || is_nan($value))) {
             return false;
         }
 

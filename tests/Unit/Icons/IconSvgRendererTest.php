@@ -625,3 +625,33 @@ it('still emits a legitimate css custom property color value', function () {
 
     expect($svg)->toContain('style="color: var(--x);"');
 });
+
+it('ignores a zero width and falls back to 1em', function () {
+    $svg = makeParityRenderer('zero-width')->render('mdi:zero-width', ['width' => 0]);
+
+    expect($svg)->toContain('width="1em"');
+});
+
+it('ignores an empty string height and falls back to 1em', function () {
+    $svg = makeParityRenderer('empty-height')->render('mdi:empty-height', ['height' => '']);
+
+    expect($svg)->toContain('height="1em"');
+});
+
+it('keeps a zero written as a string, matching javascript truthiness', function () {
+    $svg = makeParityRenderer('string-zero')->render('mdi:string-zero', ['width' => '0']);
+
+    expect($svg)->toContain('width="0"');
+});
+
+it('ignores a boolean width', function () {
+    $svg = makeParityRenderer('bool-width')->render('mdi:bool-width', ['width' => true]);
+
+    expect($svg)->toContain('width="1em"');
+});
+
+it('keeps an explicit null width as the default', function () {
+    $svg = makeParityRenderer('null-width')->render('mdi:null-width', ['width' => null]);
+
+    expect($svg)->toContain('width="1em"');
+});
