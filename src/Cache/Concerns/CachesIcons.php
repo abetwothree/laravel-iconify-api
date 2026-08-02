@@ -62,8 +62,14 @@ trait CachesIcons
     /**
      * Cache one icon entry.
      *
-     * A hit is immutable for as long as the icon set stays installed, so it is stored
-     * without a TTL. A miss is not: `IconFinder::find()` returns an entry for every
+     * A hit is immutable for as long as the *installed version* of the icon set is, so
+     * it is stored without a TTL. Nothing here keys off the icon set file's mtime,
+     * version or hash, so upgrading an icon package rewrites bodies in place while
+     * every entry — and the cached path at `meta:file:icons` — survives, and a redrawn
+     * icon serves its old body indefinitely. `php artisan cache:clear` is the way out;
+     * the README says so in its caching section.
+     *
+     * A miss is not immutable: `IconFinder::find()` returns an entry for every
      * requested name, so one request can mint an entry per distinct name it asks for,
      * and nothing in this package ever calls `forget()`. Negative entries therefore
      * expire, which bounds what a request can leave behind. A TTL of zero disables

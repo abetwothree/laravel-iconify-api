@@ -156,9 +156,14 @@ return [
     | Cached miss lifetime
     |--------------------------------------------------------------------------
     | How many seconds a "this icon does not exist" result stays cached. A found
-    | icon never expires — it cannot change while the icon set stays installed —
-    | but a miss can be minted for any name a caller invents, so it is kept only
-    | briefly. Set this to 0 to stop caching misses entirely.
+    | icon never expires — it cannot change while the installed version of the icon
+    | set stays the same — but a miss can be minted for any name a caller invents, so
+    | it is kept only briefly. Set this to 0 to stop caching misses entirely.
+    |
+    | Nothing keys off the icon set file, so upgrading an icon package does not
+    | invalidate anything. Run `php artisan cache:clear` after `npm update
+    | @iconify/json` or after upgrading an `@iconify-json/*` package, or a redrawn
+    | icon keeps serving its old body.
     |
     */
 
