@@ -116,3 +116,38 @@ it('resets a transformation to its default when the parent set it and the xor ca
 
     expect($result['vFlip'])->toBeFalse();
 });
+
+it('lets an alias override the parent body', function () {
+    $resolver = new IconDataResolver;
+
+    $result = $resolver->resolve([
+        'icons' => ['base' => ['body' => '<path d="parent"/>', 'width' => 24]],
+        'aliases' => ['custom' => ['parent' => 'base', 'body' => '<path d="child"/>']],
+    ], 'custom');
+
+    expect($result['body'])->toBe('<path d="child"/>');
+    expect($result['width'])->toBe(24);
+});
+
+it('propagates the hidden flag from an alias', function () {
+    $resolver = new IconDataResolver;
+
+    $result = $resolver->resolve([
+        'icons' => ['base' => ['body' => '<path/>']],
+        'aliases' => ['deprecated' => ['parent' => 'base', 'hidden' => true]],
+    ], 'deprecated');
+
+    expect($result['hidden'])->toBeTrue();
+});
+
+it('treats an explicitly null property as present', function () {
+    $resolver = new IconDataResolver;
+
+    $result = $resolver->resolve([
+        'icons' => ['base' => ['body' => '<path/>', 'width' => 24]],
+        'aliases' => ['nulled' => ['parent' => 'base', 'width' => null]],
+    ], 'nulled');
+
+    expect($result)->toHaveKey('width');
+    expect($result['width'])->toBeNull();
+});

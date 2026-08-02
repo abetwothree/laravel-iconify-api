@@ -188,7 +188,7 @@ class IconSvgRenderer
             $options['viewBox']
         );
 
-        if (isset($options['ariaHidden'])) {
+        if (array_key_exists('ariaHidden', $options)) {
             $options['aria-hidden'] = $options['ariaHidden'];
             unset($options['ariaHidden']);
         }
@@ -212,7 +212,7 @@ class IconSvgRenderer
             $attributes['height'] = $renderAttributes['height'];
         }
 
-        if (isset($options['aria-hidden'])) {
+        if (array_key_exists('aria-hidden', $options)) {
             if ($options['aria-hidden'] !== true && $options['aria-hidden'] !== 'true') {
                 unset($attributes['aria-hidden']);
             }
