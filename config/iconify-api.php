@@ -88,7 +88,8 @@ return [
     |--------------------------------------------------------------------------
     | Configure the optional helper function and Blade component for rendering
     | Iconify icons directly to SVG without an HTTP request.
-    | Defaults support any SVG attributes (for example class, data-*, style).
+    | Defaults support any SVG attribute (for example class, data-*, style) as
+    | well as any render option (width, height, rotate, flip, inline, color).
     |
     */
 

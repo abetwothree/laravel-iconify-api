@@ -15,6 +15,10 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
   Previously a set with a negative origin such as `jam` was served without its offsets,
   so a browser-side Iconify client rebuilt every icon as `viewBox="0 0 24 24"` instead
   of `viewBox="-2 -2 24 24"`.
+- `inline.defaults` now drives render options, not just plain SVG attributes. `width`,
+  `height`, `rotate`, `flip`, the flip aliases and `inline` were silently swallowed when
+  configured as defaults (only `color` happened to work), so `'width' => '2em'` still
+  rendered `width="1em"`. Per-call options continue to override configured defaults.
 - SVG element IDs no longer collide between icons on the same page. The ID counter is now
   a shared singleton, matching Iconify's module-scoped counter.
 - Fractional icon dimensions are no longer truncated to whole numbers.

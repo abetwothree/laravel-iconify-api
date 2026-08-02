@@ -216,13 +216,16 @@ class IconSvgRenderer
      */
     protected function buildSvg(array $icon, array $options, ?array $parsedName = null): string
     {
+        // Configured defaults are merged before anything is read out of the options so
+        // that `inline.defaults` drives customisations (width, rotate, flip, inline) as
+        // uniformly as it drives plain SVG attributes. Per-call options still win.
+        $options = $this->mergeDefaultAttributes($options, $this->buildAutomaticClasses($parsedName));
+
         $buildResult = $this->svgBuilder->build($icon, [], $this->extractCustomisations($options));
         $renderAttributes = $buildResult['attributes'];
         $renderBody = $this->svgIdReplacer->replace($buildResult['body']);
 
         $inline = $this->narrowTruthy($options['inline'] ?? false);
-
-        $options = $this->mergeDefaultAttributes($options, $this->buildAutomaticClasses($parsedName));
 
         foreach (self::CUSTOMISATION_KEYS as $key) {
             unset($options[$key]);

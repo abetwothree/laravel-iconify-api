@@ -143,10 +143,12 @@ You can also customize or disable each one in `config/iconify-api.php`:
 
 	'defaults' => [
 		'class' => '',
-		// Any default SVG attributes are supported.
+		// Any default SVG attribute or render option is supported.
 		// Examples:
 		// 'data-source' => 'iconify-api',
 		// 'style' => 'vertical-align: middle;',
+		// 'width' => '1.5em',
+		// 'inline' => true,
 	],
 
 	'helper' => [
@@ -161,7 +163,7 @@ You can also customize or disable each one in `config/iconify-api.php`:
 ],
 ```
 
-Values from `defaults` are applied to every rendered icon. Per-icon options (helper or Blade attributes) override matching keys, except `class`, which is merged.
+Values from `defaults` are applied to every rendered icon. Per-icon options (helper or Blade attributes) override matching keys, except `class`, which is merged. Render options such as `width`, `height`, `rotate`, `flip`, `inline` and `color` are honoured here too, not just plain SVG attributes.
 
 ### PHPStan support
 
