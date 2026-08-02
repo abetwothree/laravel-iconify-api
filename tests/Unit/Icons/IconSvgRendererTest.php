@@ -413,6 +413,10 @@ it('covers remaining parser and helper branches', function () {
     expect($customisations['vFlip'])->toBeTrue();
     expect($customisations['rotate'])->toBe(2);
 
+    // Only keys the SVG builder reads are handed to it.
+    expect($customisations)->not->toHaveKey('inline');
+    expect($customisations)->not->toHaveKey('flip');
+
     config()->set('iconify-api.inline.defaults', [
         'class' => '',
     ]);

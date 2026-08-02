@@ -8,8 +8,6 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconifySvgBuilder;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
 
 /**
- * @phpstan-import-type TIcon from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
- * @phpstan-import-type TAlias from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
  * @phpstan-import-type TIconData from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
  */
 class IconSvgRenderer
@@ -331,7 +329,9 @@ class IconSvgRenderer
     {
         $customisations = [];
 
-        foreach (['inline', 'hFlip', 'vFlip', 'flip', 'rotate'] as $key) {
+        // Only keys the SVG builder reads are copied. `inline` and `flip` are handled
+        // separately below and never reach the builder, which ignores both.
+        foreach (['hFlip', 'vFlip', 'rotate'] as $key) {
             if (array_key_exists($key, $options)) {
                 $customisations[$key] = $options[$key];
             }
@@ -363,8 +363,8 @@ class IconSvgRenderer
             }
         }
 
-        if (isset($customisations['flip']) && is_string($customisations['flip'])) {
-            foreach (preg_split('/[\s,]+/', $customisations['flip']) ?: [] as $flipValue) {
+        if (isset($options['flip']) && is_string($options['flip'])) {
+            foreach (preg_split('/[\s,]+/', $options['flip']) ?: [] as $flipValue) {
                 $value = trim($flipValue);
 
                 if ($value === 'horizontal') {
