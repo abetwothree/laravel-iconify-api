@@ -278,6 +278,10 @@ class IconifySvgBuilder
 
         $units = preg_replace('/^-?[0-9.]*/', '', $value);
 
+        if ($units === null) {
+            return 0;
+        }
+
         if ($units === '') {
             if (! is_numeric($value)) {
                 return 0;
