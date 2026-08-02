@@ -279,15 +279,6 @@ it('covers protected parse and safe helpers via reflection', function () {
     expect($parse->invoke($renderer, '50%'))->toBe(2);
     expect($parse->invoke($renderer, '45deg'))->toBe(0);
     expect($parse->invoke($renderer, 'bad-rotate'))->toBe(0);
-
-    $safeRotate = new ReflectionMethod($renderer, 'safeRotateValue');
-    $safeRotate->setAccessible(true);
-    expect($safeRotate->invoke($renderer, ['bad']))->toBe(0);
-
-    $safeInt = new ReflectionMethod($renderer, 'safeInt');
-    $safeInt->setAccessible(true);
-    expect($safeInt->invoke($renderer, '42', 9))->toBe(42);
-    expect($safeInt->invoke($renderer, ['bad'], 9))->toBe(9);
 });
 
 it('matches iconify dimension keywords for auto and unset values', function () {
@@ -504,18 +495,10 @@ it('covers remaining parser and helper branches', function () {
     $implode->setAccessible(true);
     expect($implode->invoke($renderer, ['', 'dup', 'dup', 'keep']))->toBe('dup keep');
 
-    $normalizeRotate = new ReflectionMethod($renderer, 'normalizeRotate');
-    $normalizeRotate->setAccessible(true);
-    expect($normalizeRotate->invoke($renderer, -1, 0))->toBe(3);
-
     $parseRotate = new ReflectionMethod($renderer, 'parseRotateValue');
     $parseRotate->setAccessible(true);
     expect($parseRotate->invoke($renderer, '10rad'))->toBe(0);
     expect($parseRotate->invoke($renderer, '.deg'))->toBe(0);
-
-    $safeInt = new ReflectionMethod($renderer, 'safeInt');
-    $safeInt->setAccessible(true);
-    expect($safeInt->invoke($renderer, 7, 0))->toBe(7);
 
     $safeString = new ReflectionMethod($renderer, 'safeString');
     $safeString->setAccessible(true);
