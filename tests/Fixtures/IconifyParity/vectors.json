@@ -130,6 +130,26 @@
             "name": "animation-begin-reference",
             "body": "<path id=\"spinner_a\" d=\"M0 0\"><animate begin=\"0;spinner_a.end\"/></path>",
             "times": 2
+        },
+        {
+            "name": "digit-initial-id",
+            "body": "<path id=\"0abc\"/><use href=\"#0abc\"/>",
+            "times": 2
+        },
+        {
+            "name": "digit-initial-id-with-trailing-digits",
+            "body": "<path id=\"2foo3\"/><use href=\"#2foo3\"/>",
+            "times": 2
+        },
+        {
+            "name": "two-distinct-ids",
+            "body": "<defs><linearGradient id=\"grad\"/><path id=\"0shape\"/></defs><use fill=\"url(#grad)\" href=\"#0shape\"/>",
+            "times": 2
+        },
+        {
+            "name": "id-with-regex-metacharacters",
+            "body": "<path id=\"a.b+c(d)\"/><use href=\"#a.b+c(d)\"/>",
+            "times": 2
         }
     ],
     "iconData": [

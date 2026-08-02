@@ -21,7 +21,7 @@ const vectors = JSON.parse(fixtureRaw);
  */
 const expectedCounts = {
     build: 8,
-    ids: 2,
+    ids: 6,
     iconData: 36,
 };
 

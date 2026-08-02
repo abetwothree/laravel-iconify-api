@@ -25,9 +25,15 @@ class SvgIdReplacer
             $newId = $this->nextId($id);
             $escapedId = preg_quote($id, '/');
 
+            // The braces are load-bearing: `'$1'.$newId` fuses into a higher-numbered
+            // backreference whenever the new id starts with a digit (`$1` + `0abc`
+            // reads as group 10, which does not exist), so the captured delimiter is
+            // dropped and the output is invalid SVG. Upstream is immune because it
+            // interpolates the id after the group reference rather than merging with
+            // it: `"$1" + newID + suffix + "$3"`, node_modules/@iconify/utils/lib/svg/id.js.
             $body = (string) preg_replace(
                 '/([#;"])(?:'.$escapedId.')([")]|\.[a-z])/',
-                '$1'.$newId.$suffix.'$2',
+                '${1}'.$newId.$suffix.'${2}',
                 $body
             );
         }
