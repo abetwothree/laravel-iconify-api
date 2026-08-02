@@ -9,7 +9,7 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  *     top?:int,
  *     width?:int,
  *     height?:int,
- *     rotate?:int|string,
+ *     rotate?:int|float|string,
  *     hFlip?:bool,
  *     vFlip?:bool,
  *     hidden?:bool,
@@ -17,7 +17,7 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  * @phpstan-type TIcons = array<string, TIcon>
  * @phpstan-type TAlias = array{
  *     parent: string,
- *     rotate?:int|string,
+ *     rotate?:int|float|string,
  *     hFlip?:bool,
  *     vFlip?:bool,
  *     left?:int,
@@ -44,7 +44,7 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  *      top?:int|float,
  *      width?:int|float,
  *      height?:int|float,
- *      rotate?:int,
+ *      rotate?:int|float,
  *      hFlip?:bool,
  *      vFlip?:bool,
  * }

@@ -91,6 +91,33 @@
             "customisations": {
                 "rotate": 1
             }
+        },
+        {
+            "name": "icon-fractional-rotate-with-both-flips",
+            "icon": {
+                "body": "<path d=\"...\" />",
+                "width": 20,
+                "height": 16,
+                "rotate": 1.5,
+                "hFlip": true,
+                "vFlip": true
+            },
+            "iconSetInfo": {},
+            "customisations": {}
+        },
+        {
+            "name": "customisation-fractional-rotate-with-both-flips",
+            "icon": {
+                "body": "<path d=\"...\" />",
+                "width": 20,
+                "height": 16
+            },
+            "iconSetInfo": {},
+            "customisations": {
+                "rotate": 1.5,
+                "hFlip": true,
+                "vFlip": true
+            }
         }
     ],
     "ids": [
@@ -249,6 +276,66 @@
                 "lastModified": 1,
                 "icons": {
                     "no-set-defaults": { "body": "<path d=\"M0 0\"/>" }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "icon-fractional-rotate",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "icon-fractional-rotate": { "body": "<path d=\"M0 0\"/>", "rotate": 1.5 }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "set-fractional-rotate",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "rotate": 1.5,
+                "icons": {
+                    "set-fractional-rotate": { "body": "<path d=\"M0 0\"/>" }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "alias-fractional-rotates-sum-to-whole",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "base": { "body": "<path d=\"M0 0\"/>", "rotate": 0.5 }
+                },
+                "aliases": {
+                    "alias-fractional-rotates-sum-to-whole": { "parent": "base", "rotate": 0.5 }
+                }
+            },
+            "customisations": {}
+        },
+        {
+            "name": "set-and-icon-fractional-rotates-sum-to-whole",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "rotate": 0.5,
+                "icons": {
+                    "set-and-icon-fractional-rotates-sum-to-whole": { "body": "<path d=\"M0 0\"/>", "rotate": 0.5 }
                 },
                 "aliases": {}
             },

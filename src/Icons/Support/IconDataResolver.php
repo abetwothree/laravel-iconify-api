@@ -151,9 +151,17 @@ class IconDataResolver
             $result['vFlip'] = true;
         }
 
-        $rotate = ($this->rotateValue($parent['rotate'] ?? 0) + $this->rotateValue($child['rotate'] ?? 0)) % 4;
+        // The rotations are added as numbers and only reduced by `% 4`, exactly as
+        // upstream does. A fraction is carried through rather than collapsed here:
+        // `rotate: 0.5` on an icon plus `rotate: 0.5` on its alias is a whole 1 and
+        // must rotate 90 degrees. Only the SVG builder collapses, at the `switch`.
+        $rotate = IconRotation::modulo(
+            IconRotation::parse($parent['rotate'] ?? 0) + IconRotation::parse($child['rotate'] ?? 0)
+        );
 
-        if ($rotate !== 0) {
+        // JavaScript's `if (rotate)`: a zero rotation is left out so that
+        // mergeIconData() falls back to the transformation default.
+        if ($rotate !== 0 && $rotate !== 0.0) {
             $result['rotate'] = $rotate;
         }
 
@@ -163,22 +171,5 @@ class IconDataResolver
     protected function truthy(mixed $value): bool
     {
         return $value !== null && $value !== false && $value !== 0 && $value !== '';
-    }
-
-    protected function rotateValue(mixed $value): int
-    {
-        if (is_int($value)) {
-            return $value;
-        }
-
-        if (is_float($value)) {
-            return (int) $value;
-        }
-
-        if (is_string($value) && is_numeric($value)) {
-            return (int) $value;
-        }
-
-        return 0;
     }
 }

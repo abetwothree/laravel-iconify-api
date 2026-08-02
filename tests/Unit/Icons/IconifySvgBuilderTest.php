@@ -67,7 +67,7 @@ it('covers transform passes and defs-safe wrapping', function () {
     expect($normalisedNegativeRotation['body'])->toContain('rotate(-90');
 });
 
-it('covers dimensions, size math, rotate parsing, and scalar guards', function () {
+it('covers dimensions, size math, and scalar guards', function () {
     $builder = new IconifySvgBuilder;
 
     $normaliseCustomisations = new ReflectionMethod($builder, 'normaliseCustomisations');
@@ -82,7 +82,8 @@ it('covers dimensions, size math, rotate parsing, and scalar guards', function (
 
     expect($custom['width'])->toBeNull();
     expect($custom['height'])->toBeNull();
-    expect($custom['rotate'])->toBe(3);
+    // Carried through as the number it is; only the transform pass collapses it.
+    expect($custom['rotate'])->toBe(-1.6);
     expect($custom['hFlip'])->toBeTrue();
     expect($custom['vFlip'])->toBeTrue();
 
@@ -114,24 +115,6 @@ it('covers dimensions, size math, rotate parsing, and scalar guards', function (
     expect($calculateSize->invoke($builder, 10, 1.25))->toBe(12.5);
     expect($calculateSize->invoke($builder, '1.5em', 2.0))->toBe('3em');
     expect($calculateSize->invoke($builder, '3em', 1.0))->toBe('3em');
-
-    $parseRotateValue = new ReflectionMethod($builder, 'parseRotateValue');
-    $parseRotateValue->setAccessible(true);
-    expect($parseRotateValue->invoke($builder, 3))->toBe(3);
-    expect($parseRotateValue->invoke($builder, 2.9))->toBe(2);
-    expect($parseRotateValue->invoke($builder, '2'))->toBe(2);
-    expect($parseRotateValue->invoke($builder, '.'))->toBe(0);
-    expect($parseRotateValue->invoke($builder, '180deg'))->toBe(2);
-    expect($parseRotateValue->invoke($builder, '75%'))->toBe(3);
-    expect($parseRotateValue->invoke($builder, '45deg'))->toBe(0);
-    expect($parseRotateValue->invoke($builder, '12rad'))->toBe(0);
-    expect($parseRotateValue->invoke($builder, '.deg'))->toBe(0);
-    expect($parseRotateValue->invoke($builder, []))->toBe(0);
-    expect($parseRotateValue->invoke($builder, 'deg'))->toBe(0);
-
-    $normaliseRotate = new ReflectionMethod($builder, 'normaliseRotate');
-    $normaliseRotate->setAccessible(true);
-    expect($normaliseRotate->invoke($builder, -5))->toBe(3);
 
     $splitSvgDefs = new ReflectionMethod($builder, 'splitSvgDefs');
     $splitSvgDefs->setAccessible(true);

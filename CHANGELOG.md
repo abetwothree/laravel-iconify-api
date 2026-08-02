@@ -36,9 +36,12 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
   either key holding a value that is not `true` decides the attribute is removed.
   Previously `ariaHidden` overwrote an explicit `aria-hidden`, so
   `['aria-hidden' => false, 'ariaHidden' => true]` still emitted `aria-hidden="true"`.
-- A `rotate` given as a fraction such as `1.5` no longer rotates the icon. PHP cast it to
-  an int and rotated 90 degrees; JavaScript's `switch` matches no case and applies no
-  rotation. Whole-number floats such as `2.0` still rotate.
+- A `rotate` given as a fraction such as `1.5` no longer rotates the icon, wherever it
+  comes from: the `rotate` option, an icon's own `rotate`, or an icon set's root
+  `rotate`. PHP cast it to an int and rotated 90 degrees; JavaScript's `switch` matches
+  no case and applies no rotation. Fractions are still added up first, so `0.5` on an
+  icon plus `0.5` on its alias makes a whole rotation and does rotate 90 degrees, the
+  same as upstream. Whole-number floats such as `2.0` still rotate.
 - Framework-only props Iconify's React/Vue/Svelte components swallow — `icon`, `mode`,
   `ssr`, `onLoad`, `children`, `fallback`, `customise`, `_ref` — are no longer emitted as
   raw, invalid SVG attributes (for example `mode="mask"` used to leak through).

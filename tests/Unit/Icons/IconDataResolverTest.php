@@ -44,6 +44,48 @@ it('accumulates rotation additively across a multi level alias chain', function 
     expect($result['rotate'])->toBe(3);
 });
 
+it('carries a fractional rotation through the merge instead of collapsing it', function () {
+    $resolver = new IconDataResolver;
+
+    $summed = $resolver->resolve([
+        'icons' => ['base' => ['body' => '<path/>', 'rotate' => 0.5]],
+        'aliases' => ['half' => ['parent' => 'base', 'rotate' => 0.5]],
+    ], 'half');
+
+    // Two fractions that add up to a whole rotation must still rotate.
+    expect($summed['rotate'])->toBe(1.0);
+
+    $unsummed = $resolver->resolve([
+        'icons' => ['base' => ['body' => '<path/>', 'rotate' => 1.5]],
+        'aliases' => [],
+    ], 'base');
+
+    expect($unsummed['rotate'])->toBe(1.5);
+});
+
+it('adds a fractional icon set root rotation to the icon rotation', function () {
+    $resolver = new IconDataResolver;
+
+    $result = $resolver->resolve(
+        ['icons' => ['home' => ['body' => '<path/>', 'rotate' => 0.5]], 'aliases' => []],
+        'home',
+        ['rotate' => 0.5],
+    );
+
+    expect($result['rotate'])->toBe(1.0);
+});
+
+it('keeps a whole number float rotation', function () {
+    $resolver = new IconDataResolver;
+
+    $result = $resolver->resolve([
+        'icons' => ['home' => ['body' => '<path/>', 'rotate' => 2.0]],
+        'aliases' => [],
+    ], 'home');
+
+    expect($result['rotate'])->toBe(2.0);
+});
+
 it('xors flips across an alias chain', function () {
     $resolver = new IconDataResolver;
 

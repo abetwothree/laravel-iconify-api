@@ -5,6 +5,7 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconDataResolver;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconifySvgBuilder;
+use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconRotation;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
 
 /**
@@ -391,14 +392,11 @@ class IconSvgRenderer
             }
         }
 
+        // The component layer only turns a string prop into a number; a numeric prop is
+        // handed to iconToSVG() untouched, fraction and all. See
+        // components/react/src/render.ts:170-177.
         if (isset($customisations['rotate'])) {
-            $rotate = $customisations['rotate'];
-
-            if (is_string($rotate) || is_int($rotate)) {
-                $customisations['rotate'] = $this->parseRotateValue($rotate);
-            } elseif (is_float($rotate)) {
-                $customisations['rotate'] = $this->normaliseFloatRotate($rotate);
-            }
+            $customisations['rotate'] = IconRotation::parse($customisations['rotate']);
         }
 
         return $customisations;
@@ -490,83 +488,6 @@ class IconSvgRenderer
         }
 
         return implode(' ', $parts);
-    }
-
-    protected function parseRotateValue(int|string $value): int
-    {
-        $cleanup = static function (int $rotation): int {
-            while ($rotation < 0) {
-                $rotation += 4;
-            }
-
-            return $rotation % 4;
-        };
-
-        if (is_int($value)) {
-            return $cleanup($value);
-        }
-
-        if (is_numeric($value)) {
-            return $cleanup((int) $value);
-        }
-
-        $units = preg_replace('/^-?[0-9.]*/', '', $value);
-
-        if ($units === null || $units === $value) {
-            return 0;
-        }
-
-        $split = 0;
-
-        if ($units === '%') {
-            $split = 25;
-        }
-
-        if ($units === 'deg') {
-            $split = 90;
-        }
-
-        if ($split === 0) {
-            return 0;
-        }
-
-        $numericPart = substr($value, 0, strlen($value) - strlen($units));
-
-        if (! is_numeric($numericPart)) {
-            return 0;
-        }
-
-        $num = (float) $numericPart / $split;
-
-        if (fmod($num, 1.0) !== 0.0) {
-            return 0;
-        }
-
-        return $cleanup((int) $num);
-    }
-
-    /**
-     * Normalise a float rotation the way JavaScript's single number type does.
-     *
-     * `iconToSVG()` reduces the rotation with `%= 4` and then feeds it to a `switch`,
-     * so a non-integral value such as `1.5` matches no case and rotates nothing.
-     * Casting to int, as PHP would, turns that into a 90 degree rotation instead.
-     * Reducing in float space also keeps a huge value away from an out-of-range
-     * `(int)` cast. See packages/utils/src/svg/build.ts.
-     */
-    protected function normaliseFloatRotate(float $value): int
-    {
-        if (! is_finite($value) || fmod($value, 1.0) !== 0.0) {
-            return 0;
-        }
-
-        $rotation = fmod($value, 4.0);
-
-        if ($rotation < 0) {
-            $rotation += 4;
-        }
-
-        return (int) $rotation;
     }
 
     protected function safeString(mixed $value, string $default = ''): string

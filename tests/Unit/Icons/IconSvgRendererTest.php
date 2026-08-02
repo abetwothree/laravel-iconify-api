@@ -238,20 +238,6 @@ it('covers cycle detection, alias dimensions, numeric and fallback parsing branc
     expect($svg)->not->toContain('data-empty=');
 });
 
-it('covers protected parse and safe helpers via reflection', function () {
-    $finder = Mockery::mock(IconFinder::class);
-    $renderer = new IconSvgRenderer($finder);
-
-    $parse = new ReflectionMethod($renderer, 'parseRotateValue');
-    $parse->setAccessible(true);
-
-    expect($parse->invoke($renderer, '2'))->toBe(2);
-    expect($parse->invoke($renderer, '180deg'))->toBe(2);
-    expect($parse->invoke($renderer, '50%'))->toBe(2);
-    expect($parse->invoke($renderer, '45deg'))->toBe(0);
-    expect($parse->invoke($renderer, 'bad-rotate'))->toBe(0);
-});
-
 it('matches iconify dimension keywords for auto and unset values', function () {
     $finder = Mockery::mock(IconFinder::class);
 
@@ -438,11 +424,6 @@ it('covers remaining parser and helper branches', function () {
     $implode = new ReflectionMethod($renderer, 'implodeUniqueClasses');
     $implode->setAccessible(true);
     expect($implode->invoke($renderer, ['', 'dup', 'dup', 'keep']))->toBe('dup keep');
-
-    $parseRotate = new ReflectionMethod($renderer, 'parseRotateValue');
-    $parseRotate->setAccessible(true);
-    expect($parseRotate->invoke($renderer, '10rad'))->toBe(0);
-    expect($parseRotate->invoke($renderer, '.deg'))->toBe(0);
 
     $safeString = new ReflectionMethod($renderer, 'safeString');
     $safeString->setAccessible(true);

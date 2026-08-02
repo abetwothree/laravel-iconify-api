@@ -71,7 +71,7 @@ class IconifySvgBuilder
     /**
      * @param  array<string, mixed>  $icon
      * @param  array<string, mixed>  $iconSetInfo
-     * @return array{left:int|float, top:int|float, width:int|float, height:int|float, rotate:int, hFlip:bool, vFlip:bool, body:string}
+     * @return array{left:int|float, top:int|float, width:int|float, height:int|float, rotate:int|float, hFlip:bool, vFlip:bool, body:string}
      */
     protected function normaliseIcon(array $icon, array $iconSetInfo): array
     {
@@ -80,7 +80,7 @@ class IconifySvgBuilder
             'top' => $this->safeNumber($icon['top'] ?? 0, 0),
             'width' => $this->safeNumber($icon['width'] ?? $iconSetInfo['width'] ?? 16, 16),
             'height' => $this->safeNumber($icon['height'] ?? $iconSetInfo['height'] ?? 16, 16),
-            'rotate' => $this->normaliseRotate($icon['rotate'] ?? 0),
+            'rotate' => IconRotation::parse($icon['rotate'] ?? 0),
             'hFlip' => $this->toBool($icon['hFlip'] ?? false),
             'vFlip' => $this->toBool($icon['vFlip'] ?? false),
             'body' => $this->safeString($icon['body'] ?? ''),
@@ -89,7 +89,7 @@ class IconifySvgBuilder
 
     /**
      * @param  array<string, mixed>  $customisations
-     * @return array{width:int|float|string|null, height:int|float|string|null, rotate:int, hFlip:bool, vFlip:bool}
+     * @return array{width:int|float|string|null, height:int|float|string|null, rotate:int|float, hFlip:bool, vFlip:bool}
      */
     protected function normaliseCustomisations(array $customisations): array
     {
@@ -107,7 +107,7 @@ class IconifySvgBuilder
         return [
             'width' => $width,
             'height' => $height,
-            'rotate' => $this->normaliseRotate($customisations['rotate'] ?? 0),
+            'rotate' => IconRotation::parse($customisations['rotate'] ?? 0),
             'hFlip' => $this->toBool($customisations['hFlip'] ?? false),
             'vFlip' => $this->toBool($customisations['vFlip'] ?? false),
         ];
@@ -115,7 +115,7 @@ class IconifySvgBuilder
 
     /**
      * @param  array{left:int|float, top:int|float, width:int|float, height:int|float}  $box
-     * @param  array{rotate:int, hFlip:bool, vFlip:bool}  $props
+     * @param  array{rotate:int|float, hFlip:bool, vFlip:bool}  $props
      * @return array{body:string, box:array{left:int|float, top:int|float, width:int|float, height:int|float}}
      */
     protected function applyTransformPass(string $body, array $box, array $props): array
@@ -141,11 +141,10 @@ class IconifySvgBuilder
             $box['left'] = 0;
         }
 
-        if ($rotation < 0) {
-            $rotation -= (int) floor($rotation / 4) * 4;
-        }
-
-        $rotation %= 4;
+        // The rotation is only collapsed here, where upstream's `switch` decides, and
+        // never earlier: a fractional rotation has to survive the `+= 2` above, since
+        // 1.5 + 2 is 3.5, which still matches no case.
+        $rotation = IconRotation::normalise($rotation);
 
         switch ($rotation) {
             case 1:
@@ -188,7 +187,7 @@ class IconifySvgBuilder
     }
 
     /**
-     * @param  array{width:int|float|string|null, height:int|float|string|null, rotate:int, hFlip:bool, vFlip:bool}  $customisations
+     * @param  array{width:int|float|string|null, height:int|float|string|null, rotate:int|float, hFlip:bool, vFlip:bool}  $customisations
      * @return array{0:int|float|string, 1:int|float|string}
      */
     protected function calculateDimensions(array $customisations, int|float $boxWidth, int|float $boxHeight): array
@@ -263,78 +262,6 @@ class IconifySvgBuilder
     protected function isUnsetKeyword(mixed $value): bool
     {
         return $value === 'unset' || $value === 'undefined' || $value === 'none';
-    }
-
-    protected function normaliseRotate(mixed $value): int
-    {
-        $rotation = $this->parseRotateValue($value);
-
-        while ($rotation < 0) {
-            $rotation += 4;
-        }
-
-        return $rotation % 4;
-    }
-
-    protected function parseRotateValue(mixed $value): int
-    {
-        if (is_int($value)) {
-            return $value;
-        }
-
-        if (is_float($value)) {
-            return (int) $value;
-        }
-
-        if (! is_string($value)) {
-            return 0;
-        }
-
-        $units = preg_replace('/^-?[0-9.]*/', '', $value);
-
-        if ($units === null) {
-            return 0;
-        }
-
-        if ($units === '') {
-            if (! is_numeric($value)) {
-                return 0;
-            }
-
-            return (int) $value;
-        }
-
-        if ($units === $value) {
-            return 0;
-        }
-
-        $split = 0;
-
-        if ($units === '%') {
-            $split = 25;
-        }
-
-        if ($units === 'deg') {
-            $split = 90;
-        }
-
-        if ($split === 0) {
-            return 0;
-        }
-
-        $numericPart = substr($value, 0, strlen($value) - strlen($units));
-
-        if (! is_numeric($numericPart)) {
-            return 0;
-        }
-
-        $num = (float) $numericPart / $split;
-
-        if (fmod($num, 1.0) !== 0.0) {
-            return 0;
-        }
-
-        return (int) $num;
     }
 
     /**
