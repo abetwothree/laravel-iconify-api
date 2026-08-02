@@ -14,6 +14,34 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
  */
 class IconSvgRenderer
 {
+    /**
+     * Customisation keys consumed by the SVG builder, never emitted as attributes.
+     *
+     * @var array<int, string>
+     */
+    protected const CUSTOMISATION_KEYS = ['width', 'height', 'inline', 'hFlip', 'vFlip', 'flip', 'rotate'];
+
+    /**
+     * Framework control props Iconify's components swallow.
+     *
+     * Mirrors components/react/src/render.ts:129-143,
+     * components/vue/src/render.ts:126-133 and
+     * components/svelte/src/render.ts:110-116.
+     *
+     * @var array<int, string>
+     */
+    protected const IGNORED_OPTIONS = [
+        'icon',
+        'mode',
+        'ssr',
+        'onLoad',
+        'onload',
+        'children',
+        'fallback',
+        'customise',
+        '_ref',
+    ];
+
     protected IconifySvgBuilder $svgBuilder;
 
     protected SvgIdReplacer $svgIdReplacer;
@@ -176,17 +204,21 @@ class IconSvgRenderer
         $renderAttributes = $buildResult['attributes'];
         $renderBody = $this->svgIdReplacer->replace($buildResult['body']);
 
+        $inline = $this->narrowTruthy($options['inline'] ?? false);
+
         $options = $this->mergeDefaultAttributes($options, $this->buildAutomaticClasses($parsedName));
-        unset(
-            $options['width'],
-            $options['height'],
-            $options['inline'],
-            $options['hFlip'],
-            $options['vFlip'],
-            $options['flip'],
-            $options['rotate'],
-            $options['viewBox']
-        );
+
+        foreach (self::CUSTOMISATION_KEYS as $key) {
+            unset($options[$key]);
+        }
+
+        foreach (self::IGNORED_OPTIONS as $key) {
+            unset($options[$key]);
+        }
+
+        unset($options['viewBox']);
+
+        $options = $this->buildStyleAttribute($options, $inline);
 
         if (array_key_exists('ariaHidden', $options)) {
             $options['aria-hidden'] = $options['ariaHidden'];
@@ -406,5 +438,60 @@ class IconSvgRenderer
         }
 
         return $default;
+    }
+
+    /**
+     * Fold `color` and `inline` into the style attribute.
+     *
+     * Precedence follows React/Vue: the caller's own `style` is emitted last and
+     * therefore wins. See components/react/src/render.ts:166-168 and :200-209.
+     *
+     * @param  array<string, mixed>  $options
+     * @return array<string, mixed>
+     */
+    protected function buildStyleAttribute(array $options, bool $inline): array
+    {
+        $parts = [];
+
+        if (array_key_exists('color', $options)) {
+            $color = trim($this->safeString($options['color'], ''));
+
+            if ($color !== '') {
+                $parts[] = 'color: '.$color.';';
+            }
+
+            unset($options['color']);
+        }
+
+        if ($inline) {
+            $parts[] = 'vertical-align: -0.125em;';
+        }
+
+        $userStyle = trim($this->safeString($options['style'] ?? '', ''));
+
+        if ($userStyle !== '') {
+            $parts[] = $userStyle;
+        }
+
+        if ($parts === []) {
+            unset($options['style']);
+
+            return $options;
+        }
+
+        $options['style'] = implode(' ', $parts);
+
+        return $options;
+    }
+
+    /**
+     * Boolean coercion used by every Iconify component for boolean customisations.
+     *
+     * Mirrors components/react/src/render.ts:155, components/vue/src/render.ts:139
+     * and components/svelte/src/render.ts:122.
+     */
+    protected function narrowTruthy(mixed $value): bool
+    {
+        return $value === true || $value === 'true' || $value === 1;
     }
 }

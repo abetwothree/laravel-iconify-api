@@ -504,3 +504,72 @@ it('removes the aria-hidden default when ariaHidden option is explicitly null', 
 
     expect($svg)->not->toContain('aria-hidden=');
 });
+
+function makeParityRenderer(string $name): IconSvgRenderer
+{
+    $finder = Mockery::mock(IconFinder::class);
+
+    $finder->shouldReceive('find')->with('mdi', [$name])->once()->andReturn([
+        $name => [
+            'icons' => [$name => ['body' => '<path d="M0 0"/>', 'width' => 24, 'height' => 24]],
+            'aliases' => [],
+            'defaults' => [],
+        ],
+    ]);
+
+    return new IconSvgRenderer($finder);
+}
+
+it('renders inline as a vertical align style', function () {
+    $svg = makeParityRenderer('inline-icon')->render('mdi:inline-icon', ['inline' => true]);
+
+    expect($svg)->toContain('style="vertical-align: -0.125em;"');
+    expect($svg)->not->toContain('inline=');
+});
+
+it('folds color into the style attribute', function () {
+    $svg = makeParityRenderer('color-icon')->render('mdi:color-icon', ['color' => 'red']);
+
+    expect($svg)->toContain('style="color: red;"');
+    expect($svg)->not->toContain('color="red"');
+});
+
+it('orders color then vertical align then the user style', function () {
+    $svg = makeParityRenderer('style-order')->render('mdi:style-order', [
+        'color' => 'red',
+        'inline' => true,
+        'style' => 'color: blue;',
+    ]);
+
+    expect($svg)->toContain('style="color: red; vertical-align: -0.125em; color: blue;"');
+});
+
+it('keeps a user style untouched when there is no color or inline', function () {
+    $svg = makeParityRenderer('plain-style')->render('mdi:plain-style', ['style' => 'opacity: 0.5;']);
+
+    expect($svg)->toContain('style="opacity: 0.5;"');
+});
+
+it('swallows framework control props instead of emitting them', function () {
+    $svg = makeParityRenderer('ignored')->render('mdi:ignored', [
+        'mode' => 'mask',
+        'ssr' => true,
+        'icon' => 'mdi:other',
+        'onLoad' => 'handler',
+        'fallback' => 'x',
+        'customise' => 'y',
+        'children' => 'z',
+        '_ref' => 'r',
+        'data-keep' => 'yes',
+    ]);
+
+    expect($svg)->not->toContain('mode=');
+    expect($svg)->not->toContain('ssr=');
+    expect($svg)->not->toContain('icon=');
+    expect($svg)->not->toContain('onLoad=');
+    expect($svg)->not->toContain('fallback=');
+    expect($svg)->not->toContain('customise=');
+    expect($svg)->not->toContain('children=');
+    expect($svg)->not->toContain('_ref=');
+    expect($svg)->toContain('data-keep="yes"');
+});
