@@ -487,3 +487,20 @@ it('removes the aria-hidden default when the option is explicitly null', functio
 
     expect($svg)->not->toContain('aria-hidden=');
 });
+
+it('removes the aria-hidden default when ariaHidden option is explicitly null', function () {
+    $finder = Mockery::mock(IconFinder::class);
+
+    $finder->shouldReceive('find')->with('mdi', ['aria-camel-null'])->once()->andReturn([
+        'aria-camel-null' => [
+            'icons' => ['aria-camel-null' => ['body' => '<path d="M0 0"/>', 'width' => 24, 'height' => 24]],
+            'aliases' => [],
+            'defaults' => [],
+        ],
+    ]);
+
+    $renderer = new IconSvgRenderer($finder);
+    $svg = $renderer->render('mdi:aria-camel-null', ['ariaHidden' => null]);
+
+    expect($svg)->not->toContain('aria-hidden=');
+});
