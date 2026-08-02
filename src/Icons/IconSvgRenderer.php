@@ -43,6 +43,16 @@ class IconSvgRenderer
     ];
 
     /**
+     * Conservative XML attribute name: a letter, underscore or colon followed by
+     * name characters.
+     *
+     * Escaping the name is not enough on its own: a key such as `x onload=alert(1)`
+     * contains no HTML special character, so it survives htmlspecialchars() intact
+     * and would emit a second, live attribute. Names that do not match are skipped.
+     */
+    protected const ATTRIBUTE_NAME_PATTERN = '/^[A-Za-z_:][-A-Za-z0-9_:.]*$/';
+
+    /**
      * Alternate spellings for the boolean flip customisations.
      *
      * Mirrors components/vue/src/render.ts:66-76 and :172-178.
@@ -415,6 +425,10 @@ class IconSvgRenderer
 
         foreach ($attributes as $key => $value) {
             if ($value === null || $value === false || $value === '') {
+                continue;
+            }
+
+            if (preg_match(self::ATTRIBUTE_NAME_PATTERN, (string) $key) !== 1) {
                 continue;
             }
 

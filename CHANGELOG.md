@@ -32,6 +32,10 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
 - Framework-only props Iconify's React/Vue/Svelte components swallow — `icon`, `mode`,
   `ssr`, `onLoad`/`onload`, `children`, `fallback`, `customise`, `_ref` — are no longer
   emitted as raw, invalid SVG attributes (for example `mode="mask"` used to leak through).
+- Attribute names are validated, not just escaped. An option key that is not a valid XML
+  name is skipped instead of emitted, so a key such as `'x onload=alert(1)'` can no longer
+  smuggle a live event handler onto the `<svg>` element — escaping alone did not help,
+  because the key contains no HTML special character.
 - The `color` option rejects values that could inject an extra CSS declaration (containing
   `;`, `{`, `}`, or a CSS comment marker). Such a value is dropped entirely rather than
   emitted; legitimate values like `rgb(1,2,3)`, `hsl(210 100% 50%)`, `var(--x, red)`,

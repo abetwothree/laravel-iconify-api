@@ -670,6 +670,49 @@ it('supports the vue style flip aliases', function (string $attribute, string $e
     ['verticalFlip', 'scale(1 -1)'],
 ]);
 
+it('skips an attribute name that smuggles a second attribute', function () {
+    $svg = makeParityRenderer('attr-name-injection')->render('mdi:attr-name-injection', [
+        'x onload=alert(1)' => 'v',
+        'data-keep' => 'yes',
+    ]);
+
+    expect($svg)
+        ->not->toContain('onload')
+        ->not->toContain('alert(1)')
+        ->toContain('data-keep="yes"');
+});
+
+it('skips attribute names that are not valid xml names', function (string $name) {
+    $svg = makeParityRenderer('attr-name-'.md5($name))->render('mdi:attr-name-'.md5($name), [
+        $name => 'v',
+    ]);
+
+    expect($svg)->not->toContain('="v"');
+})->with([
+    ['data attr'],
+    ['1data'],
+    ['-data'],
+    ['data"attr'],
+    ['data<attr'],
+    ['data/attr'],
+    ['data=attr'],
+    [''],
+]);
+
+it('keeps valid xml attribute names', function (string $name) {
+    $svg = makeParityRenderer('attr-ok-'.md5($name))->render('mdi:attr-ok-'.md5($name), [
+        $name => 'v',
+    ]);
+
+    expect($svg)->toContain($name.'="v"');
+})->with([
+    ['data-slot'],
+    ['xml:lang'],
+    ['_private'],
+    ['data.attr'],
+    ['tabindex'],
+]);
+
 it('ignores a falsy flip alias', function () {
     $svg = makeParityRenderer('flip-false')->render('mdi:flip-false', ['h-flip' => false]);
 
