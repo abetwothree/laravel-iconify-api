@@ -790,3 +790,11 @@ it('does not fatal when the icon set root declares a zero dimension', function (
         ->toContain('width="1em"')
         ->toContain('height="1em"');
 });
+
+it('swallows a lowercase onload option, going beyond what iconify ignores', function () {
+    $svg = makeParityRenderer('onload')->render('mdi:onload', ['onload' => 'init()']);
+
+    expect($svg)
+        ->not->toContain('onload')
+        ->not->toContain('init()');
+});

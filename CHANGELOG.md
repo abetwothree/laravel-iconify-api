@@ -40,8 +40,8 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
   an int and rotated 90 degrees; JavaScript's `switch` matches no case and applies no
   rotation. Whole-number floats such as `2.0` still rotate.
 - Framework-only props Iconify's React/Vue/Svelte components swallow — `icon`, `mode`,
-  `ssr`, `onLoad`/`onload`, `children`, `fallback`, `customise`, `_ref` — are no longer
-  emitted as raw, invalid SVG attributes (for example `mode="mask"` used to leak through).
+  `ssr`, `onLoad`, `children`, `fallback`, `customise`, `_ref` — are no longer emitted as
+  raw, invalid SVG attributes (for example `mode="mask"` used to leak through).
 - Attribute names are validated, not just escaped. An option key that is not a valid XML
   name is skipped instead of emitted, so a key such as `'x onload=alert(1)'` can no longer
   smuggle a live event handler onto the `<svg>` element — escaping alone did not help,
@@ -62,6 +62,14 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
 
 ### Changed
 
+- **A lowercase `onload` is no longer rendered.** `<x-icon onload="init()" />` and
+  `icon('mdi:home', ['onload' => 'init()'])` used to emit `onload="init()"` on the
+  `<svg>`; the attribute is now silently dropped. This is a behaviour removal, not only
+  a fix: Iconify's React component ignores the camelCase `onLoad` prop and never had a
+  lowercase `onload` to ignore, so there is no upstream behaviour to match here. Dropping
+  it is a deliberate choice — an inline event handler assembled from icon options is far
+  more often an injection vector than an intent. If you relied on it, attach the listener
+  to a wrapping element instead.
 - `IconSvgRenderer::__construct()` no longer takes an `IconSetInfoFinder`. It was reading
   the icon set's `info` metadata block, which carries no `width` and only a
   sample-display `height`.
