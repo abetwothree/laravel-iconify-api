@@ -96,6 +96,41 @@ Use the Blade component for direct rendering in views:
 <x-icon name="heroicons:clock" data-slot="icon" />
 ```
 
+### Supported options
+
+Both the helper and the Blade component accept the same options as the official Iconify
+components. Anything not listed here is passed through as a plain SVG attribute.
+
+| Option | Values | Effect |
+| --- | --- | --- |
+| `width`, `height` | number, CSS length, `auto`, `unset` | Icon size. Defaults to `1em`. One side is derived from the other by aspect ratio. `unset`, `undefined` and `none` omit both attributes entirely. A falsy value (`0`, `''`, `false`) is dropped and falls back to `1em`; the *string* `'0'` is kept, matching JavaScript truthiness. |
+| `color` | any CSS color | Applied via `style="color: …"`. Only affects monotone icons (paths using `fill="currentColor"` / `stroke="currentColor"`). If the value contains `;`, `{`, `}`, or a CSS comment marker (`/*` or `*/`) — which could inject an extra CSS declaration — it is dropped entirely and no `color` style is emitted at all. Values such as `rgb(1,2,3)`, `hsl(210 100% 50%)`, `var(--x, red)`, `currentColor` and `color-mix(...)` are unaffected. |
+| `inline` | `true` | Adds `vertical-align: -0.125em` so the icon sits on the text baseline. |
+| `rotate` | `1`–`3`, `"90deg"`, `"25%"` | Quarter-turn rotation. Non-quarter values are ignored. |
+| `flip` | `"horizontal"`, `"vertical"`, `"horizontal,vertical"` | Flip shorthand. |
+| `hFlip`, `vFlip` | `true` | Flip on one axis. |
+| `h-flip`, `horizontal-flip`, `horizontalFlip` | `true` | Aliases for `hFlip`. |
+| `v-flip`, `vertical-flip`, `verticalFlip` | `true` | Aliases for `vFlip`. |
+| `aria-hidden` | anything other than `true` | Removes the default `aria-hidden="true"`. |
+
+```blade
+<x-icon name="heroicons:clock" width="32" color="rebeccapurple" inline />
+<x-icon name="heroicons:clock" rotate="90deg" h-flip="true" />
+```
+
+```php
+$svg = icon('heroicons:clock', ['width' => 32, 'color' => 'rebeccapurple', 'inline' => true]);
+```
+
+A `style` you supply yourself is always emitted last, so it overrides the `color` and
+`inline` styles the package generates.
+
+The framework-only props Iconify's React/Vue/Svelte components accept — `icon`, `mode`,
+`ssr`, `onLoad` (and its lowercase form `onload`), `children`, `fallback`, `customise`,
+`_ref` — are accepted and ignored rather than emitted as attributes. Alternate render
+modes (`mode="bg"`, `mode="mask"`) are not implemented; icons always render as inline
+`<svg>`.
+
 ### Naming and collision safety
 
 If your app already has a global helper or component with the same name, this package will skip registration and leave existing behavior untouched.
