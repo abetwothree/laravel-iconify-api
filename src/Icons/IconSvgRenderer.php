@@ -48,14 +48,21 @@ class IconSvgRenderer
     protected const ARIA_HIDDEN_KEYS = ['ariaHidden', 'aria-hidden'];
 
     /**
-     * Conservative XML attribute name: a letter, underscore or colon followed by
-     * name characters.
+     * Conservative XML attribute name: a letter, underscore, colon or leading `@`
+     * followed by name characters.
      *
      * Escaping the name is not enough on its own: a key such as `x onload=alert(1)`
      * contains no HTML special character, so it survives htmlspecialchars() intact
      * and would emit a second, live attribute. Names that do not match are skipped.
+     *
+     * The leading `@` is an addition on top of plain XML: Alpine.js's `@click` /
+     * `@submit.prevent` shorthand survives Laravel's ComponentAttributeBag and is a
+     * common Blade idiom, so it is allowed through. It does not reopen the hole
+     * above — the rest of the pattern still forbids spaces, `=` and quotes, which is
+     * what made that attack shape exploitable, and `@` is only accepted as the first
+     * character, not anywhere in the name.
      */
-    protected const ATTRIBUTE_NAME_PATTERN = '/^[A-Za-z_:][-A-Za-z0-9_:.]*$/';
+    protected const ATTRIBUTE_NAME_PATTERN = '/^[A-Za-z_:@][-A-Za-z0-9_:.]*$/';
 
     /**
      * Alternate spellings for the boolean flip customisations.

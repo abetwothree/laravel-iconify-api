@@ -763,6 +763,15 @@ it('keeps valid xml attribute names', function (string $name) {
     ['_private'],
     ['data.attr'],
     ['tabindex'],
+    ['x-on:click'],
+    ['wire:model'],
+    ['v-bind:foo'],
+    [':class'],
+    ['x-data'],
+    ['data-foo'],
+    ['xmlns:xlink'],
+    ['@click'],
+    ['@submit.prevent'],
 ]);
 
 it('ignores a falsy flip alias', function () {
