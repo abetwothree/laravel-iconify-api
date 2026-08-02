@@ -201,17 +201,31 @@ class IconifySvgBuilder
                 ? '1em'
                 : ($customHeight === 'auto' ? $boxHeight : $customHeight);
 
-            $width = $this->calculateSize($height, $boxWidth / $boxHeight);
+            $width = $this->calculateSize($height, $this->aspectRatio($boxWidth, $boxHeight));
 
             return [$width, $height];
         }
 
         $width = $customWidth === 'auto' ? $boxWidth : $customWidth;
         $height = $customHeight === null
-            ? $this->calculateSize($width, $boxHeight / $boxWidth)
+            ? $this->calculateSize($width, $this->aspectRatio($boxHeight, $boxWidth))
             : ($customHeight === 'auto' ? $boxHeight : $customHeight);
 
         return [$width, $height];
+    }
+
+    /**
+     * A zero box dimension has no aspect ratio, so fall back to 1:1 and let the
+     * requested size through unscaled: JavaScript divides to Infinity and emits
+     * nonsense sizes, while PHP 8 throws an uncaught DivisionByZeroError.
+     */
+    protected function aspectRatio(int|float $numerator, int|float $denominator): float
+    {
+        if ($denominator === 0 || $denominator === 0.0) {
+            return 1.0;
+        }
+
+        return $numerator / $denominator;
     }
 
     protected function calculateSize(int|float|string $size, float $ratio, int $precision = 100): int|float|string

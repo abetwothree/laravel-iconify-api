@@ -771,3 +771,22 @@ it('ignores a falsy flip alias', function () {
     expect($svg)->not->toContain('<g transform=');
     expect($svg)->not->toContain('h-flip=');
 });
+
+it('does not fatal when the icon set root declares a zero dimension', function () {
+    $finder = Mockery::mock(IconFinder::class);
+
+    $finder->shouldReceive('find')->with('mdi', ['zero-box'])->once()->andReturn([
+        'zero-box' => [
+            'icons' => ['zero-box' => ['body' => '<path d="M0 0"/>']],
+            'aliases' => [],
+            'defaults' => ['width' => 24, 'height' => 0],
+        ],
+    ]);
+
+    $svg = (new IconSvgRenderer($finder))->render('mdi:zero-box');
+
+    expect($svg)
+        ->toContain('viewBox="0 0 24 0"')
+        ->toContain('width="1em"')
+        ->toContain('height="1em"');
+});

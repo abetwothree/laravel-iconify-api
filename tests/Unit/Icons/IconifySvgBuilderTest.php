@@ -199,3 +199,31 @@ it('preserves fractional offsets through a rotation', function () {
 
     expect($result['attributes']['viewBox'])->toBe('1.5 0.5 25 24');
 });
+
+it('does not fatal when the resolved box height is zero', function () {
+    $builder = new IconifySvgBuilder;
+
+    $result = $builder->build([
+        'body' => '<path d="M0 0"/>',
+        'width' => 24,
+        'height' => 0,
+    ], []);
+
+    expect($result['attributes']['viewBox'])->toBe('0 0 24 0');
+    expect($result['attributes']['width'])->toBe('1em');
+    expect($result['attributes']['height'])->toBe('1em');
+});
+
+it('does not fatal when the resolved box width is zero', function () {
+    $builder = new IconifySvgBuilder;
+
+    $result = $builder->build([
+        'body' => '<path d="M0 0"/>',
+        'width' => 0,
+        'height' => 24,
+    ], [], ['width' => '2em']);
+
+    expect($result['attributes']['viewBox'])->toBe('0 0 0 24');
+    expect($result['attributes']['width'])->toBe('2em');
+    expect($result['attributes']['height'])->toBe('2em');
+});

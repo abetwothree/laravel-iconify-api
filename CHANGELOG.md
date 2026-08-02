@@ -22,6 +22,9 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
 - SVG element IDs no longer collide between icons on the same page. The ID counter is now
   a shared singleton, matching Iconify's module-scoped counter.
 - Fractional icon dimensions are no longer truncated to whole numbers.
+- A malformed icon set that resolves an icon to a zero `width` or `height` no longer
+  raises an uncaught `DivisionByZeroError` (an HTTP 500 on the API routes). The icon is
+  rendered with a 1:1 aspect ratio instead. No published icon set is affected.
 - Aliases that override `body` or `hidden` are now honoured.
 - `width` / `height` values of `0` or `""` are ignored and fall back to `1em`, matching
   Iconify's `mergeCustomisations`; the string `"0"` is kept, matching JavaScript
