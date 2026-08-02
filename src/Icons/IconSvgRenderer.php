@@ -137,7 +137,6 @@ class IconSvgRenderer
             return '';
         }
 
-        /** @var array<string, mixed> $setDefaults */
         $setDefaults = $iconData['defaults'] ?? [];
 
         $resolvedIcon = $this->iconDataResolver->resolve($iconData, $iconName, $setDefaults);

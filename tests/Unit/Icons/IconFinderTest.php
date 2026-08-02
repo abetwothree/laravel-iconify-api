@@ -246,6 +246,37 @@ it('carries every legal icon set root default', function () {
     @unlink($tempFile);
 });
 
+it('returns icon set root defaults verbatim, whatever type the file used', function () {
+    // Nothing between json_decode() and the renderer coerces these, so the published
+    // TIconDefaults shape has to admit them. See the note on TIconSetData.
+    $tempFile = sys_get_temp_dir().'/iconfinder-loose-'.uniqid('', true).'.json';
+
+    file_put_contents($tempFile, '{"prefix":"test","lastModified":1,"left":"-2","width":"24",'
+        .'"height":24,"rotate":"1","hFlip":1,"icons":{"base":{"body":"<path d=\"M0 0\"/>"}},"aliases":{}}');
+
+    $fileFinder = new class($tempFile) implements IconSetsFileFinderContract
+    {
+        public function __construct(private string $path) {}
+
+        public function find(string $prefix, string $type = 'icons'): string
+        {
+            return $this->path;
+        }
+    };
+
+    $result = (new IconFinder($fileFinder))->find('test', ['base']);
+
+    expect($result['base']['defaults'])->toBe([
+        'left' => '-2',
+        'width' => '24',
+        'height' => 24,
+        'rotate' => '1',
+        'hFlip' => 1,
+    ]);
+
+    @unlink($tempFile);
+});
+
 it('emits an empty defaults array when the icon set root has none', function () {
     $tempFile = sys_get_temp_dir().'/iconfinder-nodefaults-'.uniqid('', true).'.json';
 

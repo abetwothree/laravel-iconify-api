@@ -3,6 +3,18 @@
 namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
 
 /**
+ * Shapes for the icon set data this package reads and the responses it returns.
+ *
+ * The icon set root carries a value for every property in `defaultIconProps` — see
+ * packages/utils/src/icon-set/validate-basic.ts:12-17 — and `IconFinder` reads all of
+ * them, `rotate`/`hFlip`/`vFlip` included. The scalar unions on `TIconSetData` and
+ * `TIconDefaults` are deliberately wide: an icon set is a JSON file this package does
+ * not validate, upstream's own `quicklyValidateIconSet()` is never run on it, and
+ * nothing between `json_decode()` and the renderer coerces the values. A root written
+ * `{"width": "24", "rotate": "1", "hFlip": 1}` is exactly what a consumer is handed
+ * back, so the declaration says so rather than promising a narrower type nothing here
+ * enforces.
+ *
  * @phpstan-type TIcon = array{
  *     body:string,
  *     left?:int,
@@ -33,20 +45,23 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  *      lastModified: int,
  *      icons: TIcons,
  *      aliases: TAliases,
- *      left?: int|null,
- *      top?: int|null,
- *      width?: int|null,
- *      height?: int|null,
+ *      left?: int|float|string|null,
+ *      top?: int|float|string|null,
+ *      width?: int|float|string|null,
+ *      height?: int|float|string|null,
+ *      rotate?: int|float|string|null,
+ *      hFlip?: bool|int|float|string|null,
+ *      vFlip?: bool|int|float|string|null,
  *      provider?: string|null,
  * }
  * @phpstan-type TIconDefaults = array{
- *      left?:int|float,
- *      top?:int|float,
- *      width?:int|float,
- *      height?:int|float,
- *      rotate?:int|float,
- *      hFlip?:bool,
- *      vFlip?:bool,
+ *      left?:int|float|string,
+ *      top?:int|float|string,
+ *      width?:int|float|string,
+ *      height?:int|float|string,
+ *      rotate?:int|float|string,
+ *      hFlip?:bool|int|float|string,
+ *      vFlip?:bool|int|float|string,
  * }
  * @phpstan-type TIconData = array{
  *      icons: TIcons,

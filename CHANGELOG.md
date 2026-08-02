@@ -96,7 +96,6 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
   with no count cap; a request above the limit is now rejected with a `400`. Set it to `0`
   to remove the limit.
 - `inline` option, adding `vertical-align: -0.125em`.
-- `color` option, folded into the `style` attribute.
 - Flip aliases `h-flip`, `horizontal-flip`, `horizontalFlip`, `v-flip`, `vertical-flip`
   and `verticalFlip`.
 - End-to-end parity vectors that diff the full resolution pipeline against upstream
@@ -104,9 +103,36 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
 
 ### Changed
 
+- `color` is now folded into the `style` attribute instead of being emitted as a
+  `color="…"` presentation attribute. It worked before — a `color` attribute does tint a
+  `currentColor` body — but its cascade position changes: a presentation attribute loses
+  to any author rule, an inline style beats every non-`!important` one. An app rule such
+  as `.text-brand svg { color: #0a7 }` used to win over `color="red"` and no longer does,
+  and `'defaults' => ['color' => …]` now stamps an inline style on every icon. The new
+  behaviour matches React's `style.color = value`. Snapshot tests asserting `color="red"`
+  need updating.
 - `IconSvgRenderer::__construct()` no longer takes an `IconSetInfoFinder`. It was reading
   the icon set's `info` metadata block, which carries no `width` and only a
   sample-display `height`.
+- The protected extension surface of `IconSvgRenderer` and `IconifySvgBuilder` changed.
+  A subclass overriding or calling any of the following needs updating:
+  - `IconSvgRenderer::buildSvg()` lost its `array $iconSetInfo` parameter — it is now
+    `buildSvg(array $icon, array $options, ?array $parsedName = null)`.
+  - `IconSvgRenderer::resolveIcon()`, `resolveIconRecursive()`, `mergeAliasIntoIcon()`,
+    `normalizeRotate()`, `parseRotateValue()`, `safeRotateValue()` and `safeInt()` were
+    removed. Alias resolution moved to `IconDataResolver`, rotation to `IconRotation`.
+  - `IconifySvgBuilder::build()` lost its `array $iconSetInfo` parameter — it is now
+    `build(array $icon, array $customisations = [])`, matching upstream `iconToSVG()`.
+    `normaliseIcon()` lost the same parameter.
+  - `IconifySvgBuilder::normaliseRotate()`, `parseRotateValue()` and `safeInt()` were
+    removed, and `calculateDimensions()` widened its return from `int` to `int|float`,
+    which an override typed `int` no longer satisfies.
+- The published PHPStan shapes now describe what an icon set file can actually hold.
+  `TIconSetData` gained the root `rotate`, `hFlip` and `vFlip` it has always been read
+  for, and the dimension unions on `TIconSetData`, `TIconDefaults` and
+  `TIconSetInfoSummary` widened from `int` to `int|float|string`: these values are copied
+  verbatim out of an unvalidated JSON file, so a root written `{"width": "24"}` really
+  does reach a consumer as the string `'24'`.
 - **Cache keys changed shape.** Icons are now stored at
   `{cache-prefix}:{set}:icon:{shape-version}:{name}` and icon set metadata at
   `{cache-prefix}:{set}:meta:{info|summary|file:{type}}`. Every entry written by an

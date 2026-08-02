@@ -99,12 +99,20 @@ Use the Blade component for direct rendering in views:
 ### Supported options
 
 Both the helper and the Blade component accept the same options as the official Iconify
-components. Anything not listed here is passed through as a plain SVG attribute.
+components. Anything not listed here is passed through as a plain SVG attribute, except
+`viewBox`, which is always computed from the icon data, and option keys that are not
+well-formed XML attribute names, which are skipped.
+
+That last rule is a well-formedness check on the *name* only. A key such as
+`'x onload=alert(1)'` contains no HTML special character, so escaping alone would not
+stop it opening a second, live attribute; it is dropped instead. A well-formed key such
+as `onclick` still renders as an attribute, the same as it would through any Blade
+attribute bag.
 
 | Option | Values | Effect |
 | --- | --- | --- |
 | `width`, `height` | number, CSS length, `auto`, `unset` | Icon size. Defaults to `1em`. One side is derived from the other by aspect ratio. `unset`, `undefined` and `none` omit both attributes entirely. A falsy value (`0`, `''`, `false`) is dropped and falls back to `1em`; the *string* `'0'` is kept, matching JavaScript truthiness. |
-| `color` | any CSS color | Applied via `style="color: …"`. Only affects monotone icons (paths using `fill="currentColor"` / `stroke="currentColor"`). If the value contains `;`, `{`, `}`, or a CSS comment marker (`/*` or `*/`) — which could inject an extra CSS declaration — it is dropped entirely and no `color` style is emitted at all. Values such as `rgb(1,2,3)`, `hsl(210 100% 50%)`, `var(--x, red)`, `currentColor` and `color-mix(...)` are unaffected. |
+| `color` | any CSS color | Applied via `style="color: …"`, matching React's `style.color = value`. Only affects monotone icons (paths using `fill="currentColor"` / `stroke="currentColor"`). This used to be emitted as a `color="…"` presentation attribute, which a CSS rule matching the `<svg>` could override; as an inline style it now beats any non-`!important` rule. If the value contains `;`, `{`, `}`, or a CSS comment marker (`/*` or `*/`) — which could inject an extra CSS declaration — it is dropped entirely and no `color` style is emitted at all. Values such as `rgb(1,2,3)`, `hsl(210 100% 50%)`, `var(--x, red)`, `currentColor` and `color-mix(...)` are unaffected. |
 | `inline` | `true` | Adds `vertical-align: -0.125em` so the icon sits on the text baseline. |
 | `rotate` | `1`–`3`, `"90deg"`, `"25%"` | Quarter-turn rotation. Non-quarter values are ignored. |
 | `flip` | `"horizontal"`, `"vertical"`, `"horizontal,vertical"` | Flip shorthand. |
