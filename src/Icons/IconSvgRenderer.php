@@ -69,8 +69,13 @@ class IconSvgRenderer
      * above — the rest of the pattern still forbids spaces, `=` and quotes, which is
      * what made that attack shape exploitable, and `@` is only accepted as the first
      * character, not anywhere in the name.
+     *
+     * The `D` modifier is load-bearing. Without it PCRE's `$` also matches immediately
+     * before a final newline, so `"onLoad\n"` and `"aria-hidden\n"` were accepted —
+     * and because every control key above is stripped by exact string match, the
+     * newline-suffixed spelling slipped past all of them and was emitted verbatim.
      */
-    protected const ATTRIBUTE_NAME_PATTERN = '/^[A-Za-z_:@][-A-Za-z0-9_:.]*$/';
+    protected const ATTRIBUTE_NAME_PATTERN = '/^[A-Za-z_:@][-A-Za-z0-9_:.]*$/D';
 
     /**
      * Alternate spellings for the boolean flip customisations.

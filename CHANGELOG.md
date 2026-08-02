@@ -46,10 +46,10 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
   `ssr`, `onLoad`, `children`, `fallback`, `customise`, `_ref` — are no longer emitted as
   raw, invalid SVG attributes (for example `mode="mask"` used to leak through).
 - Attribute names are validated, not just escaped. An option key that is not a valid XML
-  name — such as `'x onload=alert(1)'` — is skipped instead of emitted; escaping alone did
-  not help, because the key contains no HTML special character. This is a well-formedness
-  check on the name only: a well-formed key such as `onclick` still renders as an
-  attribute, same as any other Blade attribute bag.
+  name — such as `'x onload=alert(1)'` or one ending in a newline — is skipped instead of
+  emitted; escaping alone did not help, because the key contains no HTML special
+  character. This is a well-formedness check on the name only: a well-formed key such as
+  `onclick` still renders as an attribute, same as any other Blade attribute bag.
 - The `color` option rejects values that could inject an extra CSS declaration (containing
   `;`, `{`, `}`, or a CSS comment marker). Such a value is dropped entirely rather than
   emitted; legitimate values like `rgb(1,2,3)`, `hsl(210 100% 50%)`, `var(--x, red)`,

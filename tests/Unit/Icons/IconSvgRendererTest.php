@@ -742,7 +742,31 @@ it('skips attribute names that are not valid xml names', function (string $name)
     ['data/attr'],
     ['data=attr'],
     [''],
+    // PCRE's `$` matches before a final newline unless the `D` modifier is set, so a
+    // key ending in one LF used to be accepted.
+    ["data-attr\n"],
+    ["onLoad\n"],
+    ["color\n"],
+    ["viewBox\n"],
 ]);
+
+it('does not let a trailing newline smuggle a stripped control key back in', function () {
+    $svg = makeParityRenderer('attr-name-newline')->render('mdi:attr-name-newline', [
+        "onLoad\n" => 'alert(1)',
+        'aria-hidden' => false,
+        "aria-hidden\n" => 'true',
+        "color\n" => 'red;background:url(x)',
+        'data-keep' => 'yes',
+    ]);
+
+    expect($svg)
+        ->not->toContain('onLoad')
+        ->not->toContain('alert(1)')
+        ->not->toContain('aria-hidden')
+        ->not->toContain('background:url(x)')
+        ->not->toContain("\n")
+        ->toContain('data-keep="yes"');
+});
 
 it('keeps valid xml attribute names', function (string $name) {
     $svg = makeParityRenderer('attr-ok-'.md5($name))->render('mdi:attr-ok-'.md5($name), [
