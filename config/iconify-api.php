@@ -143,9 +143,12 @@ return [
     | array shape has changed.
     |
     | Icon names are not filtered, so a name a cache key cannot hold — one carrying a
-    | space, a control character, a ":" or a "/", or longer than 128 bytes — is
+    | space, a ":", a "/", a control character or any other byte outside printable
+    | ASCII (so a non-ASCII name always hashes), or longer than 128 bytes — is
     | replaced in that last segment by "h:" and a SHA-256 of the whole name. No icon
-    | set published through @iconify/json contains such a name.
+    | set published through @iconify/json contains such a name, but a hand-authored
+    | one reached through a custom icons_location may, and its keys will not be
+    | readable back to a name.
     |
     */
 

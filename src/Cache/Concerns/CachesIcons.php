@@ -13,11 +13,19 @@ trait CachesIcons
     /**
      * Bytes of an icon name that may be written into a cache key verbatim.
      *
-     * The longest of the 344,625 names in the 235 sets bundled with `@iconify/json` is
-     * 99 bytes, so no published set comes near this. It keeps the part of the key this
-     * package controls — prefix, icon set prefix, literal segments and name — inside
-     * memcached's 250-byte key limit and the `database` store's `varchar(255)` column
-     * with room left for the application's own cache prefix.
+     * This bounds the name segment and nothing else. The icon set prefix ahead of it is
+     * caller-supplied, has no route constraint and is bounded by nothing here — an
+     * unenforced precondition this constant shares with every other key builder in this
+     * package, since `meta:` keys are built from that same prefix. Given a plausible
+     * prefix the whole key stays well inside memcached's 250-byte limit and the
+     * `database` store's `varchar(255)`: the longest prefix bundled with
+     * `@iconify/json` is 26 bytes, which puts the worst case at 176 with the default
+     * `cache_key_prefix`. A caller asking for a long enough prefix can still exceed
+     * both, exactly as it can on a metadata key today.
+     *
+     * The value itself is sized off the names: the longest of the 344,625 in the 235
+     * bundled sets is 99 bytes, so no published set comes near it and the hashed form
+     * (66 bytes) is shorter still.
      */
     protected const MAX_ICON_KEY_NAME_BYTES = 128;
 

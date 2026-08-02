@@ -83,16 +83,18 @@ it('looks up icon names that upstream matchIconName would not accept', function 
 it('keeps the icon set metadata intact for names that spell a metadata key', function () {
     // With no name filter in front of it, the key builder is the only thing standing
     // between these names and the metadata keys they are written to imitate. `info` is
-    // the name the original bug used; the rest spell the other three key builders.
+    // the name the original bug used; the rest spell every metadata key this package
+    // writes, both `fileSetKey()` types included.
     $response = test()->get(route('iconify-api.set-json.show', [
         'set' => 'codicon',
-        'icons' => 'info,meta:info,meta:summary,meta:file:icons',
+        'icons' => 'info,meta:info,meta:summary,meta:file:icons,meta:file:info',
     ]));
 
     $response->assertStatus(200);
 
     expect($response->json('icons.info.body'))->toBeString()
-        ->and($response->json('not_found'))->toBe(['meta:info', 'meta:summary', 'meta:file:icons']);
+        ->and($response->json('not_found'))
+        ->toBe(['meta:info', 'meta:summary', 'meta:file:icons', 'meta:file:info']);
 
     $collection = test()->get(route('iconify-api.collections.show', ['prefix' => 'codicon']));
     $collection->assertStatus(200);
@@ -109,7 +111,8 @@ it('keeps the icon set metadata intact for names that spell a metadata key', fun
 
     expect(Cache::store('array')->get('iconify-icons:codicon:meta:info'))->toHaveKey('name')
         ->and(Cache::store('array')->get('iconify-icons:codicon:meta:summary'))->toHaveKey('prefix')
-        ->and(Cache::store('array')->get('iconify-icons:codicon:meta:file:icons'))->toBeString();
+        ->and(Cache::store('array')->get('iconify-icons:codicon:meta:file:icons'))->toBeString()
+        ->and(Cache::store('array')->get('iconify-icons:codicon:meta:file:info'))->toBeString();
 });
 
 it('rejects a request that asks for more icons than the configured limit', function () {

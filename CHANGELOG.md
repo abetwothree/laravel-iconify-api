@@ -76,11 +76,14 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
   permanently replaced the `/collection` and `/collections` payloads with icon body data;
   entries carry no TTL, so nothing healed it. Icon entries now live under an `icon:`
   segment and icon set metadata under a `meta:` segment. Because an icon name is not
-  filtered on the way in, a name a cache key cannot hold — one carrying a space, a
-  control character, a `:` or a `/`, or longer than 128 bytes — is replaced in that last
-  segment by `h:` and a SHA-256 of the whole name. The longest of the 344,625 names in
-  the 235 sets bundled with `@iconify/json` is 99 bytes and none of them needs the
-  replacement, so no key a real icon set writes has changed.
+  filtered on the way in, a name a cache key cannot hold — one carrying a space, a `:`,
+  a `/`, a control character or any other byte outside printable ASCII (so a non-ASCII
+  name always hashes), or longer than 128 bytes — is replaced in that last segment by
+  `h:` and a SHA-256 of the whole name. The longest of the 344,625 names in the 235 sets
+  bundled with `@iconify/json` is 99 bytes and all of them are printable ASCII, so no key
+  a real icon set writes has changed; a hand-authored set reached through a custom
+  `icons_location` may use names that do hash, and its keys will not be readable back to
+  a name.
 - A custom `IconFinder` that omits the optional `defaults` key is cached again. The
   staleness check read that key's presence, so such a finder got a 0% cache hit rate and
   re-read the icon set JSON on every request.
