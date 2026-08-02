@@ -2,13 +2,6 @@
 
 use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApi;
 
-beforeEach(function () {
-    $reflection = new ReflectionClass(LaravelIconifyApi::class);
-    $property = $reflection->getProperty('prefixes');
-    $property->setAccessible(true);
-    $property->setValue([]);
-});
-
 it('covers location helper methods and type branches', function () {
     $base = sys_get_temp_dir().'/iconify-api-locations-'.uniqid('', true);
     mkdir($base, 0777, true);
@@ -55,7 +48,7 @@ it('covers cacheStore and domain validations', function () {
     expect(fn () => $api->domain())->toThrow(Exception::class, 'Domain must be a string or null');
 });
 
-it('covers prefixes discovery and cached prefixes short path', function () {
+it('covers prefixes discovery and picks up a newly installed set', function () {
     $base = sys_get_temp_dir().'/iconify-api-prefixes-'.uniqid('', true);
 
     mkdir($base.'/@iconify-json/mdi', 0777, true);
@@ -71,8 +64,13 @@ it('covers prefixes discovery and cached prefixes short path', function () {
 
     expect($api->prefixes())->toBe(['heroicons', 'lucide', 'mdi']);
 
-    // Second call should hit cached static prefixes list.
-    expect($api->prefixes())->toBe(['heroicons', 'lucide', 'mdi']);
+    // A static memo would outlive the container reset on Octane and freeze the list at
+    // whatever the first worker request saw, so a set installed later must show up —
+    // both on the same instance and on a fresh one.
+    mkdir($base.'/@iconify-json/tabler', 0777, true);
+
+    expect($api->prefixes())->toBe(['heroicons', 'lucide', 'mdi', 'tabler']);
+    expect((new LaravelIconifyApi)->prefixes())->toBe(['heroicons', 'lucide', 'mdi', 'tabler']);
 });
 
 it('covers path generation', function () {

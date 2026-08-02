@@ -31,6 +31,12 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
   raises an uncaught `DivisionByZeroError` (an HTTP 500 on the API routes). The icon is
   rendered with a 1:1 aspect ratio instead. No published icon set is affected.
 - Aliases that override `body` or `hidden` are now honoured.
+- `/collections` no longer freezes on a long-running worker. `LaravelIconifyApi::prefixes()`
+  memoised its result in a static property, which outlives the container reset on Octane,
+  RoadRunner and Swoole, so a newly installed icon set stayed invisible there until
+  `octane:reload` — while `/collection?prefix=…`, which never consults that method, showed
+  it immediately. The memo is gone; the two directory listings it saved are cheap next to
+  the JSON reads that follow them.
 - An `hFlip` or `vFlip` written as the float `0.0` no longer mirrors the icon. The
   JavaScript falsiness port compared types strictly, and `0.0 !== 0` is true in PHP, so a
   float zero read as truthy where JavaScript reads it as falsy. Only a hand-written icon
