@@ -118,3 +118,10 @@ it('does not override an existing anonymous component with a hyphenated name', f
 
     expect(array_key_exists('existing-icon', $aliases))->toBeFalse();
 });
+
+it('supports flip aliases as blade attributes', function () {
+    $svg = Blade::render('<x-icon name="heroicons:clock" h-flip="true" />', [], true);
+
+    expect($svg)->toContain('scale(-1 1)');
+    expect($svg)->not->toContain('h-flip=');
+});

@@ -42,6 +42,22 @@ class IconSvgRenderer
         '_ref',
     ];
 
+    /**
+     * Alternate spellings for the boolean flip customisations.
+     *
+     * Mirrors components/vue/src/render.ts:66-76 and :172-178.
+     *
+     * @var array<string, string>
+     */
+    protected const FLIP_ALIASES = [
+        'horizontal-flip' => 'hFlip',
+        'h-flip' => 'hFlip',
+        'horizontalFlip' => 'hFlip',
+        'vertical-flip' => 'vFlip',
+        'v-flip' => 'vFlip',
+        'verticalFlip' => 'vFlip',
+    ];
+
     protected IconifySvgBuilder $svgBuilder;
 
     protected SvgIdReplacer $svgIdReplacer;
@@ -216,6 +232,10 @@ class IconSvgRenderer
             unset($options[$key]);
         }
 
+        foreach (array_keys(self::FLIP_ALIASES) as $alias) {
+            unset($options[$alias]);
+        }
+
         unset($options['viewBox']);
 
         $options = $this->buildStyleAttribute($options, $inline);
@@ -290,6 +310,12 @@ class IconSvgRenderer
 
             if ($this->jsTruthy($value) && (is_string($value) || is_int($value) || is_float($value))) {
                 $customisations[$key] = $value;
+            }
+        }
+
+        foreach (self::FLIP_ALIASES as $alias => $target) {
+            if (array_key_exists($alias, $options) && $this->narrowTruthy($options[$alias])) {
+                $customisations[$target] = true;
             }
         }
 

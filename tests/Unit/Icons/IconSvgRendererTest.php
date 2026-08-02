@@ -655,3 +655,24 @@ it('keeps an explicit null width as the default', function () {
 
     expect($svg)->toContain('width="1em"');
 });
+
+it('supports the vue style flip aliases', function (string $attribute, string $expectedTransform) {
+    $svg = makeParityRenderer('flip-alias')->render('mdi:flip-alias', [$attribute => true]);
+
+    expect($svg)->toContain($expectedTransform);
+    expect($svg)->not->toContain($attribute.'=');
+})->with([
+    ['horizontal-flip', 'scale(-1 1)'],
+    ['h-flip', 'scale(-1 1)'],
+    ['horizontalFlip', 'scale(-1 1)'],
+    ['vertical-flip', 'scale(1 -1)'],
+    ['v-flip', 'scale(1 -1)'],
+    ['verticalFlip', 'scale(1 -1)'],
+]);
+
+it('ignores a falsy flip alias', function () {
+    $svg = makeParityRenderer('flip-false')->render('mdi:flip-false', ['h-flip' => false]);
+
+    expect($svg)->not->toContain('<g transform=');
+    expect($svg)->not->toContain('h-flip=');
+});
