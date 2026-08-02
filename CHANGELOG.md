@@ -54,6 +54,19 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
   `;`, `{`, `}`, or a CSS comment marker). Such a value is dropped entirely rather than
   emitted; legitimate values like `rgb(1,2,3)`, `hsl(210 100% 50%)`, `var(--x, red)`,
   `currentColor` and `color-mix(...)` are unaffected.
+- An icon can no longer overwrite its icon set's cached metadata. Cache keys were a flat
+  `{cache-prefix}:{set}:{name}`, so an icon named `info` — shipped by 70 of the 235 sets
+  in `@iconify/json` — addressed the same key as the icon set info block. A single
+  `GET /iconify/api/codicon.json?icons=info`, or a plain `icon('codicon:info')` render,
+  permanently replaced the `/collection` and `/collections` payloads with icon body data;
+  entries carry no TTL, so nothing healed it. Icon entries now live under an `icon:`
+  segment and icon set metadata under a `meta:` segment.
+- Icon names on the API routes are validated against Iconify's own `matchIconName`
+  (`^[a-z0-9]+(-[a-z0-9]+)*$`) and counted into `not_found` when they do not match. All
+  344,625 names in the 235 sets bundled with `@iconify/json` match it.
+- A custom `IconFinder` that omits the optional `defaults` key is cached again. The
+  staleness check read that key's presence, so such a finder got a 0% cache hit rate and
+  re-read the icon set JSON on every request.
 
 ### Added
 
@@ -69,9 +82,15 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
 - `IconSvgRenderer::__construct()` no longer takes an `IconSetInfoFinder`. It was reading
   the icon set's `info` metadata block, which carries no `width` and only a
   sample-display `height`.
-- Icons cached before this release are treated as stale and transparently refreshed. The
-  cached icon set summary moved to a new cache key for the same reason, so a warm cache
-  does not keep serving responses without the root `left`/`top`.
+- **Cache keys changed shape.** Icons are now stored at
+  `{cache-prefix}:{set}:icon:{shape-version}:{name}` and icon set metadata at
+  `{cache-prefix}:{set}:meta:{info|summary|file:{type}}`. Every entry written by an
+  earlier release is orphaned rather than migrated: the first request after deployment
+  rebuilds what it needs, and the old entries expire with whatever policy the cache store
+  applies to them (nothing, for a store without eviction — run `cache:clear`, or prune the
+  `{cache-prefix}:` namespace, to reclaim the space). This also retires entries cached
+  before the icon set root defaults were carried through, which would otherwise keep
+  rendering with the wrong `viewBox`.
 - `IconFinderContract::find()`'s `defaults` key is now optional rather than required. The
   shipped `IconFinder` and `IconFinderCached` still always return it — the icon set
   root's `left`, `top`, `width`, `height`, `rotate`, `hFlip` and `vFlip`, or `[]` when the

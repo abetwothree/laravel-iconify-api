@@ -24,10 +24,10 @@ trait CachesIcons
         foreach ($icons as $icon) {
             $cachedIcon = Cache::store($this->store)->get($this->iconKey($prefix, $icon));
 
-            // Entries cached before icon set root defaults were carried through are
-            // stale: they would render with the wrong viewBox. Treat them as a miss
-            // so they are transparently refreshed.
-            if (is_array($cachedIcon) && array_key_exists('defaults', $cachedIcon)) {
+            // The shape version lives in the key, so anything found here is already
+            // known to be current. `defaults` is optional by contract, so its absence
+            // must not be read as staleness — see IconFinderContract.
+            if (is_array($cachedIcon) && isset($cachedIcon['icons'])) {
                 /** @var TIconData $cachedIcon */
                 $cacheResponse['found'][$icon] = $cachedIcon;
             } else {
@@ -46,8 +46,20 @@ trait CachesIcons
         Cache::store($this->store)->put($this->iconKey($prefix, $icon), $iconData);
     }
 
+    /**
+     * Icon entries live under their own `icon:` segment.
+     *
+     * The icon name is attacker- and author-controlled and is the last segment, so a
+     * flat `{prefix}:{set}:{name}` scheme let a name such as `info` — shipped by 70 of
+     * the 235 sets in `@iconify/json` — address an icon set metadata key exactly and
+     * overwrite it permanently. Every key builder in this package therefore commits to
+     * a literal segment before any caller-supplied value.
+     *
+     * The `2` is the entry shape version: it is bumped whenever the cached array shape
+     * changes, which retires stale entries without needing a marker key inside them.
+     */
     protected function iconKey(string $prefix, string $icon): string
     {
-        return "{$this->cachePrefix}:{$prefix}:{$icon}";
+        return "{$this->cachePrefix}:{$prefix}:icon:2:{$icon}";
     }
 }

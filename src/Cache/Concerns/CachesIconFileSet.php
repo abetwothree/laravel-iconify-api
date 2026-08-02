@@ -22,8 +22,12 @@ trait CachesIconFileSet
         Cache::store($this->store)->put($this->fileSetKey($prefix, $type), $file);
     }
 
+    /**
+     * Icon set file paths live under a `meta:` segment that no icon name can address.
+     * See CachesIcons::iconKey().
+     */
     protected function fileSetKey(string $prefix, string $type): string
     {
-        return "{$this->cachePrefix}:{$prefix}:{$type}";
+        return "{$this->cachePrefix}:{$prefix}:meta:file:{$type}";
     }
 }

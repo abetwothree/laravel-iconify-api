@@ -136,7 +136,11 @@ return [
     | some reason you would like to change this prefix, you can do so here.
     |
     | The format of Iconify API cache keys is:
-    | {cache-prefix}:{icon-set-prefix}:{icon-name}
+    | {cache-prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name} for icons, and
+    | {cache-prefix}:{icon-set-prefix}:meta:{info|summary|file:{type}} for icon set
+    | metadata. The literal segment in the middle keeps an icon name from ever
+    | addressing a metadata key, and the shape version retires entries whose cached
+    | array shape has changed.
     |
     */
 

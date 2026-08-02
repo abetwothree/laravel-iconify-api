@@ -33,8 +33,12 @@ trait CacheIconSetInfo
         Cache::store($this->store)->put($this->iconSetInfoKey($prefix), $iconSetInfo);
     }
 
+    /**
+     * Icon set metadata lives under a `meta:` segment that no icon name can address.
+     * See CachesIcons::iconKey().
+     */
     protected function iconSetInfoKey(string $prefix): string
     {
-        return "{$this->cachePrefix}:{$prefix}:info";
+        return "{$this->cachePrefix}:{$prefix}:meta:info";
     }
 }
