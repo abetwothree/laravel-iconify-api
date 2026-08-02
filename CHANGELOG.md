@@ -69,17 +69,12 @@ All notable changes to `laravel-iconify-api` will be documented in this file.
 - Icons cached before this release are treated as stale and transparently refreshed. The
   cached icon set summary moved to a new cache key for the same reason, so a warm cache
   does not keep serving responses without the root `left`/`top`.
-
-### Breaking
-
-- **Custom `IconFinder` implementations must now return a `defaults` key.** Every entry
-  returned from `IconFinderContract::find()` is required to carry a `defaults` array —
-  the icon set root's `left`, `top`, `width`, `height`, `rotate`, `hFlip` and `vFlip`,
-  or `[]` when the set declares none. The interface signature is unchanged, so this
-  fails at runtime rather than at compile time: an implementation that omits the key
-  raises an undefined-array-key warning and then a `TypeError`. If you have bound your
-  own `IconFinderContract`, add the key. The shipped `IconFinder` and `IconFinderCached`
-  already do.
+- `IconFinderContract::find()`'s `defaults` key is now optional rather than required. The
+  shipped `IconFinder` and `IconFinderCached` still always return it — the icon set
+  root's `left`, `top`, `width`, `height`, `rotate`, `hFlip` and `vFlip`, or `[]` when the
+  set declares none — but a custom implementation that omits it now degrades gracefully
+  to no icon-set root defaults (the pre-branch 16×16 fallback for a set that would
+  otherwise supply them) instead of erroring at render time.
 
 ## v1.2.0 - 2025-05-05
 

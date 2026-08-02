@@ -817,3 +817,46 @@ it('renders a lowercase onload option like any other attribute', function () {
 
     expect($svg)->toContain('onload="init()"');
 });
+
+it('inherits icon-set root defaults when the finder supplies them', function () {
+    $finder = Mockery::mock(IconFinder::class);
+
+    $finder->shouldReceive('find')->with('mdi', ['root-default-dims'])->once()->andReturn([
+        'root-default-dims' => [
+            'icons' => ['root-default-dims' => ['body' => '<path d="M0 0"/>']],
+            'aliases' => [],
+            'defaults' => ['width' => 32, 'height' => 32],
+        ],
+    ]);
+
+    $svg = (new IconSvgRenderer($finder))->render('mdi:root-default-dims');
+
+    expect($svg)->toContain('viewBox="0 0 32 32"');
+});
+
+it('degrades to the 16x16 fallback instead of erroring when a custom finder omits defaults', function () {
+    // A stub `IconFinderContract` implementation — not a mock — standing in for a
+    // custom finder written before icon-set root defaults existed. It returns an
+    // entry with no `defaults` key at all, which used to be an unguarded array
+    // access away from an undefined-array-key warning and a TypeError.
+    $finder = new class implements IconFinder
+    {
+        /** {@inheritDoc} */
+        public function find(string $prefix, array $icons): array
+        {
+            return [
+                'no-defaults-key' => [
+                    'icons' => ['no-defaults-key' => ['body' => '<path d="M0 0"/>']],
+                    'aliases' => [],
+                ],
+            ];
+        }
+    };
+
+    $svg = (new IconSvgRenderer($finder))->render('mdi:no-defaults-key');
+
+    // Same icon body as the previous test, minus the `defaults` key: the icon-set
+    // root defaults (32x32) that a finder honouring the key would have supplied are
+    // gone, so it renders with the pre-branch 16x16 fallback rather than throwing.
+    expect($svg)->toContain('viewBox="0 0 16 16"');
+});

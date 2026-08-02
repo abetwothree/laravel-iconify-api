@@ -51,7 +51,7 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  * @phpstan-type TIconData = array{
  *      icons: TIcons,
  *      aliases: TAliases,
- *      defaults: TIconDefaults,
+ *      defaults?: TIconDefaults,
  *      not_found?: TNotFound,
  * }
  */
