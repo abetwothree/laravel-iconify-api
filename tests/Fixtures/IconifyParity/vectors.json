@@ -327,6 +327,51 @@
             "customisations": {}
         },
         {
+            "name": "icon-string-rotate",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "icon-string-rotate": { "body": "<path d=\"M0 0\"/>", "rotate": "90deg" }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "icon-string-rotate-over-set-rotate",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "rotate": 1,
+                "icons": {
+                    "icon-string-rotate-over-set-rotate": { "body": "<path d=\"M0 0\"/>", "rotate": "90deg" }
+                },
+                "aliases": {}
+            },
+            "customisations": {}
+        },
+        {
+            "name": "alias-string-rotate",
+            "iconSet": {
+                "prefix": "test",
+                "lastModified": 1,
+                "width": 24,
+                "height": 24,
+                "icons": {
+                    "base": { "body": "<path d=\"M0 0\"/>" }
+                },
+                "aliases": {
+                    "alias-string-rotate": { "parent": "base", "rotate": "90deg" }
+                }
+            },
+            "customisations": {}
+        },
+        {
             "name": "set-and-icon-fractional-rotates-sum-to-whole",
             "iconSet": {
                 "prefix": "test",

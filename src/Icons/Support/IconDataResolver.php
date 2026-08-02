@@ -155,8 +155,9 @@ class IconDataResolver
         // upstream does. A fraction is carried through rather than collapsed here:
         // `rotate: 0.5` on an icon plus `rotate: 0.5` on its alias is a whole 1 and
         // must rotate 90 degrees. Only the SVG builder collapses, at the `switch`.
+        // fromIconData(), not parse(): upstream runs no rotateFromString() on icon data.
         $rotate = IconRotation::modulo(
-            IconRotation::parse($parent['rotate'] ?? 0) + IconRotation::parse($child['rotate'] ?? 0)
+            IconRotation::fromIconData($parent['rotate'] ?? 0) + IconRotation::fromIconData($child['rotate'] ?? 0)
         );
 
         // JavaScript's `if (rotate)`: a zero rotation is left out so that

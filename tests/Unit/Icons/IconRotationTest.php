@@ -31,6 +31,23 @@ it('treats a rotation it cannot read as no rotation', function () {
     expect(IconRotation::parse(true))->toBe(0);
 });
 
+it('does not apply the customisation string grammar to icon data', function () {
+    // Upstream adds the raw value, so '90deg' + 0 is '90deg0', whose % 4 is NaN.
+    expect(IconRotation::fromIconData('90deg'))->toBe(0);
+    expect(IconRotation::fromIconData('25%'))->toBe(0);
+    expect(IconRotation::fromIconData('bad-rotate'))->toBe(0);
+    expect(IconRotation::fromIconData([]))->toBe(0);
+    expect(IconRotation::fromIconData(null))->toBe(0);
+});
+
+it('reads a numeric icon data rotation without collapsing a fraction', function () {
+    expect(IconRotation::fromIconData(1))->toBe(1);
+    expect(IconRotation::fromIconData(1.5))->toBe(1.5);
+    expect(IconRotation::fromIconData(0.5))->toBe(0.5);
+    expect(IconRotation::fromIconData('2'))->toBe(2);
+    expect(IconRotation::fromIconData('1.5'))->toBe(1);
+});
+
 it('reduces a rotation to the switch case iconToSVG would take', function () {
     expect(IconRotation::normalise(0))->toBe(0);
     expect(IconRotation::normalise(7))->toBe(3);
