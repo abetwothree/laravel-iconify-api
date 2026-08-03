@@ -14,16 +14,13 @@ class IconifyIconsController
             return response()->json(['error' => 'No icons specified'], 404);
         }
 
-        // Names are not filtered here. A set reached through a custom `icons_location`
-        // may be hand-authored and use names upstream's `matchIconName` would reject,
-        // and `IconFinder::find()` already reports a name it cannot resolve in
-        // `not_found`, so a name that does not exist costs a lookup and nothing more.
-        // The cache key builder guards itself — see `CachesIcons::iconKeySegment()`.
+        // Names are deliberately unfiltered: a hand-authored set may use names upstream's
+        // `matchIconName` would reject, an unresolvable name already comes back in
+        // `not_found`, and the key builder guards itself (`CachesIcons::iconKeySegment()`).
         $icons = explode(',', $request->string('icons'));
 
-        // Every name in the list mints a cache entry, so the list is bounded. A zero
-        // limit disables the check. Iconify's own browser client splits its requests by
-        // URL length and never approaches the default.
+        // Every name in the list mints a cache entry, so the list is bounded. Zero
+        // disables the check.
         $limit = max(0, config()->integer('iconify-api.max_icons_per_request', 200));
 
         if ($limit > 0 && count($icons) > $limit) {

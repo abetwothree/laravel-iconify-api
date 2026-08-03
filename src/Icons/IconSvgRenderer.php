@@ -48,32 +48,18 @@ class IconSvgRenderer
     protected const ARIA_HIDDEN_KEYS = ['ariaHidden', 'aria-hidden'];
 
     /**
-     * Conservative XML attribute name: a letter, underscore, colon or leading `@`
-     * followed by name characters.
+     * Conservative XML attribute name, with a leading `@` allowed for Alpine's `@click`
+     * shorthand. Names that do not match are skipped.
      *
-     * Escaping the name is not enough on its own: a key such as `x onload=alert(1)`
-     * contains no HTML special character, so it survives htmlspecialchars() intact
-     * and would emit a second, live attribute. Names that do not match are skipped.
+     * A well-formedness check on the *name*, not a sanitiser for attribute *semantics*.
+     * It stops a key like `x onload=alert(1)` — which carries no HTML special character
+     * and so survives htmlspecialchars() — from opening a second, live attribute. Option
+     * keys are trusted developer input, as in any Blade attribute bag: a literal
+     * `onclick` is well-formed and renders, by design.
      *
-     * This is a well-formedness check on the attribute *name* — it rejects names
-     * that would break out of the attribute syntax (a space or `=` opening a second
-     * attribute, a quote closing the value early) — not a sanitiser for attribute
-     * *semantics*. Option keys are trusted developer input here, exactly as they are
-     * in a Blade attribute bag: a literal `onclick` key is a well-formed name and
-     * renders `onclick`, by design. Nothing in this class blocks event-handler-shaped
-     * attribute names.
-     *
-     * The leading `@` is an addition on top of plain XML: Alpine.js's `@click` /
-     * `@submit.prevent` shorthand survives Laravel's ComponentAttributeBag and is a
-     * common Blade idiom, so it is allowed through. It does not reopen the hole
-     * above — the rest of the pattern still forbids spaces, `=` and quotes, which is
-     * what made that attack shape exploitable, and `@` is only accepted as the first
-     * character, not anywhere in the name.
-     *
-     * The `D` modifier is load-bearing. Without it PCRE's `$` also matches immediately
-     * before a final newline, so `"onLoad\n"` and `"aria-hidden\n"` were accepted —
-     * and because every control key above is stripped by exact string match, the
-     * newline-suffixed spelling slipped past all of them and was emitted verbatim.
+     * The `D` modifier is load-bearing. Without it PCRE's `$` also matches before a
+     * final newline, so `"onLoad\n"` slipped past the exact-match control-key filters
+     * above and was emitted verbatim.
      */
     protected const ATTRIBUTE_NAME_PATTERN = '/^[A-Za-z_:@][-A-Za-z0-9_:.]*$/D';
 
@@ -561,12 +547,10 @@ class IconSvgRenderer
     /**
      * Reject values that could terminate a CSS declaration or open a new block.
      *
-     * Upstream sets `color` via a CSSOM property assignment (`style.color = value`),
-     * which the browser parses as a single property value: anything containing a
-     * declaration separator is invalid and the assignment is silently dropped, so
-     * nothing is set. Our renderer instead concatenates `color` into a raw CSS
-     * string, so we must reject the same class of value ourselves rather than
-     * emitting it — a value is dropped entirely, never partially sanitised.
+     * Upstream assigns `style.color = value` through the CSSOM, which silently drops a
+     * value carrying a declaration separator. This renderer concatenates into a raw CSS
+     * string instead, so it has to reject the same class of value itself — dropping it
+     * entirely rather than partially sanitising it.
      */
     protected function isSafeCssDeclarationValue(string $value): bool
     {

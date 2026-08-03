@@ -5,15 +5,14 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
 /**
  * Shapes for the icon set data this package reads and the responses it returns.
  *
- * The icon set root carries a value for every property in `defaultIconProps` — see
- * packages/utils/src/icon-set/validate-basic.ts:12-17 — and `IconFinder` reads all of
- * them, `rotate`/`hFlip`/`vFlip` included. The scalar unions on `TIconSetData` and
- * `TIconDefaults` are deliberately wide: an icon set is a JSON file this package does
- * not validate, upstream's own `quicklyValidateIconSet()` is never run on it, and
- * nothing between `json_decode()` and the renderer coerces the values. A root written
- * `{"width": "24", "rotate": "1", "hFlip": 1}` is exactly what a consumer is handed
- * back, so the declaration says so rather than promising a narrower type nothing here
- * enforces.
+ * The scalar unions on `TIconSetData` and `TIconDefaults` are deliberately wide. An icon
+ * set is unvalidated JSON and nothing between `json_decode()` and the renderer coerces
+ * it, so a root written `{"width": "24", "rotate": "1", "hFlip": 1}` is handed back
+ * verbatim. Narrowing these would promise a type nothing enforces.
+ *
+ * The root carries every property in `defaultIconProps`
+ * (packages/utils/src/icon-set/validate-basic.ts:12-17) and `IconFinder` reads all of
+ * them, `rotate`/`hFlip`/`vFlip` included.
  *
  * @phpstan-type TIcon = array{
  *     body:string,

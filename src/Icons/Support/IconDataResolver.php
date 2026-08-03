@@ -70,15 +70,13 @@ class IconDataResolver
     }
 
     /**
-     * Fold an alias chain the way internalGetIconData() does.
+     * Fold an alias chain the way internalGetIconData() does: seed with
+     * `mergeIconData(self, {})`, then fold each ancestor in nearest-first, always as the
+     * *parent* operand (packages/utils/src/icon-set/get-icon.ts:6-14).
      *
-     * Upstream seeds the accumulator with `mergeIconData(self, {})` and then folds each
-     * ancestor in nearest-first, always as the *parent* operand — see
-     * packages/utils/src/icon-set/get-icon.ts:6-14 and the `[parent].concat(value)`
-     * ordering of getIconsTree(). That first merge against an empty object is not a
-     * no-op: it is what turns a string `rotate` of `'1'` into `'1' + 0`, i.e. `'10'`,
-     * i.e. a half turn. Nesting the merges the other way round would make it `0 + '1'`,
-     * i.e. `'01'`, i.e. a quarter turn.
+     * The seeding merge against an empty array is not a no-op. It is what makes a string
+     * `rotate` of `'1'` into `'1' + 0` = `'10'`, a half turn; nesting the other way round
+     * gives `0 + '1'` = `'01'`, a quarter turn.
      *
      * @param  TIconData  $iconData
      * @param  array<int, string>  $visited
@@ -171,13 +169,10 @@ class IconDataResolver
             $result['vFlip'] = true;
         }
 
-        // The rotations are added and reduced by `% 4` exactly as upstream does, with
-        // JavaScript's `+` — which concatenates when either side is a string. A
-        // fraction is carried through rather than collapsed here: `rotate: 0.5` on an
+        // A fraction is carried through rather than collapsed here: `rotate: 0.5` on an
         // icon plus `rotate: 0.5` on its alias is a whole 1 and must rotate 90 degrees.
-        // Only the SVG builder collapses, at the `switch`. Null means the merged
-        // rotation is falsy, so `if (rotate)` skips it and mergeIconData() falls back
-        // to the transformation default.
+        // Only the SVG builder collapses, at the `switch`. Null means the merged rotation
+        // is falsy, so the transformation default applies instead.
         $rotate = IconRotation::mergeIconData($parent['rotate'] ?? null, $child['rotate'] ?? null);
 
         if ($rotate !== null) {
@@ -190,19 +185,15 @@ class IconDataResolver
     /**
      * JavaScript's `!!value`, which the flip merge above depends on.
      *
-     * The strict comparisons below are type-sensitive, so `0.0 !== 0` is true and a
-     * float zero would read as truthy. JSON decodes a literal `0.0` to a PHP float, so
-     * an icon set written `"hFlip": 0.0` rather than `"hFlip": 0` would mirror an icon
-     * upstream leaves alone. `NAN` is falsy in JavaScript and passes every strict
-     * comparison here, so it needs the same branch. Negative zero needs no special
-     * case: `-0.0 !== 0.0` is false.
+     * The float branch is not redundant: the strict comparisons are type-sensitive, so
+     * `0.0 !== 0` and a float zero would read as truthy — an icon set written
+     * `"hFlip": 0.0` would mirror an icon upstream leaves alone. `NAN` needs the same
+     * branch, being falsy in JavaScript but passing every strict comparison here.
      *
-     * Loose comparison is not the fix: `'0' != 0` is false in PHP 8, but `'0'` is
-     * truthy in JavaScript, which would introduce the opposite bug.
-     *
-     * The parity harness cannot cover this: it sends its fixture through
-     * `JSON.stringify`, which emits a float zero as `0`, so the PHP side never sees a
-     * float. Only a hand-written icon set file can carry one.
+     * Loose comparison is not the fix: `'0' != 0` is false in PHP 8 but `'0'` is truthy
+     * in JavaScript, which introduces the opposite bug. The parity harness cannot cover
+     * this either — `JSON.stringify` emits a float zero as `0`, so only a hand-written
+     * icon set can carry one.
      */
     protected function truthy(mixed $value): bool
     {

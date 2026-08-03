@@ -16,18 +16,13 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Support;
 final class IconRotation
 {
     /**
-     * Coerce a rotation prop into the number JavaScript would carry around.
+     * Coerce a `rotate` *prop* into the number JavaScript would carry around.
      *
-     * Numbers pass through untouched, fractions included. A fraction has to survive
-     * the merge arithmetic: `rotate: 0.5` on an icon plus `rotate: 0.5` on its alias
-     * sums to a whole `1` and does rotate 90 degrees, because upstream adds during
-     * the merge and only reaches its `switch` at build time. Collapsing is therefore
-     * normalise()'s job alone, at the one point where upstream decides.
+     * Numbers pass through untouched, fractions included — a fraction has to survive the
+     * merge arithmetic, so collapsing is normalise()'s job alone. Strings go through
+     * rotateFromString(), the grammar the framework components apply before iconToSVG().
      *
-     * Strings go through rotateFromString(), which is what the framework components do
-     * to a `rotate` prop before it ever reaches iconToSVG(). This is the customization
-     * grammar only — icon data goes through mergeIconData() instead, where upstream
-     * applies no such parsing.
+     * Props only. Icon data goes through mergeIconData(), where upstream parses nothing.
      */
     public static function parse(mixed $value): int|float
     {
@@ -43,26 +38,17 @@ final class IconRotation
     }
 
     /**
-     * Merge two rotations that came from icon data — an icon, an alias or an icon set
-     * root — the way mergeIconTransformations() does.
+     * Merge two rotations from icon data — an icon, an alias or an icon set root.
      *
-     * Port of `((obj1.rotate || 0) + (obj2.rotate || 0)) % 4` plus the `if (rotate)`
-     * that follows it, packages/utils/src/icon/transformations.ts:6-11. Null is
-     * returned for a merged rotation JavaScript would treat as falsy, i.e. one the
-     * caller must leave out so the transformation default applies.
+     * Port of `((obj1.rotate || 0) + (obj2.rotate || 0)) % 4` and the `if (rotate)` after
+     * it, packages/utils/src/icon/transformations.ts:6-11. Null means the result is falsy
+     * in JavaScript, so the caller must omit it and let the transformation default apply.
      *
-     * Upstream never parses a rotation that came from icon data: no rotateFromString(),
-     * no Number(), it just adds the two raw values. A string operand therefore makes
-     * `+` *concatenation*, and only the trailing `% 4` converts. So `'2' + 0` is the
-     * string `'20'`, whose `% 4` is 0 — an icon written `"rotate": "2"` is not rotated
-     * at all — while `'1' + 0` is `'10'`, whose `% 4` is 2, making `"rotate": "1"` a
-     * half turn rather than a quarter one. Only a unit-suffixed string such as
-     * `'90deg'` genuinely makes NaN. Reading a numeric string as a number, as an
-     * earlier version of this class did, both rotates icons upstream leaves alone and
-     * under-rotates the ones it turns.
-     *
-     * The customization grammar (parse()/rotateFromString()) deliberately does not
-     * apply here — it belongs to the component prop layer, not to icon data.
+     * Upstream parses nothing here — it adds the raw values, so a string operand makes
+     * `+` *concatenation* and only the trailing `% 4` converts. `'2' + 0` is `'20'`,
+     * whose `% 4` is 0, so `"rotate": "2"` does not rotate at all; `'1' + 0` is `'10'`,
+     * whose `% 4` is 2, so `"rotate": "1"` is a half turn. Reading a numeric string as a
+     * number instead both rotates icons upstream leaves alone and under-rotates the rest.
      */
     public static function mergeIconData(mixed $parent, mixed $child): int|float|null
     {
@@ -92,9 +78,8 @@ final class IconRotation
         }
 
         if (is_float($value)) {
-            // `NaN || 0` and `±0 || 0` are both the number 0. Folding negative zero in
-            // here also keeps `-0` from stringifying as `'-0'`, which JavaScript never
-            // does.
+            // `NaN || 0` and `±0 || 0` are both 0. Folding negative zero here also keeps
+            // it from stringifying as `'-0'`, which JavaScript never does.
             return is_nan($value) || $value === 0.0 ? 0 : $value;
         }
 
@@ -106,11 +91,10 @@ final class IconRotation
             return $value ? true : 0;
         }
 
-        // Anything else contributes nothing. json_decode() maps both a JSON array and
-        // a JSON object onto a PHP array, so the two cannot be told apart well enough
-        // to reproduce `String(value)` exactly — and it does not matter: upstream's own
-        // quicklyValidateIconSet() rejects an icon whose `rotate` is not a number, so
-        // such a set never reaches a renderer at all.
+        // Anything else contributes nothing. json_decode() maps a JSON array and a JSON
+        // object onto the same PHP type, so `String(value)` cannot be reproduced exactly
+        // — and need not be: upstream's quicklyValidateIconSet() rejects a non-numeric
+        // `rotate` outright, so such a set never reaches a renderer there either.
         return 0;
     }
 
@@ -149,9 +133,9 @@ final class IconRotation
                 return $value > 0 ? 'Infinity' : '-Infinity';
             }
 
-            // JavaScript prints a whole float without its fraction; PHP's default
-            // precision would also round long fractions, so json_encode() (shortest
-            // round-trip, like JavaScript) does the rest.
+            // JavaScript prints a whole float without its fraction. json_encode() handles
+            // the rest, being shortest-round-trip like JavaScript where PHP's default
+            // precision would round.
             if ($value === floor($value) && abs($value) < 1.0e15) {
                 return (string) (int) $value;
             }
@@ -180,16 +164,12 @@ final class IconRotation
      * JavaScript's `Number(string)`: whitespace is trimmed, an empty string is 0, and
      * anything else that is not a number is NaN.
      *
-     * Deliberate deviation: `is_numeric()` is narrower than `Number()`. JavaScript also
-     * reads the `0x`, `0o` and `0b` integer literals and the word `Infinity`, so
-     * `Number('0x10')` is 16 where this returns NaN and the rotation is dropped. The
-     * gap is only reachable through mergeIconData(), and only for a hand-authored icon
-     * set that writes `rotate` as a radix-prefixed string *and* pairs it with a second
-     * non-zero rotation in the same chain: none of the 235 sets in `@iconify/json`
-     * writes `rotate` as a string at all, and upstream's own quicklyValidateIconSet()
-     * rejects a non-numeric `rotate` outright, so such a set never reaches a renderer
-     * there either. Widening this to the full literal grammar would buy nothing a real
-     * icon set can express.
+     * Deliberate deviation: `is_numeric()` is narrower than `Number()`, which also reads
+     * the `0x`/`0o`/`0b` literals and `Infinity` — `Number('0x10')` is 16 where this is
+     * NaN. Only a hand-authored set pairing a radix-prefixed `rotate` string with a
+     * second rotation in the same chain can reach it, and upstream's
+     * quicklyValidateIconSet() rejects such a set anyway. Recorded as deviation 19 in
+     * docs/iconify-renderer-parity-audit.md.
      */
     private static function toNumber(string $value): int|float
     {
@@ -209,15 +189,10 @@ final class IconRotation
     /**
      * Reduce a rotation to the `switch` case iconToSVG() would take, 0 through 3.
      *
-     * `iconToSVG()` reduces the rotation with `%= 4` and then feeds it to a `switch`
-     * with integer cases, so a non-integral value such as 1.5 stays 1.5, matches no
-     * case and rotates nothing. Casting to int, as PHP would, turns that into a 90
-     * degree rotation instead. Reducing in float space also keeps a huge value away
-     * from an out-of-range `(int)` cast.
-     *
-     * Returning 0 for a value that matches no case is exact rather than a fallback:
-     * case 0 is the one that emits no transform, and `0 % 2 === 1` is false, so the
-     * box is left unswapped as well.
+     * That `switch` has integer cases, so a non-integral value like 1.5 matches none and
+     * rotates nothing; casting to int would turn it into a 90 degree rotation instead.
+     * Returning 0 there is exact rather than a fallback — case 0 emits no transform and
+     * leaves the box unswapped, which is what no-match produces.
      */
     public static function normalise(int|float $value): int
     {
