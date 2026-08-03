@@ -102,3 +102,14 @@ it('tests getting an error if icons are not specified', function (string $route)
     ['iconify-api.set-icons-json.show'],
     ['iconify-api.set-json.show'],
 ]);
+
+it('rejects an icons parameter that is not a string', function (string $route) {
+    $response = test()->get(route($route, ['set' => 'mdi', 'icons' => ['home', 'account']]));
+
+    $response->assertStatus(400);
+
+    expect($response->json('error'))->toBe('The icons parameter must be a comma separated string');
+})->with([
+    ['iconify-api.set-icons-json.show'],
+    ['iconify-api.set-json.show'],
+]);

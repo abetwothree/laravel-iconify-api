@@ -14,10 +14,19 @@ class IconifyIconsController
             return response()->json(['error' => 'No icons specified'], 404);
         }
 
+        $iconsParameter = $request->input('icons');
+
+        // `$request->string()` would stringify an array parameter instead, which is an
+        // array-to-string conversion — a warning, a 500, and a lookup for an icon
+        // literally named "Array".
+        if (! is_string($iconsParameter)) {
+            return response()->json(['error' => 'The icons parameter must be a comma separated string'], 400);
+        }
+
         // Names are deliberately unfiltered: a hand-authored set may use names upstream's
         // `matchIconName` would reject, an unresolvable name already comes back in
         // `not_found`, and the key builder guards itself (`CachesIcons::iconKeySegment()`).
-        $icons = explode(',', $request->string('icons'));
+        $icons = explode(',', $iconsParameter);
 
         // Every name in the list mints a cache entry, so the list is bounded. Zero
         // disables the check.
