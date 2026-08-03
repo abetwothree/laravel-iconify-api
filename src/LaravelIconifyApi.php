@@ -67,7 +67,7 @@ class LaravelIconifyApi
             throw new Exception('Domain must be a string or null');
         }
 
-        return $domain ? $domain : null;
+        return $domain === '' ? null : $domain;
     }
 
     public function path(): string

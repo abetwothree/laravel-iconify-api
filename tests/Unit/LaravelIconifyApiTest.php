@@ -96,3 +96,9 @@ it('does not conflate icon set prefixes that PHP reads as equal numbers', functi
     // and SORT_REGULAR would then order what is left numerically.
     expect((new LaravelIconifyApi)->prefixes())->toBe(['100', '1e2', '9']);
 });
+
+it('keeps a route domain whose string value is falsy', function () {
+    config()->set('iconify-api.route_domain', '0');
+
+    expect((new LaravelIconifyApi)->domain())->toBe('0');
+});
