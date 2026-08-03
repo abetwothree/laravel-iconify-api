@@ -10,9 +10,6 @@ on:
       - "composer.lock"
       - "package.json"
       - "package-lock.json"
-      # The parity harness lives outside the patterns above: its fixture is JSON and
-      # its checker is an .mjs file, so a push touching only the harness's inputs or
-      # its comparison logic used to run no job at all.
       - "tests/Fixtures/**"
       - "tests/bin/**"
 
