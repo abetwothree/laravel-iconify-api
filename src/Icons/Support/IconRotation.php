@@ -25,7 +25,7 @@ final class IconRotation
      * normalise()'s job alone, at the one point where upstream decides.
      *
      * Strings go through rotateFromString(), which is what the framework components do
-     * to a `rotate` prop before it ever reaches iconToSVG(). This is the customisation
+     * to a `rotate` prop before it ever reaches iconToSVG(). This is the customization
      * grammar only — icon data goes through mergeIconData() instead, where upstream
      * applies no such parsing.
      */
@@ -61,7 +61,7 @@ final class IconRotation
      * earlier version of this class did, both rotates icons upstream leaves alone and
      * under-rotates the ones it turns.
      *
-     * The customisation grammar (parse()/rotateFromString()) deliberately does not
+     * The customization grammar (parse()/rotateFromString()) deliberately does not
      * apply here — it belongs to the component prop layer, not to icon data.
      */
     public static function mergeIconData(mixed $parent, mixed $child): int|float|null
@@ -179,6 +179,17 @@ final class IconRotation
     /**
      * JavaScript's `Number(string)`: whitespace is trimmed, an empty string is 0, and
      * anything else that is not a number is NaN.
+     *
+     * Deliberate deviation: `is_numeric()` is narrower than `Number()`. JavaScript also
+     * reads the `0x`, `0o` and `0b` integer literals and the word `Infinity`, so
+     * `Number('0x10')` is 16 where this returns NaN and the rotation is dropped. The
+     * gap is only reachable through mergeIconData(), and only for a hand-authored icon
+     * set that writes `rotate` as a radix-prefixed string *and* pairs it with a second
+     * non-zero rotation in the same chain: none of the 235 sets in `@iconify/json`
+     * writes `rotate` as a string at all, and upstream's own quicklyValidateIconSet()
+     * rejects a non-numeric `rotate` outright, so such a set never reaches a renderer
+     * there either. Widening this to the full literal grammar would buy nothing a real
+     * icon set can express.
      */
     private static function toNumber(string $value): int|float
     {
