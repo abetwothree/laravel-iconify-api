@@ -225,6 +225,8 @@ A "this icon does not exist" result is cached only briefly, because any name a c
 
 The `icons` parameter must be a single comma separated string. A request that sends it as an array — `?icons[]=home&icons[]=account` — is rejected with a `400` rather than being flattened into a nonsense lookup.
 
+The `prefix` parameter on `/iconify/api/collection` is bound by the same rule: a missing prefix is a `404`, and a prefix sent as an array is a `400`.
+
 Cache keys are `{cache_key_prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name}` for icons and `{cache_key_prefix}:{icon-set-prefix}:meta:…` for icon set metadata. Icon names are not filtered, so a name a cache key cannot hold — one carrying a space, a `:`, a `/`, a control character or any other byte outside printable ASCII (so a non-ASCII name always hashes), or longer than 128 bytes — is replaced in that last segment by `h:` and a SHA-256 of the whole name; no icon set published through `@iconify/json` contains such a name, but a hand-authored one reached through a custom `icons_location` may, and its keys will not be readable back to a name. The shape version changes when the cached array shape does, which orphans the older entries rather than migrating them — run `php artisan cache:clear` after upgrading this package too, if you want the space back straight away.
 
 ## Missing Features

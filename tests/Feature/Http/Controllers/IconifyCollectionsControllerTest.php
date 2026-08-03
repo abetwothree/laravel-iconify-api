@@ -58,3 +58,11 @@ it('tests not passing a prefix and getting an exception', function () {
     $response = test()->get(route('iconify-api.collections.show'));
     $response->assertStatus(404);
 });
+
+it('rejects a prefix parameter that is not a string', function () {
+    $response = test()->get(route('iconify-api.collections.show', ['prefix' => ['mdi']]));
+
+    $response->assertStatus(400);
+
+    expect($response->json('error'))->toBe('The prefix parameter must be a string');
+});
