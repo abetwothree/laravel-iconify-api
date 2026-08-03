@@ -55,6 +55,12 @@ The following routes are currently available:
 - `/iconify/api/collections` - Returns a list of icon collections available in your application.
 - `/iconify/api/collection?prefix={prefix}` - Returns the information for a specific icon collection.
 
+### Error responses
+
+The `icons` parameter must be a single comma separated string. A request that sends it as an array — `?icons[]=home&icons[]=account` — is rejected with a `400` rather than being flattened into a nonsense lookup.
+
+The `prefix` parameter on `/iconify/api/collection` is bound by the same rule: a missing prefix is a `404`, and a prefix sent as an array is a `400`.
+
 ### How To Display Dynamic On-Demand Icons
 
 To display on-demand icons follow the instructions on the [Iconify](https://iconify.design/docs/icon-components/) on demand docs and use any of their component libraries in your Laravel Application.
@@ -222,10 +228,6 @@ You can set which cache store to use for this package in your `config/iconify-ap
 A found icon is cached without an expiry — it cannot change while the installed version of the icon set stays the same. Nothing keys off the icon set file, so upgrading an icon package invalidates nothing: run `php artisan cache:clear` after `npm update @iconify/json` or after upgrading an `@iconify-json/*` package, or a redrawn icon keeps serving its old body indefinitely, on both the API routes and `icon('set:name')`.
 
 A "this icon does not exist" result is cached only briefly, because any name a caller invents produces one; `not_found_cache_ttl` controls how long (300 seconds by default, `0` to skip caching misses entirely). The API routes also bound how many names one request may ask for, via `max_icons_per_request` (200 by default, `0` for no limit); a request above the limit is rejected with a `400`.
-
-The `icons` parameter must be a single comma separated string. A request that sends it as an array — `?icons[]=home&icons[]=account` — is rejected with a `400` rather than being flattened into a nonsense lookup.
-
-The `prefix` parameter on `/iconify/api/collection` is bound by the same rule: a missing prefix is a `404`, and a prefix sent as an array is a `400`.
 
 Cache keys are `{cache_key_prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name}` for icons and `{cache_key_prefix}:{icon-set-prefix}:meta:…` for icon set metadata. Icon names are not filtered, so a name a cache key cannot hold — one carrying a space, a `:`, a `/`, a control character or any other byte outside printable ASCII (so a non-ASCII name always hashes), or longer than 128 bytes — is replaced in that last segment by `h:` and a SHA-256 of the whole name; no icon set published through `@iconify/json` contains such a name, but a hand-authored one reached through a custom `icons_location` may, and its keys will not be readable back to a name. The shape version changes when the cached array shape does, which orphans the older entries rather than migrating them — run `php artisan cache:clear` after upgrading this package too, if you want the space back straight away.
 
