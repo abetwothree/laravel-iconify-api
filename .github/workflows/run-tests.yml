@@ -10,6 +10,8 @@ on:
       - "composer.lock"
       - "package.json"
       - "package-lock.json"
+      - "tests/Fixtures/**"
+      - "tests/bin/**"
 
 jobs:
   test:

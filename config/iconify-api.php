@@ -88,7 +88,9 @@ return [
     |--------------------------------------------------------------------------
     | Configure the optional helper function and Blade component for rendering
     | Iconify icons directly to SVG without an HTTP request.
-    | Defaults support any SVG attributes (for example class, data-*, style).
+    |
+    | Defaults support any SVG attribute (for example class, data-*, style) as
+    | well as any render option (width, height, rotate, flip, inline, color).
     |
     */
 
@@ -97,10 +99,11 @@ return [
 
         'defaults' => [
             'class' => '',
-            // Any default SVG attributes are supported.
-            // Examples:
+            // Any default SVG attribute or render option is supported.
             // 'data-source' => 'iconify-api',
             // 'style' => 'vertical-align: middle;',
+            // 'width' => '1.5em',
+            // 'inline' => true,
         ],
 
         'helper' => [
@@ -133,9 +136,41 @@ return [
     | some reason you would like to change this prefix, you can do so here.
     |
     | The format of Iconify API cache keys is:
-    | {cache-prefix}:{icon-set-prefix}:{icon-name}
+    | {cache-prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name} for icons, and
+    | {cache-prefix}:{icon-set-prefix}:meta:{info|summary|file:{type}} for icon set
+    | metadata.
     |
     */
 
     'cache_key_prefix' => 'iconify-icons',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cached miss lifetime
+    |--------------------------------------------------------------------------
+    | How many seconds a "this icon does not exist" result stays cached. A found
+    | icon never expires — it cannot change while the installed version of the icon
+    | set stays the same — but a miss can be minted for any name a caller invents, so
+    | it is kept only briefly. Set this to 0 to stop caching misses entirely.
+    |
+    | Nothing keys off the icon set file, so upgrading an icon package does not
+    | invalidate anything. Run `php artisan cache:clear` after `npm update
+    | @iconify/json` or after upgrading an `@iconify-json/*` package, or a redrawn
+    | icon keeps serving its old body.
+    |
+    */
+
+    'not_found_cache_ttl' => 300,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Maximum icons per API request
+    |--------------------------------------------------------------------------
+    | Upper bound on the number of names accepted in the `icons` query string of
+    | the icon set routes. Requests above it are rejected with a 400. Set this to
+    | 0 to remove the limit.
+    |
+    */
+
+    'max_icons_per_request' => 200,
 ];

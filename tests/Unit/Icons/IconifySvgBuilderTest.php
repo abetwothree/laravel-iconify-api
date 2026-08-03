@@ -67,7 +67,7 @@ it('covers transform passes and defs-safe wrapping', function () {
     expect($normalisedNegativeRotation['body'])->toContain('rotate(-90');
 });
 
-it('covers dimensions, size math, rotate parsing, and scalar guards', function () {
+it('covers dimensions, size math, and scalar guards', function () {
     $builder = new IconifySvgBuilder;
 
     $normaliseCustomisations = new ReflectionMethod($builder, 'normaliseCustomisations');
@@ -82,7 +82,8 @@ it('covers dimensions, size math, rotate parsing, and scalar guards', function (
 
     expect($custom['width'])->toBeNull();
     expect($custom['height'])->toBeNull();
-    expect($custom['rotate'])->toBe(3);
+    // Carried through as the number it is; only the transform pass collapses it.
+    expect($custom['rotate'])->toBe(-1.6);
     expect($custom['hFlip'])->toBeTrue();
     expect($custom['vFlip'])->toBeTrue();
 
@@ -115,24 +116,6 @@ it('covers dimensions, size math, rotate parsing, and scalar guards', function (
     expect($calculateSize->invoke($builder, '1.5em', 2.0))->toBe('3em');
     expect($calculateSize->invoke($builder, '3em', 1.0))->toBe('3em');
 
-    $parseRotateValue = new ReflectionMethod($builder, 'parseRotateValue');
-    $parseRotateValue->setAccessible(true);
-    expect($parseRotateValue->invoke($builder, 3))->toBe(3);
-    expect($parseRotateValue->invoke($builder, 2.9))->toBe(2);
-    expect($parseRotateValue->invoke($builder, '2'))->toBe(2);
-    expect($parseRotateValue->invoke($builder, '.'))->toBe(0);
-    expect($parseRotateValue->invoke($builder, '180deg'))->toBe(2);
-    expect($parseRotateValue->invoke($builder, '75%'))->toBe(3);
-    expect($parseRotateValue->invoke($builder, '45deg'))->toBe(0);
-    expect($parseRotateValue->invoke($builder, '12rad'))->toBe(0);
-    expect($parseRotateValue->invoke($builder, '.deg'))->toBe(0);
-    expect($parseRotateValue->invoke($builder, []))->toBe(0);
-    expect($parseRotateValue->invoke($builder, 'deg'))->toBe(0);
-
-    $normaliseRotate = new ReflectionMethod($builder, 'normaliseRotate');
-    $normaliseRotate->setAccessible(true);
-    expect($normaliseRotate->invoke($builder, -5))->toBe(3);
-
     $splitSvgDefs = new ReflectionMethod($builder, 'splitSvgDefs');
     $splitSvgDefs->setAccessible(true);
     [$defs, $content] = $splitSvgDefs->invoke($builder, '<defs><path id="a"/></defs><defs><path id="b"/></defs><path d="M0 0"/>');
@@ -160,9 +143,6 @@ it('covers build output with unset keywords', function () {
         'width' => 20,
         'height' => 10,
     ], [
-        'width' => 16,
-        'height' => 16,
-    ], [
         'width' => 'unset',
         'height' => 'none',
     ]);
@@ -170,4 +150,60 @@ it('covers build output with unset keywords', function () {
     expect($result['attributes']['viewBox'])->toBe('0 0 20 10');
     expect($result['attributes'])->not->toHaveKey('width');
     expect($result['attributes'])->not->toHaveKey('height');
+});
+
+it('preserves fractional icon dimensions', function () {
+    $builder = new IconifySvgBuilder;
+
+    $result = $builder->build([
+        'body' => '<path/>',
+        'width' => 20.5,
+        'height' => 16,
+    ]);
+
+    expect($result['attributes']['viewBox'])->toBe('0 0 20.5 16');
+    expect($result['attributes']['width'])->toBe('1.29em');
+    expect($result['viewBox'])->toBe([0, 0, 20.5, 16]);
+});
+
+it('preserves fractional offsets through a rotation', function () {
+    $builder = new IconifySvgBuilder;
+
+    $result = $builder->build([
+        'body' => '<path/>',
+        'left' => 0.5,
+        'top' => 1.5,
+        'width' => 24,
+        'height' => 25,
+    ], ['rotate' => 1]);
+
+    expect($result['attributes']['viewBox'])->toBe('1.5 0.5 25 24');
+});
+
+it('does not fatal when the resolved box height is zero', function () {
+    $builder = new IconifySvgBuilder;
+
+    $result = $builder->build([
+        'body' => '<path d="M0 0"/>',
+        'width' => 24,
+        'height' => 0,
+    ]);
+
+    expect($result['attributes']['viewBox'])->toBe('0 0 24 0');
+    expect($result['attributes']['width'])->toBe('1em');
+    expect($result['attributes']['height'])->toBe('1em');
+});
+
+it('does not fatal when the resolved box width is zero', function () {
+    $builder = new IconifySvgBuilder;
+
+    $result = $builder->build([
+        'body' => '<path d="M0 0"/>',
+        'width' => 0,
+        'height' => 24,
+    ], ['width' => '2em']);
+
+    expect($result['attributes']['viewBox'])->toBe('0 0 0 24');
+    expect($result['attributes']['width'])->toBe('2em');
+    expect($result['attributes']['height'])->toBe('2em');
 });

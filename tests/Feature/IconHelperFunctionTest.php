@@ -46,6 +46,49 @@ it('applies arbitrary configured defaults and allows per-call overrides', functi
         ->toContain('style="color: red;"');
 });
 
+it('applies configured defaults for customisation options', function () {
+    config()->set('iconify-api.inline.defaults', [
+        'width' => '2em',
+        'inline' => true,
+        'rotate' => 1,
+        'h-flip' => true,
+        'color' => 'red',
+    ]);
+
+    $helper = 'icon';
+    $svg = $helper('heroicons:clock');
+
+    expect($svg)
+        ->toContain('width="2em"')
+        ->toContain('rotate(90')
+        ->toContain('scale(-1 1)')
+        ->toContain('color: red;')
+        ->toContain('vertical-align: -0.125em;')
+        ->not->toContain('rotate="')
+        ->not->toContain('h-flip=')
+        ->not->toContain('inline=');
+});
+
+it('prefers per-call customisations over configured defaults', function () {
+    config()->set('iconify-api.inline.defaults', [
+        'width' => '2em',
+        'inline' => true,
+        'rotate' => 1,
+    ]);
+
+    $helper = 'icon';
+    $svg = $helper('heroicons:clock', [
+        'width' => '24',
+        'inline' => false,
+        'rotate' => 0,
+    ]);
+
+    expect($svg)
+        ->toContain('width="24"')
+        ->not->toContain('rotate(')
+        ->not->toContain('vertical-align');
+});
+
 it('prefers per-call width and height over configured defaults', function () {
     config()->set('iconify-api.inline.defaults', [
         'width' => '2em',

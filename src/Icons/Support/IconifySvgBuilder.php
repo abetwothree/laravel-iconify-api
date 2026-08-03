@@ -5,18 +5,19 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Support;
 class IconifySvgBuilder
 {
     /**
+     * Signature-compatible with upstream `iconToSVG(icon, customisations)`.
+     *
      * @param  array<string, mixed>  $icon
-     * @param  array<string, mixed>  $iconSetInfo
      * @param  array<string, mixed>  $customisations
      * @return array{
      *     attributes: array{viewBox:string, width?:string, height?:string},
-     *     viewBox: array{0:int,1:int,2:int,3:int},
+     *     viewBox: array{0:int|float,1:int|float,2:int|float,3:int|float},
      *     body:string,
      * }
      */
-    public function build(array $icon, array $iconSetInfo, array $customisations = []): array
+    public function build(array $icon, array $customisations = []): array
     {
-        $fullIcon = $this->normaliseIcon($icon, $iconSetInfo);
+        $fullIcon = $this->normaliseIcon($icon);
         $fullCustomisations = $this->normaliseCustomisations($customisations);
 
         $box = [
@@ -69,18 +70,23 @@ class IconifySvgBuilder
     }
 
     /**
+     * Mirrors `{ ...defaultIconProps, ...icon }`, packages/utils/src/svg/build.ts.
+     *
+     * Icon set root defaults are merged into the icon by IconDataResolver before it
+     * gets here, exactly as upstream's getIconData() does, so there is no second
+     * source of dimensions to fall back to.
+     *
      * @param  array<string, mixed>  $icon
-     * @param  array<string, mixed>  $iconSetInfo
-     * @return array{left:int, top:int, width:int, height:int, rotate:int, hFlip:bool, vFlip:bool, body:string}
+     * @return array{left:int|float, top:int|float, width:int|float, height:int|float, rotate:int|float, hFlip:bool, vFlip:bool, body:string}
      */
-    protected function normaliseIcon(array $icon, array $iconSetInfo): array
+    protected function normaliseIcon(array $icon): array
     {
         return [
-            'left' => $this->safeInt($icon['left'] ?? 0, 0),
-            'top' => $this->safeInt($icon['top'] ?? 0, 0),
-            'width' => $this->safeInt($icon['width'] ?? $iconSetInfo['width'] ?? 16, 16),
-            'height' => $this->safeInt($icon['height'] ?? $iconSetInfo['height'] ?? 16, 16),
-            'rotate' => $this->normaliseRotate($icon['rotate'] ?? 0),
+            'left' => $this->safeNumber($icon['left'] ?? 0, 0),
+            'top' => $this->safeNumber($icon['top'] ?? 0, 0),
+            'width' => $this->safeNumber($icon['width'] ?? 16, 16),
+            'height' => $this->safeNumber($icon['height'] ?? 16, 16),
+            'rotate' => IconRotation::parse($icon['rotate'] ?? 0),
             'hFlip' => $this->toBool($icon['hFlip'] ?? false),
             'vFlip' => $this->toBool($icon['vFlip'] ?? false),
             'body' => $this->safeString($icon['body'] ?? ''),
@@ -89,7 +95,7 @@ class IconifySvgBuilder
 
     /**
      * @param  array<string, mixed>  $customisations
-     * @return array{width:int|float|string|null, height:int|float|string|null, rotate:int, hFlip:bool, vFlip:bool}
+     * @return array{width:int|float|string|null, height:int|float|string|null, rotate:int|float, hFlip:bool, vFlip:bool}
      */
     protected function normaliseCustomisations(array $customisations): array
     {
@@ -107,16 +113,16 @@ class IconifySvgBuilder
         return [
             'width' => $width,
             'height' => $height,
-            'rotate' => $this->normaliseRotate($customisations['rotate'] ?? 0),
+            'rotate' => IconRotation::parse($customisations['rotate'] ?? 0),
             'hFlip' => $this->toBool($customisations['hFlip'] ?? false),
             'vFlip' => $this->toBool($customisations['vFlip'] ?? false),
         ];
     }
 
     /**
-     * @param  array{left:int, top:int, width:int, height:int}  $box
-     * @param  array{rotate:int, hFlip:bool, vFlip:bool}  $props
-     * @return array{body:string, box:array{left:int, top:int, width:int, height:int}}
+     * @param  array{left:int|float, top:int|float, width:int|float, height:int|float}  $box
+     * @param  array{rotate:int|float, hFlip:bool, vFlip:bool}  $props
+     * @return array{body:string, box:array{left:int|float, top:int|float, width:int|float, height:int|float}}
      */
     protected function applyTransformPass(string $body, array $box, array $props): array
     {
@@ -141,11 +147,10 @@ class IconifySvgBuilder
             $box['left'] = 0;
         }
 
-        if ($rotation < 0) {
-            $rotation -= (int) floor($rotation / 4) * 4;
-        }
-
-        $rotation %= 4;
+        // The rotation is only collapsed here, where upstream's `switch` decides, and
+        // never earlier: a fractional rotation has to survive the `+= 2` above, since
+        // 1.5 + 2 is 3.5, which still matches no case.
+        $rotation = IconRotation::normalise($rotation);
 
         switch ($rotation) {
             case 1:
@@ -188,10 +193,10 @@ class IconifySvgBuilder
     }
 
     /**
-     * @param  array{width:int|float|string|null, height:int|float|string|null, rotate:int, hFlip:bool, vFlip:bool}  $customisations
+     * @param  array{width:int|float|string|null, height:int|float|string|null, rotate:int|float, hFlip:bool, vFlip:bool}  $customisations
      * @return array{0:int|float|string, 1:int|float|string}
      */
-    protected function calculateDimensions(array $customisations, int $boxWidth, int $boxHeight): array
+    protected function calculateDimensions(array $customisations, int|float $boxWidth, int|float $boxHeight): array
     {
         $customWidth = $customisations['width'];
         $customHeight = $customisations['height'];
@@ -201,17 +206,31 @@ class IconifySvgBuilder
                 ? '1em'
                 : ($customHeight === 'auto' ? $boxHeight : $customHeight);
 
-            $width = $this->calculateSize($height, $boxWidth / $boxHeight);
+            $width = $this->calculateSize($height, $this->aspectRatio($boxWidth, $boxHeight));
 
             return [$width, $height];
         }
 
         $width = $customWidth === 'auto' ? $boxWidth : $customWidth;
         $height = $customHeight === null
-            ? $this->calculateSize($width, $boxHeight / $boxWidth)
+            ? $this->calculateSize($width, $this->aspectRatio($boxHeight, $boxWidth))
             : ($customHeight === 'auto' ? $boxHeight : $customHeight);
 
         return [$width, $height];
+    }
+
+    /**
+     * A zero box dimension has no aspect ratio, so fall back to 1:1 and let the
+     * requested size through unscaled: JavaScript divides to Infinity and emits
+     * nonsense sizes, while PHP 8 throws an uncaught DivisionByZeroError.
+     */
+    protected function aspectRatio(int|float $numerator, int|float $denominator): float
+    {
+        if ($denominator === 0 || $denominator === 0.0) {
+            return 1.0;
+        }
+
+        return $numerator / $denominator;
     }
 
     protected function calculateSize(int|float|string $size, float $ratio, int $precision = 100): int|float|string
@@ -249,78 +268,6 @@ class IconifySvgBuilder
     protected function isUnsetKeyword(mixed $value): bool
     {
         return $value === 'unset' || $value === 'undefined' || $value === 'none';
-    }
-
-    protected function normaliseRotate(mixed $value): int
-    {
-        $rotation = $this->parseRotateValue($value);
-
-        while ($rotation < 0) {
-            $rotation += 4;
-        }
-
-        return $rotation % 4;
-    }
-
-    protected function parseRotateValue(mixed $value): int
-    {
-        if (is_int($value)) {
-            return $value;
-        }
-
-        if (is_float($value)) {
-            return (int) $value;
-        }
-
-        if (! is_string($value)) {
-            return 0;
-        }
-
-        $units = preg_replace('/^-?[0-9.]*/', '', $value);
-
-        if ($units === null) {
-            return 0;
-        }
-
-        if ($units === '') {
-            if (! is_numeric($value)) {
-                return 0;
-            }
-
-            return (int) $value;
-        }
-
-        if ($units === $value) {
-            return 0;
-        }
-
-        $split = 0;
-
-        if ($units === '%') {
-            $split = 25;
-        }
-
-        if ($units === 'deg') {
-            $split = 90;
-        }
-
-        if ($split === 0) {
-            return 0;
-        }
-
-        $numericPart = substr($value, 0, strlen($value) - strlen($units));
-
-        if (! is_numeric($numericPart)) {
-            return 0;
-        }
-
-        $num = (float) $numericPart / $split;
-
-        if (fmod($num, 1.0) !== 0.0) {
-            return 0;
-        }
-
-        return (int) $num;
     }
 
     /**
@@ -374,14 +321,14 @@ class IconifySvgBuilder
         return $value === true || $value === 'true' || $value === 1;
     }
 
-    protected function safeInt(mixed $value, int $default = 0): int
+    protected function safeNumber(mixed $value, int|float $default = 0): int|float
     {
-        if (is_int($value)) {
+        if (is_int($value) || is_float($value)) {
             return $value;
         }
 
         if (is_numeric($value)) {
-            return (int) $value;
+            return $value + 0;
         }
 
         return $default;

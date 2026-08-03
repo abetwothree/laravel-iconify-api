@@ -19,9 +19,15 @@ class CacheRepository
 
     protected string $store;
 
+    /**
+     * Seconds a cached miss lives for. Zero disables negative caching.
+     */
+    protected int $notFoundTtl;
+
     public function __construct()
     {
         $this->store = LaravelIconifyApi::cacheStore();
         $this->cachePrefix = config()->string('iconify-api.cache_key_prefix');
+        $this->notFoundTtl = max(0, config()->integer('iconify-api.not_found_cache_ttl', 300));
     }
 }

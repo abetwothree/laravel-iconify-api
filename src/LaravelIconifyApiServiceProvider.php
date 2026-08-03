@@ -15,6 +15,8 @@ use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoSummaryFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoSummaryFinderCached;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinderCached;
+use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconifySvgBuilder;
+use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
 use AbeTwoThree\LaravelIconifyApi\Support\IconHelperRegistrar;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
@@ -73,6 +75,12 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
 
     protected function registerServicesBindings(): void
     {
+        // Iconify keeps its ID counter in module scope for the lifetime of the page
+        // (packages/utils/src/svg/id.ts:23). A shared instance is what stops two
+        // icons on the same response from emitting the same element ids.
+        $this->app->singleton(SvgIdReplacer::class);
+        $this->app->singleton(IconifySvgBuilder::class);
+
         $store = LaravelIconifyApi::cacheStore();
 
         $this->app->bind(IconSetsFileFinderContract::class, function ($app) use ($store) {

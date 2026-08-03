@@ -195,3 +195,111 @@ it('marks alias chain cycles as not found', function () {
 
     @unlink($tempFile);
 });
+
+it('carries icon set root defaults on every returned icon', function () {
+    $iconFinder = resolve(IconFinder::class);
+    $result = $iconFinder->find('heroicons', ['clock']);
+
+    expect($result['clock'])->toHaveKey('defaults');
+    expect($result['clock']['defaults'])->toBe(['width' => 24, 'height' => 24]);
+});
+
+it('carries every legal icon set root default', function () {
+    $tempFile = sys_get_temp_dir().'/iconfinder-defaults-'.uniqid('', true).'.json';
+
+    file_put_contents($tempFile, json_encode([
+        'prefix' => 'test',
+        'lastModified' => time(),
+        'left' => 1,
+        'top' => 2,
+        'width' => 32,
+        'height' => 48,
+        'rotate' => 1,
+        'hFlip' => true,
+        'vFlip' => false,
+        'icons' => ['base' => ['body' => '<path d="M0 0"/>']],
+        'aliases' => [],
+    ], JSON_THROW_ON_ERROR));
+
+    $fileFinder = new class($tempFile) implements IconSetsFileFinderContract
+    {
+        public function __construct(private string $path) {}
+
+        public function find(string $prefix, string $type = 'icons'): string
+        {
+            return $this->path;
+        }
+    };
+
+    $result = (new IconFinder($fileFinder))->find('test', ['base']);
+
+    expect($result['base']['defaults'])->toBe([
+        'left' => 1,
+        'top' => 2,
+        'width' => 32,
+        'height' => 48,
+        'rotate' => 1,
+        'hFlip' => true,
+        'vFlip' => false,
+    ]);
+
+    @unlink($tempFile);
+});
+
+it('returns icon set root defaults verbatim, whatever type the file used', function () {
+    // Nothing between json_decode() and the renderer coerces these, so the published
+    // TIconDefaults shape has to admit them. See the note on TIconSetData.
+    $tempFile = sys_get_temp_dir().'/iconfinder-loose-'.uniqid('', true).'.json';
+
+    file_put_contents($tempFile, '{"prefix":"test","lastModified":1,"left":"-2","width":"24",'
+        .'"height":24,"rotate":"1","hFlip":1,"icons":{"base":{"body":"<path d=\"M0 0\"/>"}},"aliases":{}}');
+
+    $fileFinder = new class($tempFile) implements IconSetsFileFinderContract
+    {
+        public function __construct(private string $path) {}
+
+        public function find(string $prefix, string $type = 'icons'): string
+        {
+            return $this->path;
+        }
+    };
+
+    $result = (new IconFinder($fileFinder))->find('test', ['base']);
+
+    expect($result['base']['defaults'])->toBe([
+        'left' => '-2',
+        'width' => '24',
+        'height' => 24,
+        'rotate' => '1',
+        'hFlip' => 1,
+    ]);
+
+    @unlink($tempFile);
+});
+
+it('emits an empty defaults array when the icon set root has none', function () {
+    $tempFile = sys_get_temp_dir().'/iconfinder-nodefaults-'.uniqid('', true).'.json';
+
+    file_put_contents($tempFile, json_encode([
+        'prefix' => 'test',
+        'lastModified' => time(),
+        'icons' => ['base' => ['body' => '<path d="M0 0"/>']],
+        'aliases' => [],
+    ], JSON_THROW_ON_ERROR));
+
+    $fileFinder = new class($tempFile) implements IconSetsFileFinderContract
+    {
+        public function __construct(private string $path) {}
+
+        public function find(string $prefix, string $type = 'icons'): string
+        {
+            return $this->path;
+        }
+    };
+
+    $result = (new IconFinder($fileFinder))->find('test', ['base']);
+
+    expect($result['base']['defaults'])->toBe([]);
+
+    @unlink($tempFile);
+});

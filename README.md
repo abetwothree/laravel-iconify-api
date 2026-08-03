@@ -96,6 +96,44 @@ Use the Blade component for direct rendering in views:
 <x-icon name="heroicons:clock" data-slot="icon" />
 ```
 
+### Supported options
+
+Both the helper and the Blade component accept the same options as the official Iconify components. Anything not listed here is passed through as a plain SVG attribute, except
+`viewBox`, which is always computed from the icon data, and option keys that are not well-formed XML attribute names, which are skipped.
+
+That last rule checks the attribute *name* only — a key like `'x onload=alert(1)'` would otherwise open a second, live attribute, since escaping does not touch it. Well-formed keys such as `onclick` still render, exactly as they would through a Blade attribute bag.
+
+Values are rendered when they are a string, a number, a boolean, or an object with a `__toString()`. Anything else — an array, a closure, a plain object — is skipped rather than emitted as an empty attribute.
+
+| Option | Values | Effect |
+| --- | --- | --- |
+| `width`, `height` | number, CSS length, `auto`, `unset` | Icon size. Defaults to `1em`. One side is derived from the other by aspect ratio. `unset`, `undefined` and `none` omit both attributes entirely. A falsy value (`0`, `''`, `false`) falls back to `1em`; the *string* `'0'` is kept, matching JavaScript truthiness. |
+| `color` | any CSS color | Applied via `style="color: …"`, matching React's `style.color = value`. Only affects monotone icons (those using `fill="currentColor"` / `stroke="currentColor"`). As an inline style it beats any non-`!important` CSS rule — it was previously a `color="…"` attribute, which such a rule could override. A value containing `;`, `{`, `}`, `/*` or `*/` could inject a second declaration and is dropped entirely; `rgb(1,2,3)`, `hsl(210 100% 50%)`, `var(--x, red)`, `currentColor` and `color-mix(...)` are unaffected. |
+| `inline` | `true` | Adds `vertical-align: -0.125em` so the icon sits on the text baseline. |
+| `rotate` | `1`–`3`, `"90deg"`, `"25%"` | Quarter-turn rotation. Non-quarter values are ignored. |
+| `flip` | `"horizontal"`, `"vertical"`, `"horizontal,vertical"` | Flip shorthand. |
+| `hFlip`, `vFlip` | `true` | Flip on one axis. |
+| `h-flip`, `horizontal-flip`, `horizontalFlip` | `true` | Aliases for `hFlip`. |
+| `v-flip`, `vertical-flip`, `verticalFlip` | `true` | Aliases for `vFlip`. |
+| `aria-hidden` | anything other than `true` | Removes the default `aria-hidden="true"`. |
+
+```blade
+<x-icon name="heroicons:clock" width="32" color="rebeccapurple" inline />
+<x-icon name="heroicons:clock" rotate="90deg" h-flip="true" />
+```
+
+```php
+$svg = icon('heroicons:clock', ['width' => 32, 'color' => 'rebeccapurple', 'inline' => true]);
+```
+
+A `style` you supply yourself is always emitted last, so it overrides the `color` and
+`inline` styles the package generates.
+
+The framework-only props Iconify's React/Vue/Svelte components accept — `icon`, `mode`,
+`ssr`, `onLoad`, `children`, `fallback`, `customise`, `_ref` — are accepted and ignored
+rather than emitted as attributes. Alternate render modes (`mode="bg"`, `mode="mask"`)
+are not implemented; icons always render as inline `<svg>`.
+
 ### Naming and collision safety
 
 If your app already has a global helper or component with the same name, this package will skip registration and leave existing behavior untouched.
@@ -108,10 +146,12 @@ You can also customize or disable each one in `config/iconify-api.php`:
 
 	'defaults' => [
 		'class' => '',
-		// Any default SVG attributes are supported.
+		// Any default SVG attribute or render option is supported.
 		// Examples:
 		// 'data-source' => 'iconify-api',
 		// 'style' => 'vertical-align: middle;',
+		// 'width' => '1.5em',
+		// 'inline' => true,
 	],
 
 	'helper' => [
@@ -126,7 +166,7 @@ You can also customize or disable each one in `config/iconify-api.php`:
 ],
 ```
 
-Values from `defaults` are applied to every rendered icon. Per-icon options (helper or Blade attributes) override matching keys, except `class`, which is merged.
+Values from `defaults` are applied to every rendered icon. Per-icon options (helper or Blade attributes) override matching keys, except `class`, which is merged. Render options such as `width`, `height`, `rotate`, `flip`, `inline` and `color` are honoured here too, not just plain SVG attributes.
 
 ### PHPStan support
 
@@ -178,6 +218,12 @@ php artisan view:clear
 This package uses Laravel's caching system to cache the icon data to make repeated requests for the same icon faster. It caches icon data when it is requested so that it only caches the icons that are actually used in your application.
 
 You can set which cache store to use for this package in your `config/iconify-api.php` file. Otherwise, it will use your default cache store setting.
+
+A found icon is cached without an expiry — it cannot change while the installed version of the icon set stays the same. Nothing keys off the icon set file, so upgrading an icon package invalidates nothing: run `php artisan cache:clear` after `npm update @iconify/json` or after upgrading an `@iconify-json/*` package, or a redrawn icon keeps serving its old body indefinitely, on both the API routes and `icon('set:name')`.
+
+A "this icon does not exist" result is cached only briefly, because any name a caller invents produces one; `not_found_cache_ttl` controls how long (300 seconds by default, `0` to skip caching misses entirely). The API routes also bound how many names one request may ask for, via `max_icons_per_request` (200 by default, `0` for no limit); a request above the limit is rejected with a `400`.
+
+Cache keys are `{cache_key_prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name}` for icons and `{cache_key_prefix}:{icon-set-prefix}:meta:…` for icon set metadata. Icon names are not filtered, so a name a cache key cannot hold — one carrying a space, a `:`, a `/`, a control character or any other byte outside printable ASCII (so a non-ASCII name always hashes), or longer than 128 bytes — is replaced in that last segment by `h:` and a SHA-256 of the whole name; no icon set published through `@iconify/json` contains such a name, but a hand-authored one reached through a custom `icons_location` may, and its keys will not be readable back to a name. The shape version changes when the cached array shape does, which orphans the older entries rather than migrating them — run `php artisan cache:clear` after upgrading this package too, if you want the space back straight away.
 
 ## Missing Features
 

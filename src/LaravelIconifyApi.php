@@ -15,11 +15,6 @@ class LaravelIconifyApi
 
     public static string $singleSetFolder = '@iconify-json';
 
-    /**
-     * @var TPrefixes
-     */
-    protected static array $prefixes = [];
-
     public function iconsLocation(): string
     {
         return config()->string('iconify-api.icons_location');
@@ -81,14 +76,16 @@ class LaravelIconifyApi
     }
 
     /**
+     * Every icon set prefix installed under the icons location.
+     *
+     * Deliberately not memoised: a static memo outlives the container reset on Octane and
+     * friends, freezing `/collections` at whatever the first worker request saw. Two
+     * directory listings are cheap next to the JSON reads every caller goes on to do.
+     *
      * @return TPrefixes
      */
     public function prefixes(): array
     {
-        if (count(self::$prefixes) > 0) {
-            return self::$prefixes;
-        }
-
         $prefixes = [];
 
         if (is_dir($this->singleSetLocation())) {
@@ -115,8 +112,6 @@ class LaravelIconifyApi
         }
 
         sort($prefixes);
-
-        self::$prefixes = $prefixes;
 
         return $prefixes;
     }

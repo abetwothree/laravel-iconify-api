@@ -25,9 +25,13 @@ class SvgIdReplacer
             $newId = $this->nextId($id);
             $escapedId = preg_quote($id, '/');
 
+            // The braces are load-bearing: `'$1'.$newId` fuses into a higher-numbered
+            // backreference whenever the new id starts with a digit (`$1` + `0abc` reads
+            // as group 10, which does not exist), dropping the captured delimiter and
+            // emitting invalid SVG.
             $body = (string) preg_replace(
                 '/([#;"])(?:'.$escapedId.')([")]|\.[a-z])/',
-                '$1'.$newId.$suffix.'$2',
+                '${1}'.$newId.$suffix.'${2}',
                 $body
             );
         }

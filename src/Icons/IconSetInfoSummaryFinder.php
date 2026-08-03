@@ -12,6 +12,17 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSets
  */
 class IconSetInfoSummaryFinder implements IconSetInfoSummaryFinderContract
 {
+    /**
+     * Icon set root properties copied verbatim onto an icon set response.
+     *
+     * Mirrors `propsToCopy` in packages/utils/src/icon-set/get-icons.ts:8-10 —
+     * the keys of `defaultIconDimensions` plus `provider`. Dropping `left`/`top`
+     * makes a client rebuild the wrong viewBox for any set with a negative origin.
+     *
+     * @var array<int, string>
+     */
+    protected const PROPS_TO_COPY = ['left', 'top', 'width', 'height', 'provider'];
+
     public function __construct(
         protected IconSetsFileFinderContract $iconSetsFileFinder
     ) {}
@@ -30,12 +41,10 @@ class IconSetInfoSummaryFinder implements IconSetInfoSummaryFinderContract
             'lastModified' => $content['lastModified'],
         ];
 
-        if (isset($content['width']) && ! empty($content['width'])) {
-            $data['width'] = $content['width'];
-        }
-
-        if (isset($content['height']) && ! empty($content['height'])) {
-            $data['height'] = $content['height'];
+        foreach (self::PROPS_TO_COPY as $property) {
+            if (array_key_exists($property, $content) && $content[$property] !== null) {
+                $data[$property] = $content[$property];
+            }
         }
 
         unset($content);

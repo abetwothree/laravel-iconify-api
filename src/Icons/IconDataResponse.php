@@ -15,8 +15,11 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoSummaryFinder as Ic
  * @phpstan-type TIconResponse = array{
  *      prefix: string,
  *      lastModified: int,
- *      width?: int,
- *      height?: int,
+ *      left?: int|float|string,
+ *      top?: int|float|string,
+ *      width?: int|float|string,
+ *      height?: int|float|string,
+ *      provider?: string,
  *      aliases: TAliases,
  *      icons: TIcons,
  *      not_found?: TNotFound,
