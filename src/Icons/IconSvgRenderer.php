@@ -7,6 +7,7 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconDataResolver;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconifySvgBuilder;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconRotation;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
+use Stringable;
 
 /**
  * @phpstan-import-type TIconData from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
@@ -471,8 +472,17 @@ class IconSvgRenderer
                 continue;
             }
 
+            // A value safeString() cannot represent — an array, a closure, a plain object
+            // — coerces to the empty default. Emitting it would produce a present but
+            // empty attribute, which is not the same thing as no attribute at all.
+            $stringValue = $this->safeString($value, '');
+
+            if ($stringValue === '') {
+                continue;
+            }
+
             $escapedKey = htmlspecialchars((string) $key, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-            $escapedValue = htmlspecialchars($this->safeString($value, ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $escapedValue = htmlspecialchars($stringValue, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
             $parts[] = $escapedKey.'="'.$escapedValue.'"';
         }
@@ -480,9 +490,20 @@ class IconSvgRenderer
         return implode(' ', $parts);
     }
 
+    /**
+     * Render a value as an attribute string, or the default when it has no representation.
+     *
+     * `Stringable` is included because a Blade component hands over whatever was bound to
+     * it — `<x-icon :data-x="$stringable" />` reaches here as the object — and Laravel's
+     * own ComponentAttributeBag would have rendered its string.
+     */
     protected function safeString(mixed $value, string $default = ''): string
     {
         if (is_string($value) || is_numeric($value) || is_bool($value)) {
+            return (string) $value;
+        }
+
+        if ($value instanceof Stringable) {
             return (string) $value;
         }
 

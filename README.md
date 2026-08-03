@@ -107,6 +107,10 @@ That last rule checks the attribute *name* only — a key like `'x onload=alert(
 otherwise open a second, live attribute, since escaping does not touch it. Well-formed
 keys such as `onclick` still render, exactly as they would through a Blade attribute bag.
 
+Values are rendered when they are a string, a number, a boolean, or an object with a
+`__toString()`. Anything else — an array, a closure, a plain object — is skipped rather
+than emitted as an empty attribute.
+
 | Option | Values | Effect |
 | --- | --- | --- |
 | `width`, `height` | number, CSS length, `auto`, `unset` | Icon size. Defaults to `1em`. One side is derived from the other by aspect ratio. `unset`, `undefined` and `none` omit both attributes entirely. A falsy value (`0`, `''`, `false`) falls back to `1em`; the *string* `'0'` is kept, matching JavaScript truthiness. |

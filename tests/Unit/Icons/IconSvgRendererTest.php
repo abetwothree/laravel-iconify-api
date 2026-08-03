@@ -418,7 +418,7 @@ it('covers remaining parser and helper branches', function () {
         'data-array' => ['value'],
         'data-keep' => 'ok',
     ]);
-    expect($attributeString)->toContain('data-array=""');
+    expect($attributeString)->not->toContain('data-array');
     expect($attributeString)->toContain('data-keep="ok"');
 
     $implode = new ReflectionMethod($renderer, 'implodeUniqueClasses');
@@ -864,4 +864,53 @@ it('degrades to the 16x16 fallback instead of erroring when a custom finder omit
     // root defaults (32x32) that a finder honouring the key would have supplied are
     // gone, so it renders with the pre-branch 16x16 fallback rather than throwing.
     expect($svg)->toContain('viewBox="0 0 16 16"');
+});
+
+it('skips attributes whose value has no string representation', function () {
+    $renderer = new IconSvgRenderer(Mockery::mock(IconFinder::class));
+
+    $stringify = new ReflectionMethod($renderer, 'stringifyAttributes');
+    $stringify->setAccessible(true);
+
+    $attributeString = $stringify->invoke($renderer, [
+        'data-array' => ['a' => 1],
+        'data-empty-array' => [],
+        'data-object' => new stdClass,
+        'data-closure' => fn (): string => 'x',
+        'data-keep' => 'ok',
+    ]);
+
+    // A value safeString() cannot represent used to coerce to '' and emit a present
+    // but empty attribute, which is not the same thing as no attribute at all.
+    expect($attributeString)->toBe('data-keep="ok"');
+});
+
+it('renders a stringable attribute value rather than blanking it', function () {
+    $renderer = new IconSvgRenderer(Mockery::mock(IconFinder::class));
+
+    $stringify = new ReflectionMethod($renderer, 'stringifyAttributes');
+    $stringify->setAccessible(true);
+
+    $stringable = new class implements Stringable
+    {
+        public function __toString(): string
+        {
+            return 'from-tostring';
+        }
+    };
+
+    // A Blade component hands over whatever was bound to it, so `:data-x="$stringable"`
+    // arrives here as the object. Laravel's own attribute bag would render its string.
+    $attributeString = $stringify->invoke($renderer, [
+        'data-x' => $stringable,
+        'data-blank' => new class implements Stringable
+        {
+            public function __toString(): string
+            {
+                return '';
+            }
+        },
+    ]);
+
+    expect($attributeString)->toBe('data-x="from-tostring"');
 });
