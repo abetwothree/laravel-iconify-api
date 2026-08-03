@@ -121,7 +121,7 @@ it('does not cache a miss at all when the ttl is zero', function () {
     ]);
 
     expect($repo->getIcons('test', ['junk'])['not_found'])->toBe(['junk']);
-    expect(array_keys(Cache::store('array')->getStore()->all()))->toBe([]);
+    expect(cachedKeys())->toBe([]);
 });
 
 it('caches an icon whose name a cache key cannot hold', function () {
@@ -160,7 +160,7 @@ it('caches an icon whose name a cache key cannot hold', function () {
     );
 
     // One key per name, all hashed, none of them equal to another.
-    expect(array_keys(Cache::store('array')->getStore()->all()))->toBe($expected)
+    expect(cachedKeys())->toBe($expected)
         ->and(array_unique($expected))->toHaveCount(count($names));
 
     // And every one of them reads back as itself.
@@ -189,7 +189,7 @@ it('keeps writing the name itself for every name a cache key can hold', function
         ]);
     }
 
-    expect(array_keys(Cache::store('array')->getStore()->all()))->toBe([
+    expect(cachedKeys())->toBe([
         'iconify-icons:mdi:icon:2:home',
         'iconify-icons:mdi:icon:2:account-circle',
         'iconify-icons:mdi:icon:2:24-hours',

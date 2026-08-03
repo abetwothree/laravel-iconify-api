@@ -62,7 +62,7 @@ it('looks up icon names that upstream matchIconName would not accept', function 
     expect($response->json('icons'))->toHaveKey('activity')
         ->and($response->json('not_found'))->toBe(['info:summary:2', '../../etc/passwd', 'UPPER']);
 
-    $keys = array_keys(Cache::store('array')->getStore()->all());
+    $keys = cachedKeys();
 
     // A name a cache key can hold is written verbatim; one carrying the key separator
     // or a path separator is replaced by a hash of the whole name.
@@ -129,7 +129,7 @@ it('rejects a request that asks for more icons than the configured limit', funct
     expect($response->json('error'))->toContain('5');
 
     // Nothing about a rejected request may reach the cache.
-    expect(array_keys(Cache::store('array')->getStore()->all()))->toBe([]);
+    expect(cachedKeys())->toBe([]);
 });
 
 it('does not leave permanent cache entries behind for names that do not exist', function () {
@@ -142,7 +142,7 @@ it('does not leave permanent cache entries behind for names that do not exist', 
         'icons' => implode(',', $names),
     ]))->assertStatus(200);
 
-    $before = array_keys(Cache::store('array')->getStore()->all());
+    $before = cachedKeys();
     expect($before)->toContain('iconify-icons:bytesize:icon:2:junk-0');
 
     test()->travel(301)->seconds();
@@ -156,7 +156,7 @@ it('never writes a cache key that another key builder could address', function (
     test()->get(route('iconify-api.set-json.show', ['set' => 'codicon', 'icons' => 'info']));
     test()->get(route('iconify-api.collections.show', ['prefix' => 'codicon']));
 
-    $keys = array_keys(Cache::store('array')->getStore()->all());
+    $keys = cachedKeys();
 
     expect($keys)->toContain('iconify-icons:codicon:icon:2:info')
         ->and($keys)->toContain('iconify-icons:codicon:meta:info')
