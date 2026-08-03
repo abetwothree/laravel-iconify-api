@@ -88,6 +88,7 @@ return [
     |--------------------------------------------------------------------------
     | Configure the optional helper function and Blade component for rendering
     | Iconify icons directly to SVG without an HTTP request.
+    |
     | Defaults support any SVG attribute (for example class, data-*, style) as
     | well as any render option (width, height, rotate, flip, inline, color).
     |
@@ -99,7 +100,6 @@ return [
         'defaults' => [
             'class' => '',
             // Any default SVG attribute or render option is supported.
-            // Examples:
             // 'data-source' => 'iconify-api',
             // 'style' => 'vertical-align: middle;',
             // 'width' => '1.5em',
@@ -138,17 +138,7 @@ return [
     | The format of Iconify API cache keys is:
     | {cache-prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name} for icons, and
     | {cache-prefix}:{icon-set-prefix}:meta:{info|summary|file:{type}} for icon set
-    | metadata. The literal segment in the middle keeps an icon name from ever
-    | addressing a metadata key, and the shape version retires entries whose cached
-    | array shape has changed.
-    |
-    | Icon names are not filtered, so a name a cache key cannot hold — one carrying a
-    | space, a ":", a "/", a control character or any other byte outside printable
-    | ASCII (so a non-ASCII name always hashes), or longer than 128 bytes — is
-    | replaced in that last segment by "h:" and a SHA-256 of the whole name. No icon
-    | set published through @iconify/json contains such a name, but a hand-authored
-    | one reached through a custom icons_location may, and its keys will not be
-    | readable back to a name.
+    | metadata.
     |
     */
 
