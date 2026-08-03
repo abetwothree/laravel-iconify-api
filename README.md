@@ -98,18 +98,12 @@ Use the Blade component for direct rendering in views:
 
 ### Supported options
 
-Both the helper and the Blade component accept the same options as the official Iconify
-components. Anything not listed here is passed through as a plain SVG attribute, except
-`viewBox`, which is always computed from the icon data, and option keys that are not
-well-formed XML attribute names, which are skipped.
+Both the helper and the Blade component accept the same options as the official Iconify components. Anything not listed here is passed through as a plain SVG attribute, except
+`viewBox`, which is always computed from the icon data, and option keys that are not well-formed XML attribute names, which are skipped.
 
-That last rule checks the attribute *name* only — a key like `'x onload=alert(1)'` would
-otherwise open a second, live attribute, since escaping does not touch it. Well-formed
-keys such as `onclick` still render, exactly as they would through a Blade attribute bag.
+That last rule checks the attribute *name* only — a key like `'x onload=alert(1)'` would otherwise open a second, live attribute, since escaping does not touch it. Well-formed keys such as `onclick` still render, exactly as they would through a Blade attribute bag.
 
-Values are rendered when they are a string, a number, a boolean, or an object with a
-`__toString()`. Anything else — an array, a closure, a plain object — is skipped rather
-than emitted as an empty attribute.
+Values are rendered when they are a string, a number, a boolean, or an object with a `__toString()`. Anything else — an array, a closure, a plain object — is skipped rather than emitted as an empty attribute.
 
 | Option | Values | Effect |
 | --- | --- | --- |
