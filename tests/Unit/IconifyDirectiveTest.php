@@ -11,9 +11,14 @@ it('can render the directive', function () {
 
     expect($rendered)->toBeString();
     expect($rendered)->toContain('window.IconifyProviders');
-    expect($rendered)->toContain('IconifyProviders = {');
-    expect($rendered)->toContain('resources: [');
-    expect($rendered)->toContain('}');
+
+    $providers = decodeIconifyProviders($rendered);
+
+    expect($providers)->toBe([
+        '' => [
+            'resources' => ['/iconify/api'],
+        ],
+    ]);
 });
 
 it('can render the directive with custom providers', function () {
@@ -37,12 +42,21 @@ it('can render the directive with custom providers', function () {
 
     expect($rendered)->toBeString();
     expect($rendered)->toContain('window.IconifyProviders');
-    expect($rendered)->toContain('IconifyProviders = {');
-    expect($rendered)->toContain('resources: [');
-    expect($rendered)->toContain('http://example.com');
-    expect($rendered)->toContain('http://test.com');
-    expect($rendered)->toContain('rotate');
-    expect($rendered)->toContain('}');
+
+    $providers = decodeIconifyProviders($rendered);
+
+    expect($providers)->toBe([
+        '' => [
+            'resources' => ['/iconify/api'],
+        ],
+        'custom' => [
+            'resources' => ['http://example.com'],
+        ],
+        'awesome-custom' => [
+            'resources' => ['http://example.com', 'http://test.com'],
+            'rotate' => 1000,
+        ],
+    ]);
 });
 
 it('renders with no custom providers when the config value is explicitly null', function () {
@@ -50,11 +64,13 @@ it('renders with no custom providers when the config value is explicitly null', 
 
     $rendered = (new IconifyDirective)->render();
 
-    expect($rendered)->toBeString();
-    expect($rendered)->toContain('window.IconifyProviders');
-    expect($rendered)->toContain('IconifyProviders = {');
-    expect($rendered)->toContain('resources: [');
-    expect($rendered)->toContain('}');
+    $providers = decodeIconifyProviders($rendered);
+
+    expect($providers)->toBe([
+        '' => [
+            'resources' => ['/iconify/api'],
+        ],
+    ]);
 });
 
 it('rejects a custom providers config that is not an array', function () {

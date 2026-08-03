@@ -15,10 +15,15 @@ it('can render the iconify directive', function () {
     $directive = renderIconifyDirective();
 
     expect($directive)->toBeString()
-        ->toContain('window.IconifyProviders')
-        ->toContain('IconifyProviders = {')
-        ->toContain('resources: [')
-        ->toContain('}');
+        ->toContain('window.IconifyProviders');
+
+    $providers = decodeIconifyProviders($directive);
+
+    expect($providers)->toBe([
+        '' => [
+            'resources' => ['/iconify/api'],
+        ],
+    ]);
 });
 
 it('can render the iconify directive with custom providers', function () {
@@ -41,11 +46,20 @@ it('can render the iconify directive with custom providers', function () {
     $directive = renderIconifyDirective();
 
     expect($directive)->toBeString()
-        ->toContain('window.IconifyProviders')
-        ->toContain('IconifyProviders = {')
-        ->toContain('resources: [')
-        ->toContain('http://example.com')
-        ->toContain('http://test.com')
-        ->toContain('rotate')
-        ->toContain('}');
+        ->toContain('window.IconifyProviders');
+
+    $providers = decodeIconifyProviders($directive);
+
+    expect($providers)->toBe([
+        '' => [
+            'resources' => ['/iconify/api'],
+        ],
+        'custom' => [
+            'resources' => ['http://example.com'],
+        ],
+        'awesome-custom' => [
+            'resources' => ['http://example.com', 'http://test.com'],
+            'rotate' => 1000,
+        ],
+    ]);
 });

@@ -25,9 +25,15 @@ class IconifyDirective
             ? []
             : config()->array('iconify-api.custom_providers', []);
 
-        $encodedProviders = $customProviders === []
-            ? ''
-            : json_encode($customProviders, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        // Built and encoded as one array so the emitted statement is a single JSON
+        // object; encoding the default and the configured providers separately and
+        // concatenating them produced two members back to back, which is not valid
+        // object-literal syntax. array_merge() keeps a later duplicate string key over
+        // an earlier one, preserving a custom provider explicitly keyed '' winning over
+        // the default.
+        $providers = array_merge(['' => ['resources' => [$url]]], $customProviders);
+
+        $encodedProviders = json_encode($providers, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 
         return <<<HTML
             <script type="text/javascript">
@@ -35,14 +41,7 @@ class IconifyDirective
                     window.IconifyProviders = {};
                 }
 
-                IconifyProviders = {
-                    '': {
-                        resources: [
-                            '{$url}',
-                        ],
-                    },
-                    {$encodedProviders}
-                };
+                IconifyProviders = {$encodedProviders};
             </script>
         HTML;
     }

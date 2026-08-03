@@ -26,3 +26,28 @@ function cachedKeys(string $store = 'array'): array
 
     return array_keys($entries);
 }
+
+/**
+ * Decode the `IconifyProviders = {...};` object literal out of a rendered `@iconify` tag.
+ *
+ * Matching fragments of the JS with `toContain()` can pass against a right-hand side that
+ * is not valid JSON at all — that is how a duplicated-object bug went undetected. Decoding
+ * it is the only assertion that actually proves the emitted statement is one JSON object.
+ * The anchored, non-`window.`-prefixed match skips the `if(!window.IconifyProviders)` guard,
+ * which contains the same substring earlier in the string.
+ *
+ * @return array<string, mixed>
+ */
+function decodeIconifyProviders(string $rendered): array
+{
+    preg_match('/^\s*IconifyProviders = (\{.*\});$/ms', $rendered, $matches);
+
+    if (! array_key_exists(1, $matches)) {
+        throw new RuntimeException('No IconifyProviders assignment found in rendered output.');
+    }
+
+    /** @var array<string, mixed> $decoded */
+    $decoded = json_decode($matches[1], true, flags: JSON_THROW_ON_ERROR);
+
+    return $decoded;
+}
