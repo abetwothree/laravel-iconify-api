@@ -42,3 +42,9 @@ it('can render the directive with custom providers', function () {
     expect($rendered)->toContain('rotate');
     expect($rendered)->toContain('}');
 });
+
+it('rejects a custom providers config that is not an array', function () {
+    config()->set('iconify-api.custom_providers', 'not-an-array');
+
+    expect(fn () => (new IconifyDirective)->render())->toThrow(InvalidArgumentException::class);
+});
