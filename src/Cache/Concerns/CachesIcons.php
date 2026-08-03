@@ -13,28 +13,17 @@ trait CachesIcons
     /**
      * Bytes of an icon name that may be written into a cache key verbatim.
      *
-     * This bounds the name segment and nothing else. The icon set prefix ahead of it is
-     * caller-supplied, has no route constraint and is bounded by nothing here — an
-     * unenforced precondition this constant shares with every other key builder in this
-     * package, since `meta:` keys are built from that same prefix. Given a plausible
-     * prefix the whole key stays well inside memcached's 250-byte limit and the
-     * `database` store's `varchar(255)`: the longest prefix bundled with
-     * `@iconify/json` is 26 bytes, which puts the worst case at 176 with the default
-     * `cache_key_prefix`. A caller asking for a long enough prefix can still exceed
-     * both, exactly as it can on a metadata key today.
-     *
-     * The value itself is sized off the names: the longest of the 344,625 in the 235
-     * bundled sets is 99 bytes, so no published set comes near it and the hashed form
-     * (66 bytes) is shorter still.
+     * Bounds the name segment only. The icon set prefix ahead of it is caller-supplied
+     * and unbounded here, an unenforced precondition shared with every key builder in
+     * this package. The longest name in the bundled sets is 99 bytes, so no published
+     * set comes near this.
      */
     protected const MAX_ICON_KEY_NAME_BYTES = 128;
 
     /**
      * An icon name that may be written into a cache key verbatim.
      *
-     * Everything printable in ASCII except the space, the `:` that separates key
-     * segments, and the `/` — a key is an opaque string to Laravel, but not every store
-     * treats it as one, which is why the `file` store hashes it before building a path.
+     * Printable ASCII, minus the space, the `:` that separates key segments, and `/`.
      * Control characters and high bytes are out because memcached rejects them.
      */
     protected const ICON_KEY_NAME_PATTERN = '~^[^\x00-\x20\x7f-\xff:/]++$~D';
@@ -53,9 +42,8 @@ trait CachesIcons
         foreach ($icons as $icon) {
             $cachedIcon = Cache::store($this->store)->get($this->iconKey($prefix, $icon));
 
-            // The shape version lives in the key, so anything found here is already
-            // known to be current. `defaults` is optional by contract, so its absence
-            // must not be read as staleness — see IconFinderContract.
+            // The shape version lives in the key, so anything found here is current.
+            // `defaults` is optional by contract and must not be read as staleness.
             if (is_array($cachedIcon) && isset($cachedIcon['icons'])) {
                 /** @var TIconData $cachedIcon */
                 $cacheResponse['found'][$icon] = $cachedIcon;
@@ -71,17 +59,13 @@ trait CachesIcons
      * Cache one icon entry.
      *
      * A hit is immutable for as long as the *installed version* of the icon set is, so
-     * it is stored without a TTL. Nothing here keys off the icon set file's mtime,
-     * version or hash, so upgrading an icon package rewrites bodies in place while
-     * every entry — and the cached path at `meta:file:icons` — survives, and a redrawn
-     * icon serves its old body indefinitely. `php artisan cache:clear` is the way out;
-     * the README says so in its caching section.
+     * it is stored without a TTL. Nothing keys off the set file's mtime or version, so
+     * upgrading an icon package leaves the old bodies cached until `php artisan
+     * cache:clear`.
      *
-     * A miss is not immutable: `IconFinder::find()` returns an entry for every
-     * requested name, so one request can mint an entry per distinct name it asks for,
-     * and nothing in this package ever calls `forget()`. Negative entries therefore
-     * expire, which bounds what a request can leave behind. A TTL of zero disables
-     * negative caching altogether.
+     * A miss expires: `IconFinder::find()` returns an entry for every requested name,
+     * so a request can mint one per name it invents and nothing here calls `forget()`.
+     * A TTL of zero disables negative caching altogether.
      *
      * @param  TIconData  $iconData
      */
@@ -103,17 +87,13 @@ trait CachesIcons
     /**
      * Icon entries live under their own `icon:` segment.
      *
-     * The icon name is attacker- and author-controlled and is the last segment, so a
-     * flat `{prefix}:{set}:{name}` scheme let a name such as `info` — shipped by 70 of
-     * the 235 sets in `@iconify/json` — address an icon set metadata key exactly and
-     * overwrite it permanently. Every key builder in this package therefore commits to
-     * a literal segment before any caller-supplied value.
+     * A flat `{prefix}:{set}:{name}` scheme let a name such as `info` — shipped by 70
+     * of the 235 sets in `@iconify/json` — address an icon set metadata key exactly and
+     * overwrite it permanently. Every key builder here therefore commits a literal
+     * segment before any caller-supplied value.
      *
-     * The `2` is the entry shape version: it is bumped whenever the cached array shape
-     * changes, which retires stale entries without needing a marker key inside them.
-     *
-     * The name itself is not filtered before it gets here, so the last segment is
-     * conditionally hashed — see `iconKeySegment()`.
+     * The `2` is the entry shape version, bumped whenever the cached array shape
+     * changes so stale entries retire without a marker key inside them.
      */
     protected function iconKey(string $prefix, string $icon): string
     {
@@ -124,22 +104,18 @@ trait CachesIcons
      * The icon name as written, or a hash of it when a cache key cannot hold it.
      *
      * Names are not validated on the way in: a hand-authored set reached through a
-     * custom `icons_location` may legitimately use one that Iconify's own `matchIconName`
-     * would reject, and a name that does not exist is simply a miss. Cache stores are
-     * less forgiving than the finder — memcached refuses a key holding a space or a
-     * control character and caps it at 250 bytes, and the `database` store keeps keys in
-     * a `varchar(255)` — so a name a key cannot hold is replaced rather than passed on.
+     * custom `icons_location` may use one that Iconify's own `matchIconName` would
+     * reject, and a name that does not exist is simply a miss. Cache stores are less
+     * forgiving — memcached refuses a key holding a space or a control character and
+     * caps it at 250 bytes, and the `database` store keeps keys in a `varchar(255)`.
      *
-     * The replacement hashes the whole name, never a prefix of it, so two names cannot
-     * land on one key. The two branches cannot meet either: the verbatim branch rules
-     * `:` out, and the hashed branch always writes one at offset 1. `getIcons()` and
-     * `setIcon()` both build their key through here, so a hashed name reads back from
-     * the key it was written to. SHA-256 rather than a fast non-cryptographic hash
-     * because the input is caller-controlled and a collision would serve one name's
-     * entry for another's.
+     * The hash covers the whole name, never a prefix, so two names cannot land on one
+     * key, and the branches cannot meet: the verbatim branch rules `:` out and the
+     * hashed branch always writes one at offset 1. SHA-256 rather than a fast
+     * non-cryptographic hash because the input is caller-controlled.
      *
-     * Every name in every published icon set takes the verbatim branch, so the key
-     * format stays as documented and no existing entry is orphaned.
+     * Every name in every published icon set takes the verbatim branch, so the
+     * documented key format still holds and no existing entry is orphaned.
      */
     protected function iconKeySegment(string $icon): string
     {
