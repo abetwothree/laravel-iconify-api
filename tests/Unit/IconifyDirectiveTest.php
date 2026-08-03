@@ -45,6 +45,18 @@ it('can render the directive with custom providers', function () {
     expect($rendered)->toContain('}');
 });
 
+it('renders with no custom providers when the config value is explicitly null', function () {
+    config()->set('iconify-api.custom_providers', null);
+
+    $rendered = (new IconifyDirective)->render();
+
+    expect($rendered)->toBeString();
+    expect($rendered)->toContain('window.IconifyProviders');
+    expect($rendered)->toContain('IconifyProviders = {');
+    expect($rendered)->toContain('resources: [');
+    expect($rendered)->toContain('}');
+});
+
 it('rejects a custom providers config that is not an array', function () {
     config()->set('iconify-api.custom_providers', 'not-an-array');
 
