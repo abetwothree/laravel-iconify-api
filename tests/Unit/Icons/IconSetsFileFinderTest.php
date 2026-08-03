@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinder;
 
 it('can find single file for individual icon set installed', function () {

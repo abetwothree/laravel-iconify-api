@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Cache\CacheRepository;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconFinderCached;

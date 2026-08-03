@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApi;
 
 it('covers location helper methods and type branches', function () {

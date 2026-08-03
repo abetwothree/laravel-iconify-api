@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Tests\TestCase;
 use Illuminate\Support\Facades\Cache;
 

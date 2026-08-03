@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AbeTwoThree\LaravelIconifyApi\Cache;
 
 use AbeTwoThree\LaravelIconifyApi\Cache\Concerns\CacheIconSetInfo;

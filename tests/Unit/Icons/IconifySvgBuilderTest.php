@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconifySvgBuilder;
 
 it('covers transform passes and defs-safe wrapping', function () {

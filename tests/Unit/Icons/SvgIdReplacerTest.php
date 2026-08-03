@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
 
 it('returns original body when no ids exist', function () {

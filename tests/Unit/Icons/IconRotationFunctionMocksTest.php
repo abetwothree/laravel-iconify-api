@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AbeTwoThree\LaravelIconifyApi\Icons\Support {
 
     function preg_replace($pattern, $replacement, $subject, int $limit = -1, &$count = null)

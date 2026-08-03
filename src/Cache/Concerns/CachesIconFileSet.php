@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AbeTwoThree\LaravelIconifyApi\Cache\Concerns;
 
 use Illuminate\Support\Facades\Cache;

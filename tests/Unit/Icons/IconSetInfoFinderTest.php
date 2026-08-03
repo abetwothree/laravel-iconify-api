@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoFinder;
 

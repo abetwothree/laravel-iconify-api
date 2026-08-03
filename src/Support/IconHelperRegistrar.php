@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AbeTwoThree\LaravelIconifyApi\Support;
 
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSvgRenderer;

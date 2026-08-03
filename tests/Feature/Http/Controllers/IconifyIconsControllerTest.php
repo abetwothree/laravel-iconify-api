@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 beforeEach(function () {
     config()->set('iconify-api.cache_store', null);
 });

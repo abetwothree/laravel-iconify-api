@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 
 it('tests loading the full collections', function () {

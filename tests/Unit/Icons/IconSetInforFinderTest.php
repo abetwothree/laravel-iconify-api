@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetInfoSummaryFinder;
 
 it('can find info', function (
