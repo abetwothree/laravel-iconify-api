@@ -80,3 +80,19 @@ it('covers path generation', function () {
     config()->set('iconify-api.route_path', 'iconify/');
     expect((new LaravelIconifyApi)->path())->toBe('iconify/api');
 });
+
+it('does not conflate icon set prefixes that PHP reads as equal numbers', function () {
+    $base = sys_get_temp_dir().'/iconify-api-numeric-prefixes-'.uniqid('', true);
+
+    mkdir($base.'/@iconify-json/1e2', 0777, true);
+    mkdir($base.'/@iconify/json/json', 0777, true);
+
+    file_put_contents($base.'/@iconify/json/json/100.json', '{}');
+    file_put_contents($base.'/@iconify/json/json/9.json', '{}');
+
+    config()->set('iconify-api.icons_location', $base);
+
+    // `'1e2' == '100'` is true, so a loose in_array() drops one of two real icon sets,
+    // and SORT_REGULAR would then order what is left numerically.
+    expect((new LaravelIconifyApi)->prefixes())->toBe(['100', '1e2', '9']);
+});
