@@ -73,6 +73,35 @@ it('renders with no custom providers when the config value is explicitly null', 
     ]);
 });
 
+it('escapes angle brackets so a custom provider url cannot break out of the script tag', function () {
+    // `</script>` closes the tag. `<!--<script>` is subtler: it makes the browser
+    // ignore the real closing tag and swallow the rest of the page. Escaping only
+    // slashes would miss that one.
+    $payload = 'https://evil.test/<!--<script></script><img src=x onerror=alert(1)>';
+
+    config()->set('iconify-api.custom_providers', [
+        'breakout' => [
+            'resources' => [$payload],
+        ],
+    ]);
+
+    $rendered = (new IconifyDirective)->render();
+
+    expect(substr_count($rendered, '</script>'))->toBe(1)
+        ->and($rendered)->not->toContain('<!--')
+        ->and($rendered)->not->toContain('<img src=x');
+
+    // Escaping is transport-only, so the URL decodes back to what was configured.
+    expect(decodeIconifyProviders($rendered))->toBe([
+        '' => [
+            'resources' => ['/iconify/api'],
+        ],
+        'breakout' => [
+            'resources' => [$payload],
+        ],
+    ]);
+});
+
 it('rejects a custom providers config that is not an array', function () {
     config()->set('iconify-api.custom_providers', 'not-an-array');
 

@@ -25,7 +25,9 @@ class IconifyDirective
         // concatenated ones. A custom provider keyed '' overrides the default.
         $providers = array_merge(['' => ['resources' => [$url]]], $customProviders);
 
-        $encodedProviders = json_encode($providers, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        // A literal `<` in a provider URL or key would break out of the script tag,
+        // so escape it. Same flags as Laravel's Js::REQUIRED_FLAGS.
+        $encodedProviders = json_encode($providers, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
 
         return <<<HTML
             <script type="text/javascript">
