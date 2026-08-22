@@ -12,25 +12,17 @@ class IconifyDirective
     {
         $url = LaravelIconifyApi::domain().'/'.LaravelIconifyApi::path();
 
-        // A published config that explicitly sets this key to null must still mean
-        // "no custom providers" (pre-strict-types, `empty(null)` was true): Arr::get(),
-        // which backs config()->array(), returns that literal null for a key that exists
-        // rather than falling back to the default, so it has to be normalised here first.
+        // A config explicitly set to null means "no custom providers", but
+        // config()->array() would throw on null instead of using the default.
         $configuredProviders = config('iconify-api.custom_providers');
 
-        // `config()->array()` throws on any other non-array where an inline `@var` on
-        // `config()->get()` only promised one, and JSON_THROW_ON_ERROR turns an
-        // unencodable config into an exception rather than a truncated script tag.
+        // config()->array() throws if the config isn't actually an array.
         $customProviders = $configuredProviders === null
             ? []
             : config()->array('iconify-api.custom_providers', []);
 
-        // Built and encoded as one array so the emitted statement is a single JSON
-        // object; encoding the default and the configured providers separately and
-        // concatenating them produced two members back to back, which is not valid
-        // object-literal syntax. array_merge() keeps a later duplicate string key over
-        // an earlier one, preserving a custom provider explicitly keyed '' winning over
-        // the default.
+        // Merge before encoding so the output is one JSON object, not two
+        // concatenated ones. A custom provider keyed '' overrides the default.
         $providers = array_merge(['' => ['resources' => [$url]]], $customProviders);
 
         $encodedProviders = json_encode($providers, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
