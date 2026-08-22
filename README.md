@@ -221,15 +221,13 @@ php artisan view:clear
 
 ## Icon Caching
 
-This package uses Laravel's caching system to cache the icon data to make repeated requests for the same icon faster. It caches icon data when it is requested so that it only caches the icons that are actually used in your application.
+This package caches icon data through Laravel's cache as icons are requested, so only the icons your application uses get stored. Set `cache_store` in `config/iconify-api.php` to pick a store, or leave it unset to use your default.
 
-You can set which cache store to use for this package in your `config/iconify-api.php` file. Otherwise, it will use your default cache store setting.
+Found icons never expire, since an icon cannot change while the installed icon set stays the same. Nothing watches the icon set files, so run `php artisan cache:clear` after `npm update @iconify/json`, after upgrading an `@iconify-json/*` package, or after upgrading this package. Skip it and a redrawn icon keeps serving its old body.
 
-A found icon is cached without an expiry — it cannot change while the installed version of the icon set stays the same. Nothing keys off the icon set file, so upgrading an icon package invalidates nothing: run `php artisan cache:clear` after `npm update @iconify/json` or after upgrading an `@iconify-json/*` package, or a redrawn icon keeps serving its old body indefinitely, on both the API routes and `icon('set:name')`.
+Misses expire after 300 seconds, since any name a caller invents produces one. Change that with `not_found_cache_ttl`, or set it to `0` to skip caching misses. The API routes also cap how many icons one request may ask for with `max_icons_per_request` (200 by default, `0` for no limit); anything over the cap gets a `400`.
 
-A "this icon does not exist" result is cached only briefly, because any name a caller invents produces one; `not_found_cache_ttl` controls how long (300 seconds by default, `0` to skip caching misses entirely). The API routes also bound how many names one request may ask for, via `max_icons_per_request` (200 by default, `0` for no limit); a request above the limit is rejected with a `400`.
-
-Cache keys are `{cache_key_prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name}` for icons and `{cache_key_prefix}:{icon-set-prefix}:meta:…` for icon set metadata. Icon names are not filtered, so a name a cache key cannot hold — one carrying a space, a `:`, a `/`, a control character or any other byte outside printable ASCII (so a non-ASCII name always hashes), or longer than 128 bytes — is replaced in that last segment by `h:` and a SHA-256 of the whole name; no icon set published through `@iconify/json` contains such a name, but a hand-authored one reached through a custom `icons_location` may, and its keys will not be readable back to a name. The shape version changes when the cached array shape does, which orphans the older entries rather than migrating them — run `php artisan cache:clear` after upgrading this package too, if you want the space back straight away.
+Cache keys look like `{cache_key_prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name}`, with `meta:` in place of `icon:` for icon set metadata. A name that a cache key cannot hold, one carrying a space or running past 128 bytes, is replaced by a SHA-256 hash. No published icon set has such a name.
 
 ## Missing Features
 
