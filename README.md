@@ -104,24 +104,25 @@ Use the Blade component for direct rendering in views:
 
 ### Supported options
 
-Both the helper and the Blade component accept the same options as the official Iconify components. Anything not listed here is passed through as a plain SVG attribute, except
-`viewBox`, which is always computed from the icon data, and option keys that are not well-formed XML attribute names, which are skipped.
+The helper and the Blade component take the same options. Anything not listed below becomes an SVG attribute, so `onclick` and bindings like `@click`, `x-on:click` or `wire:model` render as written.
 
-That last rule checks the attribute *name* only — a key like `'x onload=alert(1)'` would otherwise open a second, live attribute, since escaping does not touch it. Well-formed keys such as `onclick` still render, exactly as they would through a Blade attribute bag.
+Keys that are not well-formed attribute names are skipped, which stops a key like `'x onload=alert(1)'` from opening a second live attribute. The check reads the name only, so it is not an XSS filter. Values that are not a string, number, boolean or `__toString()` object are skipped too, and `null`, `false` and `''` produce no attribute rather than an empty one. Boolean `true` renders as `"1"`.
 
-Values are rendered when they are a string, a number, a boolean, or an object with a `__toString()`. Anything else — an array, a closure, a plain object — is skipped rather than emitted as an empty attribute.
+Every icon carries `class="iconify iconify--{provider} iconify--{prefix}"`, with your own `class` merged onto it. `viewBox` is always computed from the icon data.
 
 | Option | Values | Effect |
 | --- | --- | --- |
-| `width`, `height` | number, CSS length, `auto`, `unset` | Icon size. Defaults to `1em`. One side is derived from the other by aspect ratio. `unset`, `undefined` and `none` omit both attributes entirely. A falsy value (`0`, `''`, `false`) falls back to `1em`; the *string* `'0'` is kept, matching JavaScript truthiness. |
-| `color` | any CSS color | Applied via `style="color: …"`, matching React's `style.color = value`. Only affects monotone icons (those using `fill="currentColor"` / `stroke="currentColor"`). As an inline style it beats any non-`!important` CSS rule — it was previously a `color="…"` attribute, which such a rule could override. A value containing `;`, `{`, `}`, `/*` or `*/` could inject a second declaration and is dropped entirely; `rgb(1,2,3)`, `hsl(210 100% 50%)`, `var(--x, red)`, `currentColor` and `color-mix(...)` are unaffected. |
+| `width`, `height` | number, CSS length, `auto`, `unset` | Set one and the other follows the aspect ratio. Height defaults to `1em`, so a non-square icon gets a computed width. `auto` uses the icon's own viewBox size. `unset`, `undefined` and `none` omit the attribute, and take the other side with them unless you set it. |
+| `color` | any CSS color | Emitted as `style="color: …"`, so it only affects monotone icons, the ones drawn with `currentColor`. A value containing `;`, `{`, `}`, `/*` or `*/` is dropped silently with no fallback. `color-mix(…)` and other functions are fine. |
 | `inline` | `true` | Adds `vertical-align: -0.125em` so the icon sits on the text baseline. |
-| `rotate` | `1`–`3`, `"90deg"`, `"25%"` | Quarter-turn rotation. Non-quarter values are ignored. |
-| `flip` | `"horizontal"`, `"vertical"`, `"horizontal,vertical"` | Flip shorthand. |
-| `hFlip`, `vFlip` | `true` | Flip on one axis. |
-| `h-flip`, `horizontal-flip`, `horizontalFlip` | `true` | Aliases for `hFlip`. |
-| `v-flip`, `vertical-flip`, `verticalFlip` | `true` | Aliases for `vFlip`. |
-| `aria-hidden` | anything other than `true` | Removes the default `aria-hidden="true"`. |
+| `rotate` | any integer, `"90deg"`, `"25%"` | Quarter turns, counted mod 4. Units are case-sensitive and untrimmed; anything that misses a whole quarter turn is ignored. |
+| `flip` | `"horizontal"`, `"vertical"`, `"horizontal,vertical"` | Setting both is a 180° rotation, and it adds to `rotate`. |
+| `hFlip`, `vFlip` | `true` | One axis each. Aliases: `h-flip`, `horizontal-flip`, `horizontalFlip`, and the `v-` equivalents. |
+| `aria-hidden` | anything but `true` | Removes the default `aria-hidden="true"`. Also spelled `ariaHidden`. |
+
+Boolean options accept only `true`, `"true"` and integer `1`. Blade passes every attribute as a string, so `<x-icon inline />` and `h-flip="true"` work while `inline="1"` silently does nothing.
+
+A missing or malformed icon name renders an empty string, with no exception and no log entry.
 
 ```blade
 <x-icon name="heroicons:clock" width="32" color="rebeccapurple" inline />
