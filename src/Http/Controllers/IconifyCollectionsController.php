@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AbeTwoThree\LaravelIconifyApi\Http\Controllers;
 
 use AbeTwoThree\LaravelIconifyApi\IconCollections\CollectionInfo;
@@ -23,9 +25,16 @@ class IconifyCollectionsController
             return response()->json(['error' => 'No icon set prefix specified in query string'], 404);
         }
 
+        $prefix = $request->input('prefix');
+
+        // `$request->string()` would stringify an array parameter instead, which is an
+        // array-to-string conversion: a warning and a 500.
+        if (! is_string($prefix)) {
+            return response()->json(['error' => 'The prefix parameter must be a string'], 400);
+        }
+
         /** @var CollectionInfo $collection */
         $collection = resolve(CollectionInfo::class);
-        $prefix = $request->string('prefix');
 
         return response()->json($collection->get($prefix));
     }

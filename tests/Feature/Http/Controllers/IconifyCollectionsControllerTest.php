@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 
 it('tests loading the full collections', function () {
@@ -57,4 +59,12 @@ it('tests getting an error if no prefix is specified', function (string $prefix)
 it('tests not passing a prefix and getting an exception', function () {
     $response = test()->get(route('iconify-api.collections.show'));
     $response->assertStatus(404);
+});
+
+it('rejects a prefix parameter that is not a string', function () {
+    $response = test()->get(route('iconify-api.collections.show', ['prefix' => ['mdi']]));
+
+    $response->assertStatus(400);
+
+    expect($response->json('error'))->toBe('The prefix parameter must be a string');
 });

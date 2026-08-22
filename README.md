@@ -55,6 +55,12 @@ The following routes are currently available:
 - `/iconify/api/collections` - Returns a list of icon collections available in your application.
 - `/iconify/api/collection?prefix={prefix}` - Returns the information for a specific icon collection.
 
+### Error responses
+
+The `icons` parameter must be a single comma separated string. A request that sends it as an array — `?icons[]=home&icons[]=account` — is rejected with a `400` rather than being flattened into a nonsense lookup.
+
+The `prefix` parameter on `/iconify/api/collection` is bound by the same rule: a missing prefix is a `404`, and a prefix sent as an array is a `400`.
+
 ### How To Display Dynamic On-Demand Icons
 
 To display on-demand icons follow the instructions on the [Iconify](https://iconify.design/docs/icon-components/) on demand docs and use any of their component libraries in your Laravel Application.

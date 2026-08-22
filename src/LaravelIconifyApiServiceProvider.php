@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AbeTwoThree\LaravelIconifyApi;
 
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
@@ -84,7 +86,7 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         $store = LaravelIconifyApi::cacheStore();
 
         $this->app->bind(IconSetsFileFinderContract::class, function ($app) use ($store) {
-            if (! empty($store)) {
+            if ($store !== '') {
                 return resolve(IconSetsFileFinderCached::class);
             }
 
@@ -92,7 +94,7 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         });
 
         $this->app->bind(IconFinderContract::class, function ($app) use ($store) {
-            if (! empty($store)) {
+            if ($store !== '') {
                 return resolve(IconFinderCached::class);
             }
 
@@ -100,7 +102,7 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         });
 
         $this->app->bind(IconSetInfoSummaryFinderContract::class, function ($app) use ($store) {
-            if (! empty($store)) {
+            if ($store !== '') {
                 return resolve(IconSetInfoSummaryFinderCached::class);
             }
 
@@ -108,7 +110,7 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         });
 
         $this->app->bind(IconSetInfoFinderContract::class, function ($app) use ($store) {
-            if (! empty($store)) {
+            if ($store !== '') {
                 return resolve(IconSetInfoFinderCached::class);
             }
 

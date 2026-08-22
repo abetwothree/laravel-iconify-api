@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AbeTwoThree\LaravelIconifyApi;
 
 use Exception;
@@ -67,7 +69,7 @@ class LaravelIconifyApi
             throw new Exception('Domain must be a string or null');
         }
 
-        return $domain ? $domain : null;
+        return $domain === '' ? null : $domain;
     }
 
     public function path(): string
@@ -103,7 +105,7 @@ class LaravelIconifyApi
 
             foreach ($finder as $file) {
                 $prefix = $file->getBasename('.json');
-                if (in_array($prefix, $prefixes)) {
+                if (in_array($prefix, $prefixes, true)) {
                     continue;
                 }
 
@@ -111,7 +113,9 @@ class LaravelIconifyApi
             }
         }
 
-        sort($prefixes);
+        // SORT_STRING, because SORT_REGULAR compares two numeric-looking prefixes as
+        // numbers — and `1e2`, `100` and `9` are all names matchIconName accepts.
+        sort($prefixes, SORT_STRING);
 
         return $prefixes;
     }

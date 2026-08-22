@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoSummaryFinder as IconSetInfoSummaryFinderContract;
@@ -121,4 +123,13 @@ it('registers the svg support services as singletons', function () {
 
     expect(app(IconifySvgBuilder::class))
         ->toBe(app(IconifySvgBuilder::class));
+});
+
+it('binds the cached finders when the cache store name is falsy as a string', function () {
+    config()->set('cache.stores.0', ['driver' => 'array']);
+    config()->set('iconify-api.cache_store', '0');
+
+    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
+
+    expect(app(IconFinderContract::class))->toBeInstanceOf(IconFinderCached::class);
 });

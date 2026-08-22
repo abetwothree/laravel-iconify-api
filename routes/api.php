@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use Illuminate\Support\Facades\Route;
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconRotation;
 
 it('parses a rotation string the way rotateFromString does', function () {

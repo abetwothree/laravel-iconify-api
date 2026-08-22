@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApiServiceProvider;
 
 it('renders an svg with the helper function', function () {
