@@ -50,16 +50,6 @@ it('covers service bindings with cache store', function () {
     expect(app(IconSetInfoFinderContract::class))->toBeInstanceOf(IconSetInfoFinderCached::class);
 });
 
-it('covers invalid helper name branch for helper registration', function () {
-    config()->set('iconify-api.inline.enabled', true);
-    config()->set('iconify-api.inline.helper.enabled', true);
-    config()->set('iconify-api.inline.helper.name', 'invalid-name');
-
-    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
-
-    expect(function_exists('invalid-name'))->toBeFalse();
-});
-
 it('covers dotted fallback component collision lookup', function () {
     config()->set('iconify-api.inline.enabled', true);
     config()->set('iconify-api.inline.component.enabled', true);
@@ -83,16 +73,6 @@ it('covers dotted fallback component collision lookup', function () {
     expect(array_key_exists('foo-bar-baz', $aliases))->toBeFalse();
 });
 
-it('covers top-level helper disabled branch', function () {
-    config()->set('iconify-api.inline.enabled', true);
-    config()->set('iconify-api.inline.helper.enabled', false);
-    config()->set('iconify-api.inline.helper.name', 'inline_disabled_provider_helper');
-
-    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
-
-    expect(function_exists('inline_disabled_provider_helper'))->toBeFalse();
-});
-
 it('covers top-level component disabled branch', function () {
     config()->set('iconify-api.inline.enabled', true);
     config()->set('iconify-api.inline.component.enabled', false);
@@ -104,17 +84,6 @@ it('covers top-level component disabled branch', function () {
     $aliases = app('blade.compiler')->getClassComponentAliases();
 
     expect(array_key_exists('inline-disabled-provider-component', $aliases))->toBeFalse();
-});
-
-it('covers blank helper name validation branch', function () {
-    config()->set('iconify-api.inline.enabled', true);
-    config()->set('iconify-api.inline.helper.enabled', true);
-    config()->set('iconify-api.inline.helper.name', '');
-
-    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
-
-    // If no exception occurs, the blank-name guard branch was safely handled.
-    expect(true)->toBeTrue();
 });
 
 it('registers the svg support services as singletons', function () {

@@ -19,9 +19,7 @@ use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinderCached;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconifySvgBuilder;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
-use AbeTwoThree\LaravelIconifyApi\Support\IconHelperRegistrar;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Str;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -61,7 +59,6 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         $this->registerBladeDirective();
 
         if (config()->boolean('iconify-api.inline.enabled', true)) {
-            $this->registerIconHelper();
             $this->registerIconComponent();
         }
 
@@ -118,21 +115,6 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         });
     }
 
-    protected function registerIconHelper(): void
-    {
-        if (! config()->boolean('iconify-api.inline.helper.enabled', true)) {
-            return;
-        }
-
-        $name = config()->string('iconify-api.inline.helper.name');
-
-        if (! $this->isValidPhpFunctionName($name) || function_exists($name)) {
-            return;
-        }
-
-        IconHelperRegistrar::register($name);
-    }
-
     protected function registerIconComponent(): void
     {
         if (! config()->boolean('iconify-api.inline.component.enabled', true)) {
@@ -164,14 +146,5 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         $aliases = $bladeCompiler->getClassComponentAliases();
 
         return array_key_exists($name, $aliases);
-    }
-
-    protected function isValidPhpFunctionName(string $name): bool
-    {
-        if (blank($name)) {
-            return false;
-        }
-
-        return Str::match('/^[A-Za-z_\\x80-\\xff][A-Za-z0-9_\\x80-\\xff]*$/', $name) !== '';
     }
 }

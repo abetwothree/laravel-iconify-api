@@ -143,9 +143,9 @@ are not implemented; icons always render as inline `<svg>`.
 
 ### Naming and collision safety
 
-If your app already has a global helper or component with the same name, this package will skip registration and leave existing behavior untouched.
+The `icon()` helper is a plain global function, autoloaded by Composer, and declared only if no `icon()` function exists yet. If your app already has a Blade component with the same name, this package skips registering its own and leaves existing behavior untouched.
 
-You can also customize or disable each one in `config/iconify-api.php`:
+You can rename or disable the component, and set rendering defaults, in `config/iconify-api.php`:
 
 ```php
 'inline' => [
@@ -161,11 +161,6 @@ You can also customize or disable each one in `config/iconify-api.php`:
 		// 'inline' => true,
 	],
 
-	'helper' => [
-		'enabled' => true,
-		'name' => 'icon',
-	],
-
 	'component' => [
 		'enabled' => true,
 		'name' => 'icon',
@@ -174,31 +169,6 @@ You can also customize or disable each one in `config/iconify-api.php`:
 ```
 
 Values from `defaults` are applied to every rendered icon. Per-icon options (helper or Blade attributes) override matching keys, except `class`, which is merged. Render options such as `width`, `height`, `rotate`, `flip`, `inline` and `color` are honoured here too, not just plain SVG attributes.
-
-### PHPStan support
-
-This package ships a PHPStan stub for the default helper name `icon`, so static analysis can recognize `icon()` calls out of the box.
-
-If you rename the helper function (for example to `iconify_svg`), add a small project-level stub so PHPStan can recognize the custom function name:
-
-```php
-<?php
-
-if (! function_exists('iconify_svg')) {
-	/**
-	 * @param  array<string, mixed>  $options
-	 */
-	function iconify_svg(string $name, array $options = []): string {}
-}
-```
-
-Then include that stub in your `phpstan.neon`:
-
-```neon
-parameters:
-	stubFiles:
-		- stubs/icon-helper.stub.php
-```
 
 ## Advanced Configuration
 

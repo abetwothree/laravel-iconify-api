@@ -88,7 +88,7 @@ return [
     |--------------------------------------------------------------------------
     | Inline Icon Rendering
     |--------------------------------------------------------------------------
-    | Configure the optional helper function and Blade component for rendering
+    | Configure the icon() helper and the optional Blade component, which render
     | Iconify icons directly to SVG without an HTTP request.
     |
     | Defaults support any SVG attribute (for example class, data-*, style) as
@@ -106,11 +106,6 @@ return [
             // 'style' => 'vertical-align: middle;',
             // 'width' => '1.5em',
             // 'inline' => true,
-        ],
-
-        'helper' => [
-            'enabled' => true,
-            'name' => 'icon',
         ],
 
         'component' => [
