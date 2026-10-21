@@ -39,6 +39,7 @@
             "AbeTwoThree\\LaravelIconifyApi\\Database\\Factories\\": "database/factories/"
         },
         "files": [
+            "src/functions.php",
             "src/helpers.php"
         ]
     },

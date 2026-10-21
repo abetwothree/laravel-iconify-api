@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
+
 it('renders an svg with the helper function', function () {
     $svg = icon('heroicons:academic-cap');
 
@@ -107,4 +109,13 @@ it('returns empty string for unknown icon in helper', function () {
 it('is declared by composer autoloading rather than at boot', function () {
     expect(realpath((string) (new ReflectionFunction('icon'))->getFileName()))
         ->toBe(realpath(__DIR__.'/../../src/helpers.php'));
+});
+
+it('renders through the LaravelIconifyApi facade', function () {
+    LaravelIconifyApi::shouldReceive('icon')
+        ->once()
+        ->with('heroicons:clock', ['class' => 'w-6'])
+        ->andReturn('<svg>facade</svg>');
+
+    expect(icon('heroicons:clock', ['class' => 'w-6']))->toBe('<svg>facade</svg>');
 });

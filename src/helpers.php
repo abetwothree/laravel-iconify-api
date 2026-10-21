@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use AbeTwoThree\LaravelIconifyApi\Icons\IconSvgRenderer;
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 
 if (! function_exists('icon')) {
     /**
@@ -12,6 +12,6 @@ if (! function_exists('icon')) {
      */
     function icon(string $name, array $options = []): string
     {
-        return app(IconSvgRenderer::class)->render($name, $options);
+        return LaravelIconifyApi::icon($name, $options);
     }
 }

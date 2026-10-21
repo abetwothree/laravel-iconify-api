@@ -9,3 +9,5 @@ declare(strict_types=1);
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 
 echo LaravelIconifyApi::icon('mdi:home', ['class' => 'w-6']);
+echo icon('mdi:home', ['class' => 'w-6']);
+echo AbeTwoThree\LaravelIconifyApi\icon('mdi:home');
