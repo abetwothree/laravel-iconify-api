@@ -74,23 +74,20 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
      */
     protected function checkRemovedHelperConfig(): void
     {
-        $helper = config()->get('iconify-api.inline.helper');
-
-        if ($helper === null) {
+        if (config()->get('iconify-api.inline.helper') === null) {
             return;
         }
 
-        $enabled = is_array($helper) ? ($helper['enabled'] ?? true) : true;
-        $name = is_array($helper) ? ($helper['name'] ?? null) : null;
+        $name = config()->get('iconify-api.inline.helper.name');
 
-        // Mirror v1: it only declared a renamed helper while inline rendering and
-        // the helper were both on and the name was a valid PHP function name.
-        if (config()->get('iconify-api.inline.enabled', true) !== false
-            && $enabled !== false
-            && is_string($name)
-            && preg_match('/^[A-Za-z_\x80-\xff][A-Za-z0-9_\x80-\xff]*$/D', $name) === 1
+        // v1 only declared a renamed helper with a valid PHP function name, while
+        // inline rendering and the helper were both on.
+        if (is_string($name)
             && $name !== 'icon'
-            && ! function_exists($name)) {
+            && preg_match('/^[A-Za-z_\x80-\xff][A-Za-z0-9_\x80-\xff]*$/D', $name) === 1
+            && ! function_exists($name)
+            && config()->get('iconify-api.inline.enabled', true) !== false
+            && config()->get('iconify-api.inline.helper.enabled', true) !== false) {
             throw new RuntimeException(
                 "The iconify-api.inline.helper config was removed in 1.6, so {$name}() is no longer declared. "
                 ."Declare {$name}() yourself or call icon(), then remove inline.helper from config/iconify-api.php. "
