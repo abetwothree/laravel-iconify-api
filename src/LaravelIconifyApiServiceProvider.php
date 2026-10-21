@@ -20,6 +20,7 @@ use AbeTwoThree\LaravelIconifyApi\Icons\IconSetsFileFinderCached;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconifySvgBuilder;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
 use Illuminate\Support\Facades\Blade;
+use RuntimeException;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -56,6 +57,8 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
+        $this->checkRemovedHelperConfig();
+
         $this->registerBladeDirective();
 
         if (config()->boolean('iconify-api.inline.enabled', true)) {
@@ -63,6 +66,44 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         }
 
         $this->registerServicesBindings();
+    }
+
+    /**
+     * The inline.helper config was removed in 2.0. Fail fast when an upgrader
+     * relied on it to declare a renamed helper that nothing declares now.
+     */
+    protected function checkRemovedHelperConfig(): void
+    {
+        $helper = config()->get('iconify-api.inline.helper');
+
+        if ($helper === null) {
+            return;
+        }
+
+        $enabled = is_array($helper) ? ($helper['enabled'] ?? true) : true;
+        $name = is_array($helper) ? ($helper['name'] ?? null) : null;
+
+        // Mirror v1: it only declared a renamed helper while inline rendering and
+        // the helper were both on and the name was a valid PHP function name.
+        if (config()->get('iconify-api.inline.enabled', true) !== false
+            && $enabled !== false
+            && is_string($name)
+            && preg_match('/^[A-Za-z_\x80-\xff][A-Za-z0-9_\x80-\xff]*$/D', $name) === 1
+            && $name !== 'icon'
+            && ! function_exists($name)) {
+            throw new RuntimeException(
+                "The iconify-api.inline.helper config was removed in 2.0, so {$name}() is no longer declared. "
+                ."Declare {$name}() yourself or call icon(), then remove inline.helper from config/iconify-api.php. "
+                .'See https://github.com/abetwothree/laravel-iconify-api#using-a-different-helper-name'
+            );
+        }
+
+        trigger_error(
+            'The iconify-api.inline.helper config was removed in 2.0 and is ignored; icon() is always declared. '
+            .'Remove inline.helper from config/iconify-api.php. '
+            .'See https://github.com/abetwothree/laravel-iconify-api#upgrading-from-1x-to-20',
+            E_USER_DEPRECATED
+        );
     }
 
     protected function registerBladeDirective(): void
