@@ -11,3 +11,4 @@ use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 echo LaravelIconifyApi::icon('mdi:home', ['class' => 'w-6']);
 echo icon('mdi:home', ['class' => 'w-6']);
 echo AbeTwoThree\LaravelIconifyApi\icon('mdi:home');
+echo iconify_svg('mdi:home');

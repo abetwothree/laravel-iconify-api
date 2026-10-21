@@ -88,11 +88,16 @@ return [
     |--------------------------------------------------------------------------
     | Inline Icon Rendering
     |--------------------------------------------------------------------------
-    | Configure the icon() helper and the optional Blade component, which render
-    | Iconify icons directly to SVG without an HTTP request.
+    | Render Iconify icons straight to SVG, without an HTTP request, through
+    | the icon() helper, the namespaced AbeTwoThree\LaravelIconifyApi\icon()
+    | function, LaravelIconifyApi::icon() or the <x-icon> Blade component.
     |
-    | Defaults support any SVG attribute (for example class, data-*, style) as
-    | well as any render option (width, height, rotate, flip, inline, color).
+    | The helpers and the facade are always available while the package is
+    | enabled (`iconify-api.enabled`, `ICONIFY_API_ENABLED`). `enabled` and
+    | `component` only control the Blade component. `defaults` apply to every
+    | one of them and support any SVG attribute (for example class, data-*,
+    | style) as well as any render option (width, height, rotate, flip,
+    | inline, color).
     |
     */
 

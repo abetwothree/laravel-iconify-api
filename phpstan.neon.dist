@@ -3,6 +3,7 @@ parameters:
     paths:
         - src
         - routes
+        - tests/Fixtures/Helpers
         - tests/Fixtures/PhpStan
     tmpDir: build/phpstan
     checkOctaneCompatibility: true

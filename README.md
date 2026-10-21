@@ -75,13 +75,44 @@ In addition to the HTTP API, this package can render icons directly to SVG in PH
 
 The icon finding and caching goes through the same process as the HTTP API, ensuring consistent behavior and performance.
 
-### Helper function
+### Helper functions and facade
 
-Use the global helper to render an icon string:
+There are three ways to render an icon string. The global helper:
 
 ```php
 $svg = icon('heroicons:clock');
 ```
+
+The namespaced function, which never collides with another `icon()`:
+
+```php
+use function AbeTwoThree\LaravelIconifyApi\icon;
+
+$svg = icon('heroicons:clock');
+```
+
+The facade:
+
+```php
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
+
+$svg = LaravelIconifyApi::icon('heroicons:clock');
+```
+
+In Blade:
+
+```blade
+{!! icon('heroicons:clock') !!}
+
+@use('function AbeTwoThree\LaravelIconifyApi\icon')
+{!! icon('heroicons:clock') !!}
+
+{!! LaravelIconifyApi::icon('heroicons:clock') !!}
+```
+
+`@use('function …')` needs Laravel 12.11 or later. All three entry points return a raw SVG string, so Blade must print it with `{!! !!}`. `{{ }}` would escape the markup.
+
+They are plain autoloaded code, so PHPStan and your IDE find them without stubs.
 
 Apply SVG attributes:
 
@@ -91,6 +122,42 @@ $svg = icon('heroicons:clock', [
 	'data-slot' => 'icon',
 ]);
 ```
+
+### Using a different helper name
+
+Earlier versions renamed the helper through config. That is gone, because a function declared at boot is invisible to static analysis, and declaring it meant writing a file on every boot.
+
+To get a different name, write a thin wrapper in your app:
+
+```php
+<?php
+
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
+
+if (! function_exists('iconify_svg')) {
+	/**
+	 * @param  array<string, mixed>  $options
+	 */
+	function iconify_svg(string $name, array $options = []): string
+	{
+		return LaravelIconifyApi::icon($name, $options);
+	}
+}
+```
+
+Then autoload the file from `composer.json`:
+
+```json
+"autoload": {
+	"files": [
+		"app/helpers.php"
+	]
+}
+```
+
+and run `composer dump-autoload`.
+
+Don't name the wrapper `icon`. See [Naming and collision safety](#naming-and-collision-safety) for why.
 
 ### Blade component
 
@@ -104,7 +171,7 @@ Use the Blade component for direct rendering in views:
 
 ### Supported options
 
-The helper and the Blade component take the same options. Anything not listed below becomes an SVG attribute, so `onclick` and bindings like `@click`, `x-on:click` or `wire:model` render as written.
+The helpers, the facade and the Blade component take the same options. Anything not listed below becomes an SVG attribute, so `onclick` and bindings like `@click`, `x-on:click` or `wire:model` render as written.
 
 Keys that are not well-formed attribute names are skipped, which stops a key like `'x onload=alert(1)'` from opening a second live attribute. The check reads the name only, so it is not an XSS filter. Values that are not a string, number, boolean or `__toString()` object are skipped too, and `null`, `false` and `''` produce no attribute rather than an empty one. Boolean `true` renders as `"1"`.
 
@@ -143,9 +210,22 @@ are not implemented; icons always render as inline `<svg>`.
 
 ### Naming and collision safety
 
-The `icon()` helper is a plain global function, autoloaded by Composer, and declared only if no `icon()` function exists yet. If your app already has a Blade component with the same name, this package skips registering its own and leaves existing behavior untouched.
+Composer loads every dependency's `files` before your app's own, so the package's global `icon()` exists first.
 
-You can rename or disable the component, and set rendering defaults, in `config/iconify-api.php`:
+- A guarded `icon()` in your app (wrapped in `if (! function_exists('icon'))`) is skipped silently.
+- An unguarded one fails with `Cannot redeclare function icon()`.
+
+To keep your own `icon()`, pick one of these:
+
+- Name your function something else. See [Using a different helper name](#using-a-different-helper-name).
+- Call the namespaced function or the facade, which never collide.
+- Require your own `icon()` before `vendor/autoload.php` in `public/index.php`, `artisan` and your PHPUnit bootstrap. The package's declaration then sees yours and steps aside. This does not cover Laravel Octane, whose worker loads `vendor/autoload.php` itself. Under Octane, use another name or the namespaced function.
+
+If another package also declares a global `icon()`, whichever Composer loads first wins, but only when that package guards its declaration with `function_exists`. An unguarded one fails with `Cannot redeclare function icon()`. The namespaced function and the facade are unambiguous.
+
+If your app already has a Blade component with the same name, this package skips registering its own and leaves existing behavior untouched.
+
+You can rename or disable the Blade component, and set rendering defaults, in `config/iconify-api.php`:
 
 ```php
 'inline' => [
@@ -167,6 +247,8 @@ You can rename or disable the component, and set rendering defaults, in `config/
 	],
 ],
 ```
+
+`inline.enabled` and `inline.component` only affect the Blade component. `defaults` apply to every entry point.
 
 Values from `defaults` are applied to every rendered icon. Per-icon options (helper or Blade attributes) override matching keys, except `class`, which is merged. Render options such as `width`, `height`, `rotate`, `flip`, `inline` and `color` are honoured here too, not just plain SVG attributes.
 
@@ -209,6 +291,44 @@ The MVP of this package was to provide an API for on demand icons in your Larave
 - [ ] List icons categorized in a collection.
 - [ ] Search endpoint for icons.
 - [ ] Keywords endpoint for icons.
+
+## Upgrading from 1.x to 2.0
+
+Entries are ordered by how many apps they affect.
+
+### The `inline.helper` config is removed
+
+Detection: your `config/iconify-api.php` still has an `inline.helper` block. Version 2.0 does not act on it, except to warn at boot. If you renamed the helper and nothing else declares that name, boot throws:
+
+```
+The iconify-api.inline.helper config was removed in 2.0, so iconify_svg() is no longer declared. Declare iconify_svg() yourself or call icon(), then remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#using-a-different-helper-name
+```
+
+Every other leftover `inline.helper` block (the defaults, a disabled helper, inline rendering turned off with `inline.enabled => false`, a name that is not a valid PHP function name, or a name something else declares) boots normally and logs this `E_USER_DEPRECATED`. Laravel sends it to the `deprecations` log channel, which is off by default: set `LOG_DEPRECATIONS_CHANNEL` (for example `stack`) to see it:
+
+```
+The iconify-api.inline.helper config was removed in 2.0 and is ignored; icon() is always declared. Remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#upgrading-from-1x-to-20
+```
+
+If your config is cached, delete `bootstrap/cache/config.php` first, because every artisan command (including `config:clear`) boots the package first and would hit the exception again.
+
+If you renamed the helper, write the wrapper from [Using a different helper name](#using-a-different-helper-name). If you kept the defaults, delete the block.
+
+### `inline.enabled = false` no longer turns off `icon()`
+
+Before, `inline.enabled => false` removed the helper. Now `icon()`, the namespaced function and the facade are always available while the package is enabled (`iconify-api.enabled`, `ICONIFY_API_ENABLED`), and `inline.enabled` only controls the Blade component. To stop using the helpers, stop calling them.
+
+### Your own global `icon()` now loses to the package's
+
+Composer loads the package's `icon()` before your app's `files`. A guarded `icon()` in your app is skipped, and an unguarded one fails with `Cannot redeclare function icon()`. Rename it, call the namespaced function or the facade, or require your own before `vendor/autoload.php`. See [Naming and collision safety](#naming-and-collision-safety).
+
+### PHPStan
+
+If you use `phpstan/extension-installer`, do nothing. If your `phpstan.neon` includes `vendor/abetwothree/laravel-iconify-api/extension.neon` by hand, delete that include, because the file is gone and PHPStan fails on it. Also delete any stub you added for `icon()` or for a renamed helper. The functions are autoloaded now, so PHPStan finds them.
+
+### New entry points
+
+`AbeTwoThree\LaravelIconifyApi\icon()` and `LaravelIconifyApi::icon()` are new. Both return the same SVG as the global `icon()`.
 
 ## Changelog
 
