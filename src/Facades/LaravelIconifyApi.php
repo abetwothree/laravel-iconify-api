@@ -7,6 +7,8 @@ namespace AbeTwoThree\LaravelIconifyApi\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
+ * @method static string icon(string $name, array<string, mixed> $options = [])
+ *
  * @see \AbeTwoThree\LaravelIconifyApi\LaravelIconifyApi
  */
 class LaravelIconifyApi extends Facade
