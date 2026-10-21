@@ -115,7 +115,7 @@ it('throws when the removed helper config names a helper nothing declares', func
     config()->set('iconify-api.inline.helper', ['enabled' => true, 'name' => 'missing_custom_icon_helper']);
 
     expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
-        ->toThrow(RuntimeException::class, 'The iconify-api.inline.helper config was removed in 2.0, so missing_custom_icon_helper() is no longer declared. Declare missing_custom_icon_helper() yourself or call icon(), then remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#using-a-different-helper-name');
+        ->toThrow(RuntimeException::class, 'The iconify-api.inline.helper config was removed in 1.6, so missing_custom_icon_helper() is no longer declared. Declare missing_custom_icon_helper() yourself or call icon(), then remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#using-a-different-helper-name');
 });
 
 it('deprecates a leftover default helper config', function () {
@@ -123,7 +123,7 @@ it('deprecates a leftover default helper config', function () {
     config()->set('iconify-api.inline.helper', ['enabled' => true, 'name' => 'icon']);
 
     expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
-        ->toThrow(ErrorException::class, 'The iconify-api.inline.helper config was removed in 2.0 and is ignored; icon() is always declared. Remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#upgrading-from-1x-to-20');
+        ->toThrow(ErrorException::class, 'The iconify-api.inline.helper config was removed in 1.6 and is ignored; icon() is always declared. Remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#upgrading-to-16');
 });
 
 it('keeps booting with a leftover default helper config', function () {
@@ -139,7 +139,7 @@ it('only deprecates the removed helper config when the renamed helper is already
     config()->set('iconify-api.inline.helper', ['enabled' => true, 'name' => 'existing_custom_icon_helper']);
 
     expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
-        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 2.0 and is ignored');
+        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 1.6 and is ignored');
 });
 
 it('only deprecates a disabled helper config', function () {
@@ -147,7 +147,7 @@ it('only deprecates a disabled helper config', function () {
     config()->set('iconify-api.inline.helper', ['enabled' => false, 'name' => 'missing_custom_icon_helper']);
 
     expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
-        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 2.0 and is ignored');
+        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 1.6 and is ignored');
 });
 
 it('stays silent when the helper config is absent', function () {
@@ -172,7 +172,7 @@ it('only deprecates a renamed helper config when inline rendering is disabled', 
     config()->set('iconify-api.inline.helper', ['enabled' => true, 'name' => 'missing_custom_icon_helper']);
 
     expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
-        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 2.0 and is ignored');
+        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 1.6 and is ignored');
 });
 
 it('only deprecates a helper config whose name v1 would have skipped', function (string $name) {
@@ -180,7 +180,7 @@ it('only deprecates a helper config whose name v1 would have skipped', function 
     config()->set('iconify-api.inline.helper', ['enabled' => true, 'name' => $name]);
 
     expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
-        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 2.0 and is ignored');
+        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 1.6 and is ignored');
 })->with([
     'blank' => '',
     'invalid php name' => 'my-icon',

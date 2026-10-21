@@ -69,7 +69,7 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
     }
 
     /**
-     * The inline.helper config was removed in 2.0. Fail fast when an upgrader
+     * The inline.helper config was removed in 1.6. Fail fast when an upgrader
      * relied on it to declare a renamed helper that nothing declares now.
      */
     protected function checkRemovedHelperConfig(): void
@@ -92,16 +92,16 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
             && $name !== 'icon'
             && ! function_exists($name)) {
             throw new RuntimeException(
-                "The iconify-api.inline.helper config was removed in 2.0, so {$name}() is no longer declared. "
+                "The iconify-api.inline.helper config was removed in 1.6, so {$name}() is no longer declared. "
                 ."Declare {$name}() yourself or call icon(), then remove inline.helper from config/iconify-api.php. "
                 .'See https://github.com/abetwothree/laravel-iconify-api#using-a-different-helper-name'
             );
         }
 
         trigger_error(
-            'The iconify-api.inline.helper config was removed in 2.0 and is ignored; icon() is always declared. '
+            'The iconify-api.inline.helper config was removed in 1.6 and is ignored; icon() is always declared. '
             .'Remove inline.helper from config/iconify-api.php. '
-            .'See https://github.com/abetwothree/laravel-iconify-api#upgrading-from-1x-to-20',
+            .'See https://github.com/abetwothree/laravel-iconify-api#upgrading-to-16',
             E_USER_DEPRECATED
         );
     }

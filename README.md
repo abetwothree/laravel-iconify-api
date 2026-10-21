@@ -292,22 +292,22 @@ The MVP of this package was to provide an API for on demand icons in your Larave
 - [ ] Search endpoint for icons.
 - [ ] Keywords endpoint for icons.
 
-## Upgrading from 1.x to 2.0
+## Upgrading to 1.6
 
 Entries are ordered by how many apps they affect.
 
 ### The `inline.helper` config is removed
 
-Detection: your `config/iconify-api.php` still has an `inline.helper` block. Version 2.0 does not act on it, except to warn at boot. If you renamed the helper and nothing else declares that name, boot throws:
+Detection: your `config/iconify-api.php` still has an `inline.helper` block. Version 1.6 does not act on it, except to warn at boot. If you renamed the helper and nothing else declares that name, boot throws:
 
 ```
-The iconify-api.inline.helper config was removed in 2.0, so iconify_svg() is no longer declared. Declare iconify_svg() yourself or call icon(), then remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#using-a-different-helper-name
+The iconify-api.inline.helper config was removed in 1.6, so iconify_svg() is no longer declared. Declare iconify_svg() yourself or call icon(), then remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#using-a-different-helper-name
 ```
 
 Every other leftover `inline.helper` block (the defaults, a disabled helper, inline rendering turned off with `inline.enabled => false`, a name that is not a valid PHP function name, or a name something else declares) boots normally and logs this `E_USER_DEPRECATED`. Laravel sends it to the `deprecations` log channel, which is off by default: set `LOG_DEPRECATIONS_CHANNEL` (for example `stack`) to see it:
 
 ```
-The iconify-api.inline.helper config was removed in 2.0 and is ignored; icon() is always declared. Remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#upgrading-from-1x-to-20
+The iconify-api.inline.helper config was removed in 1.6 and is ignored; icon() is always declared. Remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#upgrading-to-16
 ```
 
 If your config is cached, delete `bootstrap/cache/config.php` first, because every artisan command (including `config:clear`) boots the package first and would hit the exception again.
