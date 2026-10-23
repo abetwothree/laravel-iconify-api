@@ -83,7 +83,7 @@ There are three ways to render an icon string. The global helper:
 $svg = icon('heroicons:clock');
 ```
 
-The namespaced function, which never collides with another `icon()`:
+The namespaced function, which shouldn't clash with another `icon()` global method:
 
 ```php
 use function AbeTwoThree\LaravelIconifyApi\icon;
