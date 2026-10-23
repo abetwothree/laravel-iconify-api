@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AbeTwoThree\LaravelIconifyApi;
 
+use AbeTwoThree\LaravelIconifyApi\Icons\IconSvgRenderer;
 use Exception;
 use Illuminate\Support\Str;
 use Symfony\Component\Finder\Finder;
@@ -75,6 +76,16 @@ class LaravelIconifyApi
     public function path(): string
     {
         return Str::finish(config()->string('iconify-api.route_path'), '/').'api';
+    }
+
+    /**
+     * Render an Iconify icon as inline SVG.
+     *
+     * @param  array<string, mixed>  $options
+     */
+    public function icon(string $name, array $options = []): string
+    {
+        return app(IconSvgRenderer::class)->render($name, $options);
     }
 
     /**

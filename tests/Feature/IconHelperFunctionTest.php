@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApiServiceProvider;
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 
 it('renders an svg with the helper function', function () {
-    $helper = 'icon';
-    $svg = $helper('heroicons:academic-cap');
+    $svg = icon('heroicons:academic-cap');
 
     expect($svg)
         ->toBeString()
@@ -16,8 +15,7 @@ it('renders an svg with the helper function', function () {
 });
 
 it('applies helper options to rendered icon', function () {
-    $helper = 'icon';
-    $svg = $helper('heroicons:clock', [
+    $svg = icon('heroicons:clock', [
         'class' => 'w-6 h-6',
         'data-slot' => 'icon',
     ]);
@@ -34,8 +32,7 @@ it('applies arbitrary configured defaults and allows per-call overrides', functi
         'style' => 'color: red;',
     ]);
 
-    $helper = 'icon';
-    $svg = $helper('heroicons:clock', [
+    $svg = icon('heroicons:clock', [
         'class' => 'w-6',
         'data-source' => 'override',
         'data-slot' => 'icon',
@@ -57,8 +54,7 @@ it('applies configured defaults for customisation options', function () {
         'color' => 'red',
     ]);
 
-    $helper = 'icon';
-    $svg = $helper('heroicons:clock');
+    $svg = icon('heroicons:clock');
 
     expect($svg)
         ->toContain('width="2em"')
@@ -78,8 +74,7 @@ it('prefers per-call customisations over configured defaults', function () {
         'rotate' => 1,
     ]);
 
-    $helper = 'icon';
-    $svg = $helper('heroicons:clock', [
+    $svg = icon('heroicons:clock', [
         'width' => '24',
         'inline' => false,
         'rotate' => 0,
@@ -97,8 +92,7 @@ it('prefers per-call width and height over configured defaults', function () {
         'height' => '2em',
     ]);
 
-    $helper = 'icon';
-    $svg = $helper('heroicons:clock', [
+    $svg = icon('heroicons:clock', [
         'width' => '24',
         'height' => '32',
     ]);
@@ -109,48 +103,19 @@ it('prefers per-call width and height over configured defaults', function () {
 });
 
 it('returns empty string for unknown icon in helper', function () {
-    $helper = 'icon';
-
-    expect($helper('heroicons:not-an-icon'))->toBe('');
+    expect(icon('heroicons:not-an-icon'))->toBe('');
 });
 
-it('registers the helper with a custom function name', function () {
-    config()->set('iconify-api.inline.helper.name', 'iconify_svg');
-    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
-
-    $helper = 'iconify_svg';
-
-    expect(function_exists($helper))->toBeTrue();
-    expect($helper('heroicons:clock'))->toContain('<svg ');
+it('is declared by composer autoloading rather than at boot', function () {
+    expect(realpath((string) (new ReflectionFunction('icon'))->getFileName()))
+        ->toBe(realpath(__DIR__.'/../../src/helpers.php'));
 });
 
-if (! function_exists('existing_test_icon_helper')) {
-    function existing_test_icon_helper(string $name, array $options = []): string
-    {
-        return 'existing-helper';
-    }
-}
+it('renders through the LaravelIconifyApi facade', function () {
+    LaravelIconifyApi::shouldReceive('icon')
+        ->once()
+        ->with('heroicons:clock', ['class' => 'w-6'])
+        ->andReturn('<svg>facade</svg>');
 
-if (! function_exists('inline_disabled_helper')) {
-    function inline_disabled_helper(string $name, array $options = []): string
-    {
-        return 'inline-disabled-helper';
-    }
-}
-
-it('does not override an existing helper function', function () {
-    config()->set('iconify-api.inline.helper.name', 'existing_test_icon_helper');
-    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
-
-    $helper = 'existing_test_icon_helper';
-
-    expect($helper('heroicons:clock'))->toBe('existing-helper');
-});
-
-it('skips helper registration when inline rendering is disabled', function () {
-    config()->set('iconify-api.inline.enabled', false);
-    config()->set('iconify-api.inline.helper.name', 'inline_disabled_helper');
-    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
-
-    expect(inline_disabled_helper('heroicons:clock'))->toBe('inline-disabled-helper');
+    expect(icon('heroicons:clock', ['class' => 'w-6']))->toBe('<svg>facade</svg>');
 });

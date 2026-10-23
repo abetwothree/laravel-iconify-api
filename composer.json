@@ -37,7 +37,11 @@
         "psr-4": {
             "AbeTwoThree\\LaravelIconifyApi\\": "src/",
             "AbeTwoThree\\LaravelIconifyApi\\Database\\Factories\\": "database/factories/"
-        }
+        },
+        "files": [
+            "src/functions.php",
+            "src/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -80,11 +84,6 @@
         }
     },
     "extra": {
-        "phpstan": {
-            "includes": [
-                "extension.neon"
-            ]
-        },
         "laravel": {
             "providers": [
                 "AbeTwoThree\\LaravelIconifyApi\\LaravelIconifyApiServiceProvider"

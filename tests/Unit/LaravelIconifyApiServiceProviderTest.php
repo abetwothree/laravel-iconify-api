@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoFinder as IconSetInfoFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetInfoSummaryFinder as IconSetInfoSummaryFinderContract;
@@ -18,6 +19,13 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconifySvgBuilder;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
 use AbeTwoThree\LaravelIconifyApi\LaravelIconifyApiServiceProvider;
 use Illuminate\Support\Facades\View;
+
+if (! function_exists('existing_custom_icon_helper')) {
+    function existing_custom_icon_helper(): string
+    {
+        return 'existing';
+    }
+}
 
 it('covers boot short-circuit when package is disabled', function () {
     config()->set('iconify-api.enabled', false);
@@ -50,16 +58,6 @@ it('covers service bindings with cache store', function () {
     expect(app(IconSetInfoFinderContract::class))->toBeInstanceOf(IconSetInfoFinderCached::class);
 });
 
-it('covers invalid helper name branch for helper registration', function () {
-    config()->set('iconify-api.inline.enabled', true);
-    config()->set('iconify-api.inline.helper.enabled', true);
-    config()->set('iconify-api.inline.helper.name', 'invalid-name');
-
-    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
-
-    expect(function_exists('invalid-name'))->toBeFalse();
-});
-
 it('covers dotted fallback component collision lookup', function () {
     config()->set('iconify-api.inline.enabled', true);
     config()->set('iconify-api.inline.component.enabled', true);
@@ -83,16 +81,6 @@ it('covers dotted fallback component collision lookup', function () {
     expect(array_key_exists('foo-bar-baz', $aliases))->toBeFalse();
 });
 
-it('covers top-level helper disabled branch', function () {
-    config()->set('iconify-api.inline.enabled', true);
-    config()->set('iconify-api.inline.helper.enabled', false);
-    config()->set('iconify-api.inline.helper.name', 'inline_disabled_provider_helper');
-
-    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
-
-    expect(function_exists('inline_disabled_provider_helper'))->toBeFalse();
-});
-
 it('covers top-level component disabled branch', function () {
     config()->set('iconify-api.inline.enabled', true);
     config()->set('iconify-api.inline.component.enabled', false);
@@ -104,17 +92,6 @@ it('covers top-level component disabled branch', function () {
     $aliases = app('blade.compiler')->getClassComponentAliases();
 
     expect(array_key_exists('inline-disabled-provider-component', $aliases))->toBeFalse();
-});
-
-it('covers blank helper name validation branch', function () {
-    config()->set('iconify-api.inline.enabled', true);
-    config()->set('iconify-api.inline.helper.enabled', true);
-    config()->set('iconify-api.inline.helper.name', '');
-
-    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
-
-    // If no exception occurs, the blank-name guard branch was safely handled.
-    expect(true)->toBeTrue();
 });
 
 it('registers the svg support services as singletons', function () {
@@ -133,3 +110,78 @@ it('binds the cached finders when the cache store name is falsy as a string', fu
 
     expect(app(IconFinderContract::class))->toBeInstanceOf(IconFinderCached::class);
 });
+
+it('throws when the removed helper config names a helper nothing declares', function () {
+    config()->set('iconify-api.inline.helper', ['enabled' => true, 'name' => 'missing_custom_icon_helper']);
+
+    expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
+        ->toThrow(RuntimeException::class, 'The iconify-api.inline.helper config was removed in 1.6, so missing_custom_icon_helper() is no longer declared. Declare missing_custom_icon_helper() yourself or call icon(), then remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#using-a-different-helper-name');
+});
+
+it('deprecates a leftover default helper config', function () {
+    $this->withoutDeprecationHandling();
+    config()->set('iconify-api.inline.helper', ['enabled' => true, 'name' => 'icon']);
+
+    expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
+        ->toThrow(ErrorException::class, 'The iconify-api.inline.helper config was removed in 1.6 and is ignored; icon() is always declared. Remove inline.helper from config/iconify-api.php. See https://github.com/abetwothree/laravel-iconify-api#upgrading-to-16');
+});
+
+it('keeps booting with a leftover default helper config', function () {
+    config()->set('iconify-api.inline.helper', ['enabled' => true, 'name' => 'icon']);
+
+    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
+
+    expect(icon('heroicons:clock'))->toContain('<svg ');
+});
+
+it('only deprecates the removed helper config when the renamed helper is already declared', function () {
+    $this->withoutDeprecationHandling();
+    config()->set('iconify-api.inline.helper', ['enabled' => true, 'name' => 'existing_custom_icon_helper']);
+
+    expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
+        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 1.6 and is ignored');
+});
+
+it('only deprecates a disabled helper config', function () {
+    $this->withoutDeprecationHandling();
+    config()->set('iconify-api.inline.helper', ['enabled' => false, 'name' => 'missing_custom_icon_helper']);
+
+    expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
+        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 1.6 and is ignored');
+});
+
+it('stays silent when the helper config is absent', function () {
+    $this->withoutDeprecationHandling();
+
+    expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
+        ->not->toThrow(Throwable::class);
+});
+
+it('keeps the helpers available when inline rendering is disabled', function () {
+    config()->set('iconify-api.inline.enabled', false);
+
+    app()->register(LaravelIconifyApiServiceProvider::class, force: true);
+
+    expect(icon('heroicons:clock'))->toContain('<svg ')
+        ->and(LaravelIconifyApi::icon('heroicons:clock'))->toContain('<svg ');
+});
+
+it('only deprecates a renamed helper config when inline rendering is disabled', function () {
+    $this->withoutDeprecationHandling();
+    config()->set('iconify-api.inline.enabled', false);
+    config()->set('iconify-api.inline.helper', ['enabled' => true, 'name' => 'missing_custom_icon_helper']);
+
+    expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
+        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 1.6 and is ignored');
+});
+
+it('only deprecates a helper config whose name v1 would have skipped', function (string $name) {
+    $this->withoutDeprecationHandling();
+    config()->set('iconify-api.inline.helper', ['enabled' => true, 'name' => $name]);
+
+    expect(fn () => app()->register(LaravelIconifyApiServiceProvider::class, force: true))
+        ->toThrow(ErrorException::class, 'iconify-api.inline.helper config was removed in 1.6 and is ignored');
+})->with([
+    'blank' => '',
+    'invalid php name' => 'my-icon',
+]);

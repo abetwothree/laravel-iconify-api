@@ -6,15 +6,13 @@ use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
 
 it('renders heroicons with the icon set root viewBox', function () {
-    $helper = 'icon';
-    $svg = $helper('heroicons:clock');
+    $svg = icon('heroicons:clock');
 
     expect($svg)->toContain('viewBox="0 0 24 24"');
 });
 
 it('renders mdi with the icon set root viewBox', function () {
-    $helper = 'icon';
-    $svg = $helper('mdi:home');
+    $svg = icon('mdi:home');
 
     expect($svg)->toContain('viewBox="0 0 24 24"');
 });
@@ -47,10 +45,8 @@ it('does not repeat svg ids across separate helper calls', function () {
         return $finder;
     });
 
-    $helper = 'icon';
-
-    $first = $helper('mdi:gradient');
-    $second = $helper('mdi:gradient');
+    $first = icon('mdi:gradient');
+    $second = icon('mdi:gradient');
 
     preg_match_all('/\sid="([^"]+)"/', $first, $firstIds);
     preg_match_all('/\sid="([^"]+)"/', $second, $secondIds);
