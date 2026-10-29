@@ -46,6 +46,15 @@ it('rejects a body that can run script', function (string $body) {
     'animate attributeName xlink:href' => ['<a><animate attributeName="xlink:href" values="#a;javascript:alert(1)"/></a>'],
     'entity-encoded attributeName' => ['<a><set attributeName="&#104;ref" to="javascript:alert(1)"/></a>'],
     'entity-encoded attributeName without a semicolon' => ['<a><set attributeName="&#104ref" to="javascript:alert(1)"/></a>'],
+    // The parser must read markup as a browser does, not as a pattern would.
+    'href hidden behind a double-quoted decoy attribute' => ['<a title="href=#x"href="javascript:alert(1)"><path d="M0"/></a>'],
+    'href hidden behind a single-quoted decoy attribute' => ["<a title='href=#x'href='javascript:alert(1)'><path d=\"M0\"/></a>"],
+    'href hidden behind a data attribute' => ['<a data-x="href=#"href="javascript:alert(1)"><path d="M0"/></a>'],
+    'attributeName hidden behind a decoy attribute' => ['<a><set title="attributeName=x"attributeName="href" to="javascript:alert(1)"/></a>'],
+    'entity with leading zeros in attributeName' => ['<a><set attributeName="&#0000000104;ref" to="javascript:alert(1)"/></a>'],
+    'element outside the svg' => ['</svg><img src=x onerror=alert(1)>'],
+    'noscript parser differential' => ['</svg><noscript><p title="</noscript><img src=x onerror=alert(1)>">'],
+    'noscript element' => ['<noscript></noscript>'],
 ]);
 
 it('accepts a body that cannot run script', function (string $body) {
