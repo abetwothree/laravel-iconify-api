@@ -272,6 +272,32 @@ You can rename or disable the Blade component, and set rendering defaults, in `c
 
 Values from `defaults` are applied to every rendered icon. Per-icon options (helper or Blade attributes) override matching keys, except `class`, which is merged. Render options such as `width`, `height`, `rotate`, `flip`, `inline` and `color` are honoured here too, not just plain SVG attributes.
 
+## Untrusted Icon Sets
+
+The package renders and serves icon bodies exactly as the set file has them, through the API, `icon()`, `<x-icon>` and the facade. Iconify itself assumes bodies were validated, so a body from a set you do not fully trust can carry script.
+
+Check a body with `IconBody::isSafe()`, which returns a `bool`:
+
+```php
+use AbeTwoThree\LaravelIconifyApi\Icons\IconBody;
+
+if (! IconBody::isSafe($body)) {
+    // Skip or report the icon.
+}
+```
+
+It rejects a body that contains any of these:
+
+- A `<script>` element.
+- Any `on*` event attribute, such as `onload` or `onbegin`.
+- Any `href` or `xlink:href` that does not start with `#` or `data:image/`. The value is read after decoding HTML entities, so `&#106;avascript:` is caught.
+- A `<foreignObject>`, `<iframe>`, `<embed>` or `<object>` element.
+- SMIL animation whose `attributeName` targets `href`.
+
+It accepts `#id` references from gradients, masks and `<use>`, `data:image/` hrefs, and SMIL animation of other attributes. Every icon in `@iconify/json` passes.
+
+The check never modifies a body. It rejects known script vectors, but it is not an HTML sanitizer.
+
 ## Advanced Configuration
 
 To configure the package, you can publish the config file using the following command:
