@@ -42,6 +42,8 @@ In your core application blade layout file add the following directive in the he
 
 This will configure the [Iconify API](https://iconify.design/docs/api/providers.html#api-config) on demand icons to load the icons from your Laravel application instead of the Iconify API.
 
+If your application sends a Content Security Policy, see [Content Security Policy](#content-security-policy).
+
 By default Icon API routes will work out of the following route path in your Laravel application:
 
 ```
@@ -68,6 +70,22 @@ To display on-demand icons follow the instructions on the [Iconify](https://icon
 You also need icon set data to be available in your application. You'll need to install the icon set data using NPM. See more [info here](https://iconify.design/docs/icons/icon-data.html#sources).
 
 It is recommended to install individual icon sets instead of the entire Iconify JSON set to keep your application lightweight. However, you can install the entire set if you wish and this package will work with either approach.
+
+### Content Security Policy
+
+`@iconify` prints an inline `<script>`. A nonce-based Content Security Policy (`script-src 'nonce-…'`) blocks that script unless it carries the nonce. Iconify then falls back to the public Iconify API, which a strict `connect-src` blocks too.
+
+If you create your nonce with `Vite::useCspNonce()`, directly or through a package such as [spatie/laravel-csp](https://github.com/spatie/laravel-csp#integration-with-vite), `@iconify` adds it for you, the same way `@vite` does. There is nothing to configure.
+
+If your nonce comes from somewhere else, pass it to the directive. A nonce passed this way wins over the Vite one:
+
+```blade
+@iconify($nonce)
+```
+
+The tag is built on every render, so each request gets its own nonce. Views compiled by an earlier version of this package still hold the old tag, so run `php artisan view:clear` once after upgrading.
+
+If you added the nonce to the `@iconify` output yourself, for example with `str_replace()` over `IconifyDirective::render()`, remove that code. The tag already carries the nonce, and your code would add it a second time.
 
 ## Real-Time Inline Icon Rendering
 
