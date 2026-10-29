@@ -242,3 +242,21 @@ it('treats an entry cached under an older shape version as a miss', function () 
     expect($result['found'])->toBe([]);
     expect($result['not_found'])->toBe(['stale']);
 });
+
+it('keys icons on the reject_unsafe_bodies switch', function (bool $switch, string $expectedKey) {
+    config()->set('iconify-api.cache_store', 'array');
+    config()->set('cache.default', 'array');
+    config()->set('iconify-api.cache_key_prefix', 'iconify-icons');
+    config()->set('iconify-api.reject_unsafe_bodies', $switch);
+
+    (new CacheRepository)->setIcon('mdi', 'home', [
+        'icons' => ['home' => ['body' => '<path />']],
+        'aliases' => [],
+        'defaults' => [],
+    ]);
+
+    expect(cachedKeys())->toBe([$expectedKey]);
+})->with([
+    'switch off keeps the existing key' => [false, 'iconify-icons:mdi:icon:2:home'],
+    'switch on uses its own key space' => [true, 'iconify-icons:mdi:icon:2s:home'],
+]);

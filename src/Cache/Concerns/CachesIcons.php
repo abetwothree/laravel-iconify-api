@@ -95,11 +95,16 @@ trait CachesIcons
      * segment before any caller-supplied value.
      *
      * The `2` is the entry shape version, bumped whenever the cached array shape
-     * changes so stale entries retire without a marker key inside them.
+     * changes so stale entries retire without a marker key inside them. It reads `2s`
+     * while `reject_unsafe_bodies` is on. A body cached while the switch was off must
+     * never be served while it is on, and found icons never expire, so the switch gets
+     * its own key space rather than relying on `cache:clear`.
      */
     protected function iconKey(string $prefix, string $icon): string
     {
-        return "{$this->cachePrefix}:{$prefix}:icon:2:".$this->iconKeySegment($icon);
+        $shapeVersion = $this->rejectUnsafeBodies ? '2s' : '2';
+
+        return "{$this->cachePrefix}:{$prefix}:icon:{$shapeVersion}:".$this->iconKeySegment($icon);
     }
 
     /**

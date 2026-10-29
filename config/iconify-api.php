@@ -63,6 +63,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Reject Unsafe Icon Bodies
+    |--------------------------------------------------------------------------
+    | When true, every icon body is checked with `IconBody::isSafe()` as its
+    | set is read. An icon that fails, or an alias of one, is treated as not
+    | found, and a warning is logged with the set prefix and icon name.
+    |
+    | Icons cached under one setting are never served under the other, so
+    | changing this needs no `cache:clear`.
+    |
+    */
+
+    'reject_unsafe_bodies' => env('ICONIFY_API_REJECT_UNSAFE_BODIES', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Iconify Icon Providers
     |--------------------------------------------------------------------------
     | By default, this package will use your Laravel application as the provider
@@ -140,7 +155,8 @@ return [
     | The format of Iconify API cache keys is:
     | {cache-prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name} for icons, and
     | {cache-prefix}:{icon-set-prefix}:meta:{info|summary|file:{type}} for icon set
-    | metadata.
+    | metadata. {shape-version} is `2s` instead of `2` while `reject_unsafe_bodies`
+    | is on.
     |
     */
 

@@ -298,6 +298,16 @@ It accepts `#id` references from gradients, masks and `<use>`, `data:image/` hre
 
 The check never modifies a body. It rejects known script vectors, but it is not an HTML sanitizer.
 
+### Skipping unsafe icons automatically
+
+Set `reject_unsafe_bodies` in `config/iconify-api.php`, or `ICONIFY_API_REJECT_UNSAFE_BODIES=true` in your `.env`, to have the package run `IconBody::isSafe()` for you. It is off by default, so output matches upstream Iconify.
+
+With it on, an icon that fails the check, or an alias of one, is treated as not found. The API lists it under `not_found`, and `icon()`, `<x-icon>` and the facade render nothing. Each skipped icon logs a warning carrying the set prefix and the icon name.
+
+It checks every set, because the package cannot tell a custom set from an official one. Every icon in `@iconify/json` passes.
+
+Turning it on or off takes effect immediately, with no `cache:clear`. Each setting has its own cache keys, so an icon cached under one setting is never served under the other.
+
 ## Advanced Configuration
 
 To configure the package, you can publish the config file using the following command:
@@ -326,7 +336,7 @@ Found icons never expire, since an icon cannot change while the installed icon s
 
 Misses expire after 300 seconds, since any name a caller invents produces one. Change that with `not_found_cache_ttl`, or set it to `0` to skip caching misses. The API routes also cap how many icons one request may ask for with `max_icons_per_request` (200 by default, `0` for no limit); anything over the cap gets a `400`.
 
-Cache keys look like `{cache_key_prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name}`, with `meta:` in place of `icon:` for icon set metadata. A name that a cache key cannot hold, one carrying a space or running past 128 bytes, is replaced by a SHA-256 hash. No published icon set has such a name.
+Cache keys look like `{cache_key_prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name}`, with `meta:` in place of `icon:` for icon set metadata. While `reject_unsafe_bodies` is on, `{shape-version}` is `2s` instead of `2`. A name that a cache key cannot hold, one carrying a space or running past 128 bytes, is replaced by a SHA-256 hash. No published icon set has such a name.
 
 ## Missing Features
 
