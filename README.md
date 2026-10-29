@@ -83,7 +83,7 @@ If your nonce comes from somewhere else, pass it to the directive. A nonce passe
 @iconify($nonce)
 ```
 
-The tag is built on every render, so each request gets its own nonce.
+The tag is built on every render, so each request gets its own nonce. Views compiled by an earlier version of this package still hold the old tag, so run `php artisan view:clear` once after upgrading.
 
 If you added the nonce to the `@iconify` output yourself, for example with `str_replace()` over `IconifyDirective::render()`, remove that code. The tag already carries the nonce, and your code would add it a second time.
 
