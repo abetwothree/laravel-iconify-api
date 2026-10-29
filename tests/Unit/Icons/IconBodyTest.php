@@ -8,10 +8,10 @@ use AbeTwoThree\LaravelIconifyApi\Icons\IconFinder;
 it('rejects a body that can run script', function (string $body) {
     expect(IconBody::isSafe($body))->toBeFalse();
 })->with([
-    // Issue #60, rule 1: a <script> element.
+    // <script> elements.
     'script element' => ['<script>alert(1)</script>'],
     'uppercase script element' => ['<g><SCRIPT>alert(1)</SCRIPT></g>'],
-    // Rule 2: an on* event attribute.
+    // on* event attributes.
     'event attribute' => ['<path d="M0 0" onload="alert(1)"/>'],
     'event attribute after a closing quote' => ['<path d="M0"onload="alert(1)"/>'],
     'event attribute after a single quote' => ["<path d='M0'onclick='alert(1)'/>"],
@@ -19,7 +19,7 @@ it('rejects a body that can run script', function (string $body) {
     'uppercase event attribute' => ['<path ONLOAD="alert(1)"/>'],
     'spaces around the equals sign' => ['<path onload = "alert(1)"/>'],
     'smil event attribute' => ['<animate onbegin="alert(1)"/>'],
-    // Rule 3: an href that is neither #id nor data:image/.
+    // hrefs that are neither #id nor data:image/.
     'javascript href' => ['<a href="javascript:alert(1)"><path d="M0 0"/></a>'],
     'javascript xlink:href' => ['<a xlink:href="javascript:alert(1)"><path d="M0 0"/></a>'],
     'decimal entity' => ['<a href="&#106;avascript:alert(1)"/>'],
@@ -36,12 +36,12 @@ it('rejects a body that can run script', function (string $body) {
     'https url' => ['<image href="https://evil.test/track.png"/>'],
     'non-image data url' => ['<a href="data:text/html,&lt;script&gt;alert(1)&lt;/script&gt;"/>'],
     'empty href' => ['<a href=""/>'],
-    // Approved beyond the issue: elements that embed HTML or another document.
+    // Elements that embed HTML or another document.
     'foreignObject' => ['<foreignObject><iframe srcdoc="&lt;script&gt;alert(1)&lt;/script&gt;"></iframe></foreignObject>'],
     'iframe' => ['<iframe src="javascript:alert(1)"></iframe>'],
     'embed' => ['<embed src="javascript:alert(1)"/>'],
     'object' => ['<object data="javascript:alert(1)"></object>'],
-    // ...and SMIL that rewrites an href at runtime.
+    // SMIL that rewrites an href at runtime.
     'set attributeName href' => ['<a><set attributeName="href" to="javascript:alert(1)"/></a>'],
     'animate attributeName xlink:href' => ['<a><animate attributeName="xlink:href" values="#a;javascript:alert(1)"/></a>'],
     'entity-encoded attributeName' => ['<a><set attributeName="&#104;ref" to="javascript:alert(1)"/></a>'],
@@ -55,11 +55,11 @@ it('rejects a body that can run script', function (string $body) {
     'element outside the svg' => ['</svg><img src=x onerror=alert(1)>'],
     'noscript parser differential' => ['</svg><noscript><p title="</noscript><img src=x onerror=alert(1)>">'],
     'noscript element' => ['<noscript></noscript>'],
-    // Encoding sniffing: a <meta charset> must not change how the rest is decoded.
+    // A <meta charset> must not change how the rest is decoded.
     'meta charset utf-16le before a forbidden element' => ['<meta charset="utf-16le"><noscript></noscript>'],
     'meta charset iso-8859-1 before a forbidden element' => ['<meta charset="iso-8859-1"><noscript></noscript>'],
     'meta element' => ['<meta name="x">'],
-    // <template> content is not in the element walk, and a declarative shadow root is live.
+    // <template> content escapes the element walk, and a declarative shadow root is live.
     'template outside the svg' => ['</svg><template><noscript></noscript></template>'],
     'declarative shadow root' => ['</svg><template shadowrootmode="open"><b><noscript></noscript></b></template>'],
 ]);

@@ -274,7 +274,7 @@ Values from `defaults` are applied to every rendered icon. Per-icon options (hel
 
 ## Untrusted Icon Sets
 
-The package renders and serves icon bodies exactly as the set file has them, through the API, `icon()`, `<x-icon>` and the facade. Iconify itself assumes bodies were validated, so a body from a set you do not fully trust can carry script.
+The package serves and renders icon bodies exactly as they appear in the set file, through the API, `icon()`, `<x-icon>` and the facade. Iconify does not check bodies either. It assumes the set's author already did, so a body from a set you do not fully trust can contain script.
 
 Check a body with `IconBody::isSafe()`, which returns a `bool`:
 
@@ -290,23 +290,27 @@ It rejects a body that contains any of these:
 
 - A `<script>` element.
 - Any `on*` event attribute, such as `onload` or `onbegin`.
-- Any `href` or `xlink:href` that does not start with `#` or `data:image/`. The value is read after decoding HTML entities, so `&#106;avascript:` is caught.
+- Any `href` or `xlink:href` that does not start with `#` or `data:image/`. The check reads the value after decoding HTML entities, so it catches `&#106;avascript:`.
 - A `<foreignObject>`, `<iframe>`, `<embed>`, `<object>`, `<noscript>`, `<template>` or `<meta>` element.
 - SMIL animation whose `attributeName` targets `href`.
 
 It accepts `#id` references from gradients, masks and `<use>`, `data:image/` hrefs, and SMIL animation of other attributes. Every icon in `@iconify/json` passes.
 
-The check never modifies a body. It rejects known script vectors, but it is not an HTML sanitizer.
+The check never modifies a body. It rejects known ways of running script, but it is not an HTML sanitizer.
 
 ### Skipping unsafe icons automatically
 
-Set `reject_unsafe_bodies` in `config/iconify-api.php`, or `ICONIFY_API_REJECT_UNSAFE_BODIES=true` in your `.env`, to have the package run `IconBody::isSafe()` for you. It is off by default, so output matches upstream Iconify.
+To have the package run `IconBody::isSafe()` for you, set `reject_unsafe_bodies` to `true` in `config/iconify-api.php`, or set `ICONIFY_API_REJECT_UNSAFE_BODIES=true` in your `.env`. It is off by default, so output matches upstream Iconify.
 
-With it on, an icon that fails the check, or an alias of one, is treated as not found. The API lists it under `not_found`, and `icon()`, `<x-icon>` and the facade render nothing. A warning carrying the set prefix and the icon name is logged each time a skipped icon is read from its set file. That is once per `not_found_cache_ttl` window, or on every request when the TTL is 0. An icon with a missing or non-string `body` is skipped the same way. The env value must be `true` or `false`, because `1` throws, as it does for `ICONIFY_API_ENABLED`.
+With it on, the package treats an icon that fails the check, or an alias of one, as not found. The API lists the icon under `not_found`, and `icon()`, `<x-icon>` and the facade render nothing. The package also skips an icon whose `body` is missing or is not a string.
 
-It checks every set, because the package cannot tell a custom set from an official one. Every icon in `@iconify/json` passes.
+Each time the package reads a skipped icon from its set file, it logs a warning with the set prefix and the icon name. That happens once per `not_found_cache_ttl` window, or on every request when the TTL is 0.
 
-Turning it on or off takes effect immediately, with no `cache:clear`. Each setting has its own cache keys, so an icon cached under one setting is never served under the other.
+The env value must be `true` or `false`. A value of `1` throws an `InvalidArgumentException`, as it does for `ICONIFY_API_ENABLED`.
+
+It checks every set, because the package cannot tell a custom set from an official one.
+
+Turning it on or off takes effect at once, with no `cache:clear`. Each setting has its own cache keys, so the package never serves an icon it cached under the other setting.
 
 ## Advanced Configuration
 

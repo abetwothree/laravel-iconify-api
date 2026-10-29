@@ -8,43 +8,27 @@ use Dom\HTMLDocument;
 use Throwable;
 
 /**
- * Deny-list check for known script vectors in an icon body.
+ * Checks an icon body for known ways to run script. It reports and never sanitizes.
  *
- * Meant for bodies from icon sets the app does not fully trust. It only reports; it never
- * modifies a body. It is deliberately conservative and is not an HTML sanitizer: a body
- * it accepts has none of the vectors listed below, not a guarantee that no other exists.
- *
- * The body is parsed with the HTML5 parser so markup and character references are read
- * exactly as a browser reads them. Patterns read them differently: a quoted decoy value
- * can swallow a real attribute, and `&#0000000104;` is `h`. Every element in the document
- * is checked, not only those inside the `<svg>`, because a body can close the `<svg>`
- * and land HTML elements after it.
+ * It parses with the HTML5 parser and walks the whole document, since a body can close its `<svg>`.
  */
 class IconBody
 {
     /**
-     * Elements that run script or embed another document. `noscript` is included because
-     * this parser runs with scripting disabled and browsers with it enabled, so they
-     * disagree on whether its content is markup or text. Content that is text here can be
-     * a live element in a browser. `template` is included because its children sit in a
-     * separate content fragment this walk never visits, and a declarative shadow root is
-     * live in the page. `meta` is included because it can steer encoding sniffing.
+     * Elements that run script or embed a document. `noscript` parses differently with scripting off,
+     * `template` content escapes the element walk, and `meta` can change the parse encoding.
      */
     protected const FORBIDDEN_ELEMENTS = ['script', 'foreignobject', 'iframe', 'embed', 'object', 'noscript', 'meta', 'template'];
 
     /**
-     * Whether the body is free of the known script vectors.
+     * Checks whether a body can be inlined without running script.
      *
-     * Unsafe when it has a forbidden element, an `on*` event attribute, an `href` that is
-     * not `#id` or `data:image/`, or SMIL whose `attributeName` targets an `href`. A body
-     * the parser cannot process counts as unsafe, never as safe.
+     * A body the parser cannot process counts as unsafe.
      */
     public static function isSafe(string $body): bool
     {
         try {
-            // The encoding is fixed because createFromString() otherwise sniffs it, and a
-            // `<meta charset>` in the body would re-decode everything after it. A browser
-            // gets this markup as UTF-8 or as a JS string, so it never sniffs.
+            // Pinned to UTF-8, or a `<meta charset>` in the body would re-decode everything after it.
             $document = HTMLDocument::createFromString('<!DOCTYPE html><body><svg>'.$body.'</svg>', LIBXML_NOERROR, 'UTF-8');
         } catch (Throwable) {
             return false;
@@ -85,10 +69,7 @@ class IconBody
     }
 
     /**
-     * Whether a normalized `attributeName` value names an href, with or without a prefix.
-     *
-     * SMIL `<set>` and `<animate>` can rewrite an href at runtime, which the static href
-     * rule cannot see, so the target of the animation is checked instead.
+     * Whether a normalized SMIL `attributeName` targets an href, which could rewrite a link at runtime.
      */
     protected static function targetsHref(string $value): bool
     {
@@ -96,11 +77,7 @@ class IconBody
     }
 
     /**
-     * Reduce an attribute value to what a browser's URL parser would read.
-     *
-     * The HTML parser has already decoded character references. What remains is the tab
-     * and newlines the URL parser drops anywhere, the control characters and spaces it
-     * trims from both ends, and case.
+     * Reduces an attribute value to what a browser's URL parser reads: no tabs or newlines, trimmed, lowercase.
      */
     protected static function normalize(string $value): string
     {

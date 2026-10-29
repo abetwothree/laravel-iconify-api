@@ -6,9 +6,9 @@ use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
 use Illuminate\Support\Facades\File;
 
 /**
- * Track a temp directory tree for removal, or take every tracked one when given none.
+ * Tracks a temp directory for removal, or hands back and clears every tracked one when given none.
  *
- * @return array<int, string> The tracked directories, emptied from the list when taken.
+ * @return array<int, string>
  */
 function trackedUnsafeSetDirectories(?string $add = null): array
 {
@@ -33,9 +33,7 @@ afterEach(function () {
 });
 
 /**
- * Point icons_location at a temp dir holding one @iconify-json set with an unsafe icon.
- *
- * @return string The set's unique prefix.
+ * Points icons_location at a temp set with one unsafe icon and returns the set's prefix.
  */
 function installUnsafeSet(): string
 {
@@ -57,7 +55,6 @@ function installUnsafeSet(): string
 }
 
 it('renders an unsafe body while reject_unsafe_bodies is off', function () {
-    // Characterization: today's behaviour. Passes before the change.
     $prefix = installUnsafeSet();
 
     expect(LaravelIconifyApi::icon("{$prefix}:bad"))->toContain('onload=');

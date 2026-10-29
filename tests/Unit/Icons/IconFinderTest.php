@@ -309,9 +309,7 @@ it('emits an empty defaults array when the icon set root has none', function () 
 });
 
 /**
- * An IconFinder over a temporary set holding one safe and one unsafe icon, each with an alias.
- *
- * Returns the finder and the temp file path, which the caller deletes.
+ * Builds an IconFinder over a temp set with a safe and an unsafe icon, each aliased. The caller deletes the file.
  *
  * @return array{0: IconFinder, 1: string}
  */
@@ -346,7 +344,6 @@ function finderOverUnsafeSet(): array
 }
 
 it('returns an unsafe body unchanged while reject_unsafe_bodies is off', function () {
-    // Characterization: the default must keep upstream behaviour. Passes before the change.
     [$finder, $path] = finderOverUnsafeSet();
 
     $result = $finder->find('test', ['unsafe']);
@@ -418,9 +415,7 @@ it('logs a warning naming each skipped icon', function () {
 });
 
 /**
- * An IconFinder over a temporary set holding one icon with the given raw definition.
- *
- * Returns the finder and the temp file path, which the caller deletes.
+ * Builds an IconFinder over a temp set holding one icon with the given raw definition. The caller deletes the file.
  *
  * @param  array<string, mixed>  $icon
  * @return array{0: IconFinder, 1: string}
