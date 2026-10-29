@@ -7,8 +7,14 @@ use AbeTwoThree\LaravelIconifyApi\Icons\IconFinder;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconDataResolver;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\IconifySvgBuilder;
 use AbeTwoThree\LaravelIconifyApi\Icons\Support\SvgIdReplacer;
+use Illuminate\Config\Repository;
+use Illuminate\Container\Container;
 
 require __DIR__.'/../../vendor/autoload.php';
+
+// IconFinder reads config() on every find(), and this bridge runs without a Laravel app.
+// An empty repository gives every switch its default, which is the upstream-matching one.
+Container::getInstance()->instance('config', new Repository);
 
 $input = file_get_contents('php://stdin');
 

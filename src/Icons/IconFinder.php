@@ -6,6 +6,7 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons;
 
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder as IconFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @phpstan-import-type TIconSetData from \AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconFinder
@@ -46,24 +47,29 @@ class IconFinder implements IconFinderContract
         /** @var array<string, TIconData> $iconsResponse */
         $iconsResponse = [];
 
+        $rejectUnsafe = config()->boolean('iconify-api.reject_unsafe_bodies', false);
+
         foreach ($icons as $icon) {
             $iconsResponse[$icon] = $iconsSetInfo;
 
             if (isset($iconsData['icons'][$icon])) {
                 $iconsResponse[$icon]['icons'][$icon] = $iconsData['icons'][$icon];
+            } elseif (! $this->appendAliasChain($iconsData, $iconsResponse[$icon], $icon, [])) {
+                $iconsResponse[$icon]['not_found'][] = $icon;
 
                 continue;
             }
 
-            if ($this->appendAliasChain($iconsData, $iconsResponse[$icon], $icon, [])) {
-                continue;
-            }
+            // Checked here because every consumer, the API routes included, reads through find().
+            if ($rejectUnsafe && $this->hasUnsafeBody($iconsResponse[$icon])) {
+                Log::warning('Skipped an icon whose body failed IconBody::isSafe().', [
+                    'prefix' => $prefix,
+                    'icon' => $icon,
+                ]);
 
-            if (! isset($iconsResponse[$icon]['not_found'])) {
-                $iconsResponse[$icon]['not_found'] = [];
+                $iconsResponse[$icon] = $iconsSetInfo;
+                $iconsResponse[$icon]['not_found'][] = $icon;
             }
-
-            $iconsResponse[$icon]['not_found'][] = $icon;
         }
 
         unset($iconsData);
@@ -97,6 +103,23 @@ class IconFinder implements IconFinderContract
         }
 
         return $this->appendAliasChain($iconsData, $iconResponse, $parent, $visited);
+    }
+
+    /**
+     * Whether any icon body in the entry fails IconBody::isSafe().
+     *
+     * @param  TIconData  $iconData
+     */
+    protected function hasUnsafeBody(array $iconData): bool
+    {
+        foreach ($iconData['icons'] as $icon) {
+            // Icon set JSON is unvalidated, so a missing or non-string body counts as unsafe.
+            if (! is_string($icon['body'] ?? null) || ! IconBody::isSafe($icon['body'])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

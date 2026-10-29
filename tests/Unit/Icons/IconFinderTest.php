@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use AbeTwoThree\LaravelIconifyApi\Icons\Contracts\IconSetsFileFinder as IconSetsFileFinderContract;
 use AbeTwoThree\LaravelIconifyApi\Icons\IconFinder;
+use Illuminate\Log\Events\MessageLogged;
+use Illuminate\Support\Facades\Event;
 
 it('can find multiple icons', function (
     string $set,
@@ -304,4 +306,168 @@ it('emits an empty defaults array when the icon set root has none', function () 
     expect($result['base']['defaults'])->toBe([]);
 
     @unlink($tempFile);
+});
+
+/**
+ * Builds an IconFinder over a temp set with a safe and an unsafe icon, each aliased. The caller deletes the file.
+ *
+ * @return array{0: IconFinder, 1: string}
+ */
+function finderOverUnsafeSet(): array
+{
+    $path = sys_get_temp_dir().'/iconfinder-unsafe-'.uniqid('', true).'.json';
+
+    file_put_contents($path, json_encode([
+        'prefix' => 'test',
+        'lastModified' => 1,
+        'icons' => [
+            'safe' => ['body' => '<path d="M0 0h24v24H0z"/>'],
+            'unsafe' => ['body' => '<path onload="alert(1)" d="M0 0h24v24H0z"/>'],
+        ],
+        'aliases' => [
+            'safe-alias' => ['parent' => 'safe'],
+            'unsafe-alias' => ['parent' => 'unsafe'],
+        ],
+    ], JSON_THROW_ON_ERROR));
+
+    $fileFinder = new class($path) implements IconSetsFileFinderContract
+    {
+        public function __construct(private string $path) {}
+
+        public function find(string $prefix, string $type = 'icons'): string
+        {
+            return $this->path;
+        }
+    };
+
+    return [new IconFinder($fileFinder), $path];
+}
+
+it('returns an unsafe body unchanged while reject_unsafe_bodies is off', function () {
+    [$finder, $path] = finderOverUnsafeSet();
+
+    $result = $finder->find('test', ['unsafe']);
+
+    expect($result['unsafe']['icons'])->toHaveKey('unsafe')
+        ->and($result['unsafe'])->not->toHaveKey('not_found');
+
+    @unlink($path);
+});
+
+it('reports an unsafe icon as not found when reject_unsafe_bodies is on', function () {
+    config()->set('iconify-api.reject_unsafe_bodies', true);
+    [$finder, $path] = finderOverUnsafeSet();
+
+    expect($finder->find('test', ['unsafe'])['unsafe'])->toBe([
+        'icons' => [],
+        'aliases' => [],
+        'defaults' => [],
+        'not_found' => ['unsafe'],
+    ]);
+
+    @unlink($path);
+});
+
+it('reports an alias of an unsafe icon as not found', function () {
+    config()->set('iconify-api.reject_unsafe_bodies', true);
+    [$finder, $path] = finderOverUnsafeSet();
+
+    expect($finder->find('test', ['unsafe-alias'])['unsafe-alias'])->toBe([
+        'icons' => [],
+        'aliases' => [],
+        'defaults' => [],
+        'not_found' => ['unsafe-alias'],
+    ]);
+
+    @unlink($path);
+});
+
+it('keeps safe icons and their aliases when reject_unsafe_bodies is on', function () {
+    config()->set('iconify-api.reject_unsafe_bodies', true);
+    [$finder, $path] = finderOverUnsafeSet();
+
+    $result = $finder->find('test', ['safe', 'safe-alias']);
+
+    expect($result['safe']['icons'])->toHaveKey('safe')
+        ->and($result['safe-alias']['icons'])->toHaveKey('safe')
+        ->and($result['safe'])->not->toHaveKey('not_found')
+        ->and($result['safe-alias'])->not->toHaveKey('not_found');
+
+    @unlink($path);
+});
+
+it('logs a warning naming each skipped icon', function () {
+    config()->set('iconify-api.reject_unsafe_bodies', true);
+    [$finder, $path] = finderOverUnsafeSet();
+    $logged = [];
+    Event::listen(MessageLogged::class, function (MessageLogged $event) use (&$logged) {
+        $logged[] = $event;
+    });
+
+    $finder->find('test', ['unsafe', 'safe']);
+
+    expect($logged)->toHaveCount(1)
+        ->and($logged[0]->level)->toBe('warning')
+        ->and($logged[0]->message)->toBe('Skipped an icon whose body failed IconBody::isSafe().')
+        ->and($logged[0]->context)->toBe(['prefix' => 'test', 'icon' => 'unsafe']);
+
+    @unlink($path);
+});
+
+/**
+ * Builds an IconFinder over a temp set holding one icon with the given raw definition. The caller deletes the file.
+ *
+ * @param  array<string, mixed>  $icon
+ * @return array{0: IconFinder, 1: string}
+ */
+function finderOverMalformedIcon(array $icon): array
+{
+    $path = sys_get_temp_dir().'/iconfinder-malformed-'.uniqid('', true).'.json';
+
+    file_put_contents($path, json_encode([
+        'prefix' => 'test',
+        'lastModified' => 1,
+        'icons' => ['broken' => $icon],
+        'aliases' => [],
+    ], JSON_THROW_ON_ERROR));
+
+    $fileFinder = new class($path) implements IconSetsFileFinderContract
+    {
+        public function __construct(private string $path) {}
+
+        public function find(string $prefix, string $type = 'icons'): string
+        {
+            return $this->path;
+        }
+    };
+
+    return [new IconFinder($fileFinder), $path];
+}
+
+it('reports an icon with a non-string body as not found', function () {
+    config()->set('iconify-api.reject_unsafe_bodies', true);
+    [$finder, $path] = finderOverMalformedIcon(['body' => 5]);
+
+    expect($finder->find('test', ['broken'])['broken'])->toBe([
+        'icons' => [],
+        'aliases' => [],
+        'defaults' => [],
+        'not_found' => ['broken'],
+    ]);
+
+    @unlink($path);
+});
+
+it('reports an icon with no body as not found', function () {
+    config()->set('iconify-api.reject_unsafe_bodies', true);
+    [$finder, $path] = finderOverMalformedIcon(['width' => 24]);
+
+    expect($finder->find('test', ['broken'])['broken'])->toBe([
+        'icons' => [],
+        'aliases' => [],
+        'defaults' => [],
+        'not_found' => ['broken'],
+    ]);
+
+    @unlink($path);
 });

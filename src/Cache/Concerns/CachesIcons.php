@@ -87,19 +87,15 @@ trait CachesIcons
     }
 
     /**
-     * Icon entries live under their own `icon:` segment.
+     * Builds an icon's cache key. The literal `icon:` segment stops a name like `info` hitting a metadata key.
      *
-     * A flat `{prefix}:{set}:{name}` scheme let a name such as `info` — shipped by 70
-     * of the 235 sets in `@iconify/json` — address an icon set metadata key exactly and
-     * overwrite it permanently. Every key builder here therefore commits a literal
-     * segment before any caller-supplied value.
-     *
-     * The `2` is the entry shape version, bumped whenever the cached array shape
-     * changes so stale entries retire without a marker key inside them.
+     * The shape version retires stale entries, and `2s` keeps entries cached under `reject_unsafe_bodies` apart.
      */
     protected function iconKey(string $prefix, string $icon): string
     {
-        return "{$this->cachePrefix}:{$prefix}:icon:2:".$this->iconKeySegment($icon);
+        $shapeVersion = $this->rejectUnsafeBodies ? '2s' : '2';
+
+        return "{$this->cachePrefix}:{$prefix}:icon:{$shapeVersion}:".$this->iconKeySegment($icon);
     }
 
     /**
