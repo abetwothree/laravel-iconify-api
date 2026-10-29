@@ -5,10 +5,17 @@ declare(strict_types=1);
 namespace AbeTwoThree\LaravelIconifyApi;
 
 use AbeTwoThree\LaravelIconifyApi\Facades\LaravelIconifyApi;
+use Illuminate\Support\Facades\Vite;
 
 class IconifyDirective
 {
-    public function render(): string
+    /**
+     * Build the inline script that points Iconify's on-demand components at this app's API.
+     *
+     * The @iconify directive calls this on every render, so each request's CSP nonce
+     * reaches the tag. An explicit nonce overrides the one Vite::cspNonce() holds.
+     */
+    public function render(?string $nonce = null): string
     {
         $url = LaravelIconifyApi::domain().'/'.LaravelIconifyApi::path();
 
@@ -29,8 +36,10 @@ class IconifyDirective
         // so escape it. Same flags as Laravel's Js::REQUIRED_FLAGS.
         $encodedProviders = json_encode($providers, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
 
+        $nonceAttribute = $this->nonceAttribute($nonce);
+
         return <<<HTML
-            <script type="text/javascript">
+            <script{$nonceAttribute} type="text/javascript">
                 if(!window.IconifyProviders) {
                     window.IconifyProviders = {};
                 }
@@ -38,5 +47,25 @@ class IconifyDirective
                 IconifyProviders = {$encodedProviders};
             </script>
         HTML;
+    }
+
+    /**
+     * The script tag's nonce attribute with its leading space, or '' when there is no nonce.
+     *
+     * Falls back to the nonce @vite uses, so an app that calls Vite::useCspNonce() needs no
+     * setup. Escaped because @iconify($nonce) accepts any Blade expression.
+     */
+    protected function nonceAttribute(?string $nonce): string
+    {
+        if ($nonce === null || $nonce === '') {
+            $nonce = Vite::cspNonce();
+        }
+
+        // nonce="" can never match a CSP nonce-source, so print nothing instead.
+        if ($nonce === null || $nonce === '') {
+            return '';
+        }
+
+        return ' nonce="'.e($nonce).'"';
     }
 }

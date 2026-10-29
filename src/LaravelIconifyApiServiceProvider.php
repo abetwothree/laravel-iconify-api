@@ -107,12 +107,13 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
      * Register @iconify as a call that runs on every render.
      *
      * Building the tag here would freeze it into the compiled view, so a config change
-     * would need view:clear and nothing per-request could ever reach it.
+     * would need view:clear and no request could get its own CSP nonce. The directive's
+     * optional argument is that nonce, passed straight to IconifyDirective::render().
      */
     protected function registerBladeDirective(): void
     {
-        Blade::directive('iconify', function (): string {
-            return '<?php echo app(\\'.IconifyDirective::class.'::class)->render(); ?>';
+        Blade::directive('iconify', function (string $expression): string {
+            return '<?php echo app(\\'.IconifyDirective::class.'::class)->render('.$expression.'); ?>';
         });
     }
 

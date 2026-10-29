@@ -3,6 +3,31 @@
 declare(strict_types=1);
 
 use AbeTwoThree\LaravelIconifyApi\IconifyDirective;
+use Illuminate\Support\Facades\Vite;
+
+/**
+ * The tag render() prints for the default config with no CSP nonce in use.
+ *
+ * Spelled out in full so any change to the markup has to be deliberate.
+ */
+function defaultIconifyTag(): string
+{
+    return implode("\n", [
+        '    <script type="text/javascript">',
+        '        if(!window.IconifyProviders) {',
+        '            window.IconifyProviders = {};',
+        '        }',
+        '',
+        '        IconifyProviders = {',
+        '    "": {',
+        '        "resources": [',
+        '            "/iconify/api"',
+        '        ]',
+        '    }',
+        '};',
+        '    </script>',
+    ]);
+}
 
 it('can render the directive', function () {
     config()->set('app.url', 'http://localhost');
@@ -106,4 +131,45 @@ it('rejects a custom providers config that is not an array', function () {
     config()->set('iconify-api.custom_providers', 'not-an-array');
 
     expect(fn () => (new IconifyDirective)->render())->toThrow(InvalidArgumentException::class);
+});
+
+it('renders the default tag byte for byte', function () {
+    expect((new IconifyDirective)->render())->toBe(defaultIconifyTag());
+});
+
+it('adds the Vite nonce to the script tag and changes nothing else', function () {
+    Vite::useCspNonce('abc');
+
+    expect((new IconifyDirective)->render())
+        ->toBe(str_replace('<script type=', '<script nonce="abc" type=', defaultIconifyTag()));
+});
+
+it('lets an explicit nonce win over the Vite nonce', function () {
+    Vite::useCspNonce('from-vite');
+
+    expect((new IconifyDirective)->render('explicit'))
+        ->toContain('<script nonce="explicit" type="text/javascript">')
+        ->not->toContain('from-vite');
+});
+
+it('escapes the nonce so it cannot break out of the attribute', function () {
+    Vite::useCspNonce('"><script>alert(1)</script>');
+
+    $rendered = (new IconifyDirective)->render();
+
+    expect($rendered)
+        ->toContain('<script nonce="&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;" type="text/javascript">')
+        ->and(substr_count($rendered, '<script'))->toBe(1);
+});
+
+it('treats a blank nonce as no nonce', function () {
+    // nonce="" can never match a CSP nonce-source, so print no attribute at all.
+    Vite::useCspNonce('');
+
+    expect((new IconifyDirective)->render())->toBe(defaultIconifyTag());
+
+    Vite::useCspNonce('from-vite');
+
+    expect((new IconifyDirective)->render(''))
+        ->toContain('<script nonce="from-vite" type="text/javascript">');
 });
