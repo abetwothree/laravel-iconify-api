@@ -73,19 +73,21 @@ It is recommended to install individual icon sets instead of the entire Iconify 
 
 ### Content Security Policy
 
-`@iconify` prints an inline `<script>`. A nonce-based Content Security Policy (`script-src 'nonce-…'`) blocks that script unless it carries the nonce. Iconify then falls back to the public Iconify API, which a strict `connect-src` blocks too.
+`@iconify` prints an inline `<script>` tag. A nonce-based Content Security Policy (`script-src 'nonce-…'`) blocks that tag unless it includes the nonce. The blocked script never sets `window.IconifyProviders`, so Iconify's components fall back to the public Iconify API. A strict `connect-src` blocks that request too, and no icons load.
 
-If you create your nonce with `Vite::useCspNonce()`, directly or through a package such as [spatie/laravel-csp](https://github.com/spatie/laravel-csp#integration-with-vite), `@iconify` adds it for you, the same way `@vite` does. There is nothing to configure.
+If your app creates its nonce with `Vite::useCspNonce()`, directly or through a package such as [spatie/laravel-csp](https://github.com/spatie/laravel-csp#integration-with-vite), `@iconify` reads that nonce and adds it to the tag, the same way `@vite` does. You don't need to configure anything.
 
-If your nonce comes from somewhere else, pass it to the directive. A nonce passed this way wins over the Vite one:
+If your nonce comes from somewhere else, pass it to the directive. `@iconify` uses a nonce passed this way instead of the Vite one:
 
 ```blade
 @iconify($nonce)
 ```
 
-The tag is built on every render, so each request gets its own nonce. Views compiled by an earlier version of this package still hold the old tag, so run `php artisan view:clear` once after upgrading.
+`@iconify` builds the tag on every render, so each request gets its own nonce.
 
-If you added the nonce to the `@iconify` output yourself, for example with `str_replace()` over `IconifyDirective::render()`, remove that code. The tag already carries the nonce, and your code would add it a second time.
+After upgrading, run `php artisan view:clear` once. Blade recompiles a view only when its source file changes, so views compiled by an earlier version of this package still contain the old tag without a nonce.
+
+If you added the nonce to the `@iconify` output yourself, for example by running `str_replace()` on what `IconifyDirective::render()` returns, remove that code. The tag now includes the nonce, so your code would add a second `nonce` attribute.
 
 ## Real-Time Inline Icon Rendering
 
