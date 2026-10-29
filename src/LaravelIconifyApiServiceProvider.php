@@ -103,10 +103,16 @@ class LaravelIconifyApiServiceProvider extends PackageServiceProvider
         );
     }
 
+    /**
+     * Register @iconify as a call that runs on every render.
+     *
+     * Building the tag here would freeze it into the compiled view, so a config change
+     * would need view:clear and nothing per-request could ever reach it.
+     */
     protected function registerBladeDirective(): void
     {
-        Blade::directive('iconify', function () {
-            return (new IconifyDirective)->render();
+        Blade::directive('iconify', function (): string {
+            return '<?php echo app(\\'.IconifyDirective::class.'::class)->render(); ?>';
         });
     }
 
