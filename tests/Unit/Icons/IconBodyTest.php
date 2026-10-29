@@ -55,6 +55,13 @@ it('rejects a body that can run script', function (string $body) {
     'element outside the svg' => ['</svg><img src=x onerror=alert(1)>'],
     'noscript parser differential' => ['</svg><noscript><p title="</noscript><img src=x onerror=alert(1)>">'],
     'noscript element' => ['<noscript></noscript>'],
+    // Encoding sniffing: a <meta charset> must not change how the rest is decoded.
+    'meta charset utf-16le before a forbidden element' => ['<meta charset="utf-16le"><noscript></noscript>'],
+    'meta charset iso-8859-1 before a forbidden element' => ['<meta charset="iso-8859-1"><noscript></noscript>'],
+    'meta element' => ['<meta name="x">'],
+    // <template> content is not in the element walk, and a declarative shadow root is live.
+    'template outside the svg' => ['</svg><template><noscript></noscript></template>'],
+    'declarative shadow root' => ['</svg><template shadowrootmode="open"><b><noscript></noscript></b></template>'],
 ]);
 
 it('accepts a body that cannot run script', function (string $body) {

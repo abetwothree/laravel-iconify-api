@@ -291,7 +291,7 @@ It rejects a body that contains any of these:
 - A `<script>` element.
 - Any `on*` event attribute, such as `onload` or `onbegin`.
 - Any `href` or `xlink:href` that does not start with `#` or `data:image/`. The value is read after decoding HTML entities, so `&#106;avascript:` is caught.
-- A `<foreignObject>`, `<iframe>`, `<embed>` or `<object>` element.
+- A `<foreignObject>`, `<iframe>`, `<embed>`, `<object>`, `<noscript>`, `<template>` or `<meta>` element.
 - SMIL animation whose `attributeName` targets `href`.
 
 It accepts `#id` references from gradients, masks and `<use>`, `data:image/` hrefs, and SMIL animation of other attributes. Every icon in `@iconify/json` passes.

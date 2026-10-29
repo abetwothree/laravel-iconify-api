@@ -26,9 +26,11 @@ class IconBody
      * Elements that run script or embed another document. `noscript` is included because
      * this parser runs with scripting disabled and browsers with it enabled, so they
      * disagree on whether its content is markup or text. Content that is text here can be
-     * a live element in a browser.
+     * a live element in a browser. `template` is included because its children sit in a
+     * separate content fragment this walk never visits, and a declarative shadow root is
+     * live in the page. `meta` is included because it can steer encoding sniffing.
      */
-    protected const FORBIDDEN_ELEMENTS = ['script', 'foreignobject', 'iframe', 'embed', 'object', 'noscript'];
+    protected const FORBIDDEN_ELEMENTS = ['script', 'foreignobject', 'iframe', 'embed', 'object', 'noscript', 'meta', 'template'];
 
     /**
      * Whether the body is free of the known script vectors.
@@ -40,7 +42,10 @@ class IconBody
     public static function isSafe(string $body): bool
     {
         try {
-            $document = HTMLDocument::createFromString('<!DOCTYPE html><body><svg>'.$body.'</svg>', LIBXML_NOERROR);
+            // The encoding is fixed because createFromString() otherwise sniffs it, and a
+            // `<meta charset>` in the body would re-decode everything after it. A browser
+            // gets this markup as UTF-8 or as a JS string, so it never sniffs.
+            $document = HTMLDocument::createFromString('<!DOCTYPE html><body><svg>'.$body.'</svg>', LIBXML_NOERROR, 'UTF-8');
         } catch (Throwable) {
             return false;
         }
