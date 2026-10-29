@@ -302,7 +302,7 @@ The check never modifies a body. It rejects known script vectors, but it is not 
 
 Set `reject_unsafe_bodies` in `config/iconify-api.php`, or `ICONIFY_API_REJECT_UNSAFE_BODIES=true` in your `.env`, to have the package run `IconBody::isSafe()` for you. It is off by default, so output matches upstream Iconify.
 
-With it on, an icon that fails the check, or an alias of one, is treated as not found. The API lists it under `not_found`, and `icon()`, `<x-icon>` and the facade render nothing. Each skipped icon logs a warning carrying the set prefix and the icon name.
+With it on, an icon that fails the check, or an alias of one, is treated as not found. The API lists it under `not_found`, and `icon()`, `<x-icon>` and the facade render nothing. A warning carrying the set prefix and the icon name is logged each time a skipped icon is read from its set file. That is once per `not_found_cache_ttl` window, or on every request when the TTL is 0. An icon with a missing or non-string `body` is skipped the same way. The env value must be `true` or `false`, because `1` throws, as it does for `ICONIFY_API_ENABLED`.
 
 It checks every set, because the package cannot tell a custom set from an official one. Every icon in `@iconify/json` passes.
 
