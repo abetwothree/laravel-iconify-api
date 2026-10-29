@@ -12,12 +12,15 @@ namespace AbeTwoThree\LaravelIconifyApi\Icons\Contracts;
  * it, so a root written `{"width": "24", "rotate": "1", "hFlip": 1}` is handed back
  * verbatim. Narrowing these would promise a type nothing enforces.
  *
+ * `TIcon.body` is `mixed` and optional for the same reason: a malformed icon can have no
+ * body or a non-string one, and `IconFinder` checks it before trusting it.
+ *
  * The root carries every property in `defaultIconProps`
  * (packages/utils/src/icon-set/validate-basic.ts:12-17) and `IconFinder` reads all of
  * them, `rotate`/`hFlip`/`vFlip` included.
  *
  * @phpstan-type TIcon = array{
- *     body:string,
+ *     body?:mixed,
  *     left?:int,
  *     top?:int,
  *     width?:int,

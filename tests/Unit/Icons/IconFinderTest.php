@@ -416,3 +416,63 @@ it('logs a warning naming each skipped icon', function () {
 
     @unlink($path);
 });
+
+/**
+ * An IconFinder over a temporary set holding one icon with the given raw definition.
+ *
+ * Returns the finder and the temp file path, which the caller deletes.
+ *
+ * @param  array<string, mixed>  $icon
+ * @return array{0: IconFinder, 1: string}
+ */
+function finderOverMalformedIcon(array $icon): array
+{
+    $path = sys_get_temp_dir().'/iconfinder-malformed-'.uniqid('', true).'.json';
+
+    file_put_contents($path, json_encode([
+        'prefix' => 'test',
+        'lastModified' => 1,
+        'icons' => ['broken' => $icon],
+        'aliases' => [],
+    ], JSON_THROW_ON_ERROR));
+
+    $fileFinder = new class($path) implements IconSetsFileFinderContract
+    {
+        public function __construct(private string $path) {}
+
+        public function find(string $prefix, string $type = 'icons'): string
+        {
+            return $this->path;
+        }
+    };
+
+    return [new IconFinder($fileFinder), $path];
+}
+
+it('reports an icon with a non-string body as not found', function () {
+    config()->set('iconify-api.reject_unsafe_bodies', true);
+    [$finder, $path] = finderOverMalformedIcon(['body' => 5]);
+
+    expect($finder->find('test', ['broken'])['broken'])->toBe([
+        'icons' => [],
+        'aliases' => [],
+        'defaults' => [],
+        'not_found' => ['broken'],
+    ]);
+
+    @unlink($path);
+});
+
+it('reports an icon with no body as not found', function () {
+    config()->set('iconify-api.reject_unsafe_bodies', true);
+    [$finder, $path] = finderOverMalformedIcon(['width' => 24]);
+
+    expect($finder->find('test', ['broken'])['broken'])->toBe([
+        'icons' => [],
+        'aliases' => [],
+        'defaults' => [],
+        'not_found' => ['broken'],
+    ]);
+
+    @unlink($path);
+});

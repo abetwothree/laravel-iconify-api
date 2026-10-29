@@ -113,7 +113,8 @@ class IconFinder implements IconFinderContract
     protected function hasUnsafeBody(array $iconData): bool
     {
         foreach ($iconData['icons'] as $icon) {
-            if (! IconBody::isSafe($icon['body'])) {
+            // Icon set JSON is unvalidated, so a missing or non-string body counts as unsafe.
+            if (! is_string($icon['body'] ?? null) || ! IconBody::isSafe($icon['body'])) {
                 return true;
             }
         }
