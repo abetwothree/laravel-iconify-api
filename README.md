@@ -342,6 +342,64 @@ Misses expire after 300 seconds, since any name a caller invents produces one. C
 
 Cache keys look like `{cache_key_prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name}`, with `meta:` in place of `icon:` for icon set metadata. While `reject_unsafe_bodies` is on, `{shape-version}` is `2s` instead of `2`. A name that a cache key cannot hold, one carrying a space or running past 128 bytes, is replaced by a SHA-256 hash. No published icon set has such a name.
 
+## Deploying to Production
+
+The package reads icon set files at runtime, not only while you build. `icons_location` defaults to `node_modules`, so a deploy that builds your assets and then drops `node_modules` leaves the server without them. Every page that renders `<x-icon>` or `icon()` then fails with `Could not find the icons file for the set: {prefix}`, and the API returns a `500` for that set.
+
+Pick one of the two setups below.
+
+### Keep icon sets as runtime dependencies
+
+Install icon sets without `-D`, so they land in `dependencies`. Laravel keeps its build tools (`vite`, `laravel-vite-plugin`, `tailwindcss`) in `devDependencies`. Build, prune the dev dependencies, and deploy what is left:
+
+```bash
+npm ci
+npm run build
+npm prune --omit=dev
+```
+
+In a Docker multi-stage build, prune at the end of the assets stage and copy `node_modules` into the final image:
+
+```dockerfile
+FROM node:22-alpine AS assets
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build && npm prune --omit=dev
+
+FROM php:8.4-fpm-alpine
+WORKDIR /var/www/html
+# ...
+COPY --from=assets /app/public/build ./public/build
+COPY --from=assets /app/node_modules ./node_modules
+```
+
+To ship only the icon data, copy `/app/node_modules/@iconify-json` to `./node_modules/@iconify-json` instead.
+
+### Ship the icon JSON with your app
+
+Copy the folder of each set you use into a directory you commit, keeping the `@iconify-json/{prefix}` layout:
+
+```text
+resources/iconify/@iconify-json/heroicons/
+resources/iconify/@iconify-json/mdi/
+```
+
+Then point `icons_location` at it in `config/iconify-api.php`:
+
+```php
+'icons_location' => resource_path('iconify'),
+```
+
+Production then needs no npm at all. In exchange, you refresh the copy by hand when a set updates, and run `php artisan cache:clear` afterwards.
+
+The icon cache replaces neither setup. An icon is cached only after its first request, so an icon nobody has requested yet, or any icon after a deploy that clears the cache, still reads its set file.
+
+## Laravel Boost
+
+The package ships a [Laravel Boost](https://laravel.com/docs/boost) guideline and an agent skill, `rendering-iconify-icons`, so AI agents working in your app render icons through this package. Run `php artisan boost:install`, or `php artisan boost:update` if Boost is already set up, and select `abetwothree/laravel-iconify-api` when it asks which third-party guidelines and skills to add.
+
 ## Missing Features
 
 The MVP of this package was to provide an API for on demand icons in your Laravel Application. A few API endpoints that currently exist on the Node JS package that are missing in this package and will be added in future releases:
