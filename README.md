@@ -209,8 +209,6 @@ Every icon carries `class="iconify iconify--{provider} iconify--{prefix}"`, with
 
 Boolean options accept only `true`, `"true"` and integer `1`. Blade passes every attribute as a string, so `<x-icon inline />` and `h-flip="true"` work while `inline="1"` silently does nothing.
 
-A missing or malformed icon name renders an empty string, with no exception and no log entry.
-
 ```blade
 <x-icon name="heroicons:clock" width="32" color="rebeccapurple" inline />
 <x-icon name="heroicons:clock" rotate="90deg" h-flip="true" />
@@ -227,6 +225,20 @@ The framework-only props Iconify's React/Vue/Svelte components accept — `icon`
 `ssr`, `onLoad`, `children`, `fallback`, `customise`, `_ref` — are accepted and ignored
 rather than emitted as attributes. Alternate render modes (`mode="bg"`, `mode="mask"`)
 are not implemented; icons always render as inline `<svg>`.
+
+### Missing icons and icon sets
+
+What happens depends on which part of the name is wrong:
+
+| Name | `icon()` and the facade | `<x-icon>` | `/iconify/api/{prefix}.json?icons=…` |
+| --- | --- | --- | --- |
+| An icon the installed set does not have, such as `heroicons:not-real` | Empty string | Renders nothing | `200`, with the name listed under `not_found` |
+| Not an icon name: blank, an empty prefix or name (`:clock`, `heroicons:`), too many colons, or one word with no colon or dash (`box`) | Empty string | Renders nothing | n/a |
+| A prefix with no icon set installed, such as `fa6-solid:house` | Throws `Exception: Could not find the icons file for the set: fa6-solid` | Throws, so the page returns a `500` | `500` |
+
+The first two rows produce no exception and no log entry. The last row also covers a mistyped prefix (`heroicon:clock`), and a name without a colon, which is read as `prefix-name`: `heroicons-clock` renders the Heroicons clock, while `user-circle` looks for a set called `user` and throws. `/iconify/api/collection?prefix=…` returns a `500` for an uninstalled set too.
+
+To fix the last row, install the set with `npm install @iconify-json/{prefix}`. The failed lookup is not cached, so the icon renders on the next request.
 
 ### Naming and collision safety
 

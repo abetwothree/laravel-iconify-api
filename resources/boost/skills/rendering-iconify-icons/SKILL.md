@@ -52,12 +52,16 @@ npm install @iconify-json/mdi
 | Situation | `icon()` / facade | `<x-icon>` | `GET /iconify/api/{prefix}.json?icons=…` |
 | --- | --- | --- | --- |
 | Name not in an installed set | `''` | renders nothing | 200, name listed under `not_found` |
-| Malformed name (no `prefix:`) | `''` | renders nothing | n/a |
+| Not an icon name: blank, `:clock`, `heroicons:`, or one word with no colon or dash (`box`) | `''` | renders nothing | n/a |
 | Set not installed | throws `Could not find the icons file for the set: {prefix}` | 500 page (`ViewException`) | 500 |
 
-A blank icon means a wrong name. A 500 that names a set means that set is not installed: run
-`npm install @iconify-json/{prefix}`. The failed lookup is not cached, so the icon renders on the next request
-without a `cache:clear`. An icon in a shared layout takes every page down with it.
+A name without a colon is read as `prefix-name`: `heroicons-clock` works, but `user-circle` looks for a set
+called `user` and throws.
+
+A blank icon means a wrong icon name. A 500 that names a set means that set is not installed, or the prefix is
+mistyped (`heroicon:clock`). For a missing set, run `npm install @iconify-json/{prefix}`. The failed lookup is
+not cached, so the icon renders on the next request without a `cache:clear`. An icon in a shared layout takes
+every page down with it.
 
 ## Options
 
