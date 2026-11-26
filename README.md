@@ -373,14 +373,14 @@ npm prune --omit=dev
 In a Docker multi-stage build, prune at the end of the assets stage and copy `node_modules` into the final image:
 
 ```dockerfile
-FROM node:22-alpine AS assets
+FROM node:26-alpine AS assets
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 RUN npm run build && npm prune --omit=dev
 
-FROM php:8.4-fpm-alpine
+FROM php:8.5-fpm-alpine
 WORKDIR /var/www/html
 # ...
 COPY --from=assets /app/public/build ./public/build
