@@ -410,6 +410,8 @@ Production then needs no npm at all. In exchange, you refresh the copy by hand w
 
 The icon cache replaces neither setup. An icon is cached only after its first request, so an icon nobody has requested yet, or any icon after a deploy that clears the cache, still reads its set file.
 
+The package also caches the absolute path of each set file, with no expiry. If your cache survives deploys, clear the icon cache whenever that path changes: after you switch `icons_location`, and on every deploy that moves the app into a new directory, as zero-downtime deploys do. Otherwise icons that are not cached yet read the old path, and fail once those files are gone. A deploy that starts with an empty cache needs nothing extra.
+
 ## Laravel Boost
 
 The package ships a [Laravel Boost](https://laravel.com/docs/boost) guideline and an agent skill, `rendering-iconify-icons`, so AI agents working in your app render icons through this package. Run `php artisan boost:install`, or `php artisan boost:update` if Boost is already set up, and select `abetwothree/laravel-iconify-api` when it asks which third-party guidelines and skills to add.

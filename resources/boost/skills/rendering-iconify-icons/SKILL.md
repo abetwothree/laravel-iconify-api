@@ -137,6 +137,11 @@ returns 500 on every page with an `<x-icon>`. Both fixes keep icons self-hosted:
 
 The cache does not replace the files: any icon not requested since the last `cache:clear` reads its set file.
 
+The package also caches each set file's absolute path, with no expiry. Where the cache survives a deploy, clear the
+icon cache whenever that path changes: after switching `icons_location`, and on every deploy that puts the app in a
+new directory, as zero-downtime deploys do. Otherwise icons not cached yet read the old path and fail once those
+files are gone. A deploy that starts with an empty cache needs nothing extra.
+
 ## The app already has a global `icon()`
 
 Composer loads the package's `icon()` before the app's own helper files. An unguarded app `icon()` fails with
