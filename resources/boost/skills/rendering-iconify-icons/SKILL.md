@@ -112,9 +112,13 @@ A missing nonce shows up as an inline script refused by `script-src`, followed b
 ## Caching
 
 Found icons stay in Laravel's cache (`cache_store`) with no expiry. Misses expire after `not_found_cache_ttl`
-(300 s). Nothing watches the set files, so run `php artisan cache:clear` after `npm update` of a set, after
-upgrading an `@iconify-json/*` package, and after upgrading this package. A hard refresh and `view:clear`
-leave the old icon in place.
+(300 s). Nothing watches the set files, so clear the icon cache after `npm update` of a set, after upgrading an
+`@iconify-json/*` package, and after upgrading this package. A hard refresh and `view:clear` leave the old icon in
+place.
+
+To clear the icon cache, run `php artisan cache:clear`. If `cache_store` in `config/iconify-api.php` names a store
+other than the default, pass that store, for example `php artisan cache:clear redis`: a plain `cache:clear` empties
+only the default store.
 
 ## Production deploys
 

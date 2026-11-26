@@ -350,6 +350,8 @@ This package caches icon data through Laravel's cache as icons are requested, so
 
 Found icons never expire, since an icon cannot change while the installed icon set stays the same. Nothing watches the icon set files, so run `php artisan cache:clear` after `npm update @iconify/json`, after upgrading an `@iconify-json/*` package, or after upgrading this package. Skip it and a redrawn icon keeps serving its old body.
 
+A plain `cache:clear` empties only your default store. If `cache_store` names a different store, pass it, for example `php artisan cache:clear redis`.
+
 Misses expire after 300 seconds, since any name a caller invents produces one. Change that with `not_found_cache_ttl`, or set it to `0` to skip caching misses. The API routes also cap how many icons one request may ask for with `max_icons_per_request` (200 by default, `0` for no limit); anything over the cap gets a `400`.
 
 Cache keys look like `{cache_key_prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name}`, with `meta:` in place of `icon:` for icon set metadata. While `reject_unsafe_bodies` is on, `{shape-version}` is `2s` instead of `2`. A name that a cache key cannot hold, one carrying a space or running past 128 bytes, is replaced by a SHA-256 hash. No published icon set has such a name.
@@ -404,7 +406,7 @@ Then point `icons_location` at it in `config/iconify-api.php`:
 'icons_location' => resource_path('iconify'),
 ```
 
-Production then needs no npm at all. In exchange, you refresh the copy by hand when a set updates, and run `php artisan cache:clear` afterwards.
+Production then needs no npm at all. In exchange, you refresh the copy by hand when a set updates, and clear the icon cache afterwards (see [Icon Caching](#icon-caching)).
 
 The icon cache replaces neither setup. An icon is cached only after its first request, so an icon nobody has requested yet, or any icon after a deploy that clears the cache, still reads its set file.
 
