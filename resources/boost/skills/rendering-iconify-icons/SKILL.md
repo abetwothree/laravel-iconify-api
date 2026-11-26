@@ -59,8 +59,9 @@ A name without a colon is read as `prefix-name`: `heroicons-clock` works, but `u
 called `user` and throws.
 
 A blank icon means a wrong icon name. A 500 that names a set means that set is not installed, or the prefix is
-mistyped (`heroicon:clock`). For a missing set, run `npm install @iconify-json/{prefix}`. The failed lookup is
-not cached, so the icon renders on the next request without a `cache:clear`. An icon in a shared layout takes
+mistyped (`heroicon:clock`). For a missing set, run `npm install @iconify-json/{prefix}`. If `icons_location`
+points somewhere other than `node_modules`, also copy the new set's folder there. The failed lookup is not cached,
+so the icon renders on the next request without a `cache:clear`. An icon in a shared layout takes
 every page down with it.
 
 ## Options

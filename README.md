@@ -238,7 +238,7 @@ What happens depends on which part of the name is wrong:
 
 The first two rows produce no exception and no log entry. The last row also covers a mistyped prefix (`heroicon:clock`), and a name without a colon, which is read as `prefix-name`: `heroicons-clock` renders the Heroicons clock, while `user-circle` looks for a set called `user` and throws. `/iconify/api/collection?prefix=…` returns a `500` for an uninstalled set too.
 
-To fix the last row, install the set with `npm install @iconify-json/{prefix}`. The failed lookup is not cached, so the icon renders on the next request.
+To fix the last row, install the set with `npm install @iconify-json/{prefix}`. If `icons_location` points somewhere other than `node_modules`, also copy the new set's folder there (see [Ship the icon JSON with your app](#ship-the-icon-json-with-your-app)). The failed lookup is not cached, so the icon renders on the next request.
 
 ### Naming and collision safety
 
