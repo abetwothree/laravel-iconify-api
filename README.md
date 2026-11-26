@@ -209,8 +209,6 @@ Every icon carries `class="iconify iconify--{provider} iconify--{prefix}"`, with
 
 Boolean options accept only `true`, `"true"` and integer `1`. Blade passes every attribute as a string, so `<x-icon inline />` and `h-flip="true"` work while `inline="1"` silently does nothing.
 
-A missing or malformed icon name renders an empty string, with no exception and no log entry.
-
 ```blade
 <x-icon name="heroicons:clock" width="32" color="rebeccapurple" inline />
 <x-icon name="heroicons:clock" rotate="90deg" h-flip="true" />
@@ -227,6 +225,20 @@ The framework-only props Iconify's React/Vue/Svelte components accept — `icon`
 `ssr`, `onLoad`, `children`, `fallback`, `customise`, `_ref` — are accepted and ignored
 rather than emitted as attributes. Alternate render modes (`mode="bg"`, `mode="mask"`)
 are not implemented; icons always render as inline `<svg>`.
+
+### Missing icons and icon sets
+
+What happens depends on which part of the name is wrong:
+
+| Name | `icon()` and the facade | `<x-icon>` | `/iconify/api/{prefix}.json?icons=…` |
+| --- | --- | --- | --- |
+| An icon the installed set does not have, such as `heroicons:not-real` | Empty string | Renders nothing | `200`, with the name listed under `not_found` |
+| Not an icon name: blank, an empty prefix or name (`:clock`, `heroicons:`), too many colons, or one word with no colon or dash (`box`) | Empty string | Renders nothing | n/a |
+| A prefix with no icon set installed, such as `fa6-solid:house` | Throws `Exception: Could not find the icons file for the set: fa6-solid` | Throws, so the page returns a `500` | `500` |
+
+The first two rows produce no exception and no log entry. The last row also covers a mistyped prefix (`heroicon:clock`), and a name without a colon, which is read as `prefix-name`: `heroicons-clock` renders the Heroicons clock, while `user-circle` looks for a set called `user` and throws. `/iconify/api/collection?prefix=…` returns a `500` for an uninstalled set too.
+
+To fix the last row, install the set with `npm install @iconify-json/{prefix}`. If `icons_location` points somewhere other than `node_modules`, also copy the new set's folder there (see [Ship the icon JSON with your app](#ship-the-icon-json-with-your-app)). The failed lookup is not cached, so the icon renders on the next request.
 
 ### Naming and collision safety
 
@@ -338,9 +350,71 @@ This package caches icon data through Laravel's cache as icons are requested, so
 
 Found icons never expire, since an icon cannot change while the installed icon set stays the same. Nothing watches the icon set files, so run `php artisan cache:clear` after `npm update @iconify/json`, after upgrading an `@iconify-json/*` package, or after upgrading this package. Skip it and a redrawn icon keeps serving its old body.
 
+A plain `cache:clear` empties only your default store. If `cache_store` names a different store, pass it, for example `php artisan cache:clear redis`.
+
 Misses expire after 300 seconds, since any name a caller invents produces one. Change that with `not_found_cache_ttl`, or set it to `0` to skip caching misses. The API routes also cap how many icons one request may ask for with `max_icons_per_request` (200 by default, `0` for no limit); anything over the cap gets a `400`.
 
 Cache keys look like `{cache_key_prefix}:{icon-set-prefix}:icon:{shape-version}:{icon-name}`, with `meta:` in place of `icon:` for icon set metadata. While `reject_unsafe_bodies` is on, `{shape-version}` is `2s` instead of `2`. A name that a cache key cannot hold, one carrying a space or running past 128 bytes, is replaced by a SHA-256 hash. No published icon set has such a name.
+
+## Deploying to Production
+
+The package reads icon set files at runtime, not only while you build. `icons_location` defaults to `node_modules`, so a deploy that builds your assets and then drops `node_modules` leaves the server without them. Every page that renders `<x-icon>` or `icon()` then fails with `Could not find the icons file for the set: {prefix}`, and the API returns a `500` for that set.
+
+Pick one of the two setups below.
+
+### Keep icon sets as runtime dependencies
+
+Install icon sets without `-D`, so they land in `dependencies`. Laravel keeps its build tools (`vite`, `laravel-vite-plugin`, `tailwindcss`) in `devDependencies`. Build, prune the dev dependencies, and deploy what is left:
+
+```bash
+npm ci
+npm run build
+npm prune --omit=dev
+```
+
+In a Docker multi-stage build, prune at the end of the assets stage and copy `node_modules` into the final image. Add `node_modules` to a `.dockerignore` next to the Dockerfile too. Otherwise `COPY . .` copies your machine's `node_modules` over the ones `npm ci` installed in the image, and platform-specific build tools can fail there.
+
+```dockerfile
+FROM node:26-alpine AS assets
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build && npm prune --omit=dev
+
+FROM php:8.5-fpm-alpine
+WORKDIR /var/www/html
+# ...
+COPY --from=assets /app/public/build ./public/build
+COPY --from=assets /app/node_modules ./node_modules
+```
+
+To ship only the icon data, copy `/app/node_modules/@iconify-json` to `./node_modules/@iconify-json` instead.
+
+### Ship the icon JSON with your app
+
+Copy the folder of each set you use into a directory you commit, keeping the `@iconify-json/{prefix}` layout:
+
+```text
+resources/iconify/@iconify-json/heroicons/
+resources/iconify/@iconify-json/mdi/
+```
+
+Then point `icons_location` at it in `config/iconify-api.php`:
+
+```php
+'icons_location' => resource_path('iconify'),
+```
+
+Production then needs no npm at all. In exchange, you refresh the copy by hand when a set updates, and clear the icon cache afterwards (see [Icon Caching](#icon-caching)).
+
+The icon cache replaces neither setup. An icon is cached only after its first request, so an icon nobody has requested yet, or any icon after a deploy that clears the cache, still reads its set file.
+
+The package also caches the absolute path of each set file, with no expiry. If your cache survives deploys, clear the icon cache whenever that path changes: after you switch `icons_location`, and on every deploy that moves the app into a new directory, as zero-downtime deploys do. Otherwise icons that are not cached yet read the old path, and fail once those files are gone. A deploy that starts with an empty cache needs nothing extra.
+
+## Laravel Boost
+
+The package ships a [Laravel Boost](https://laravel.com/docs/boost) guideline and an agent skill, `rendering-iconify-icons`, so AI agents working in your app render icons through this package. Run `php artisan boost:install`, or `php artisan boost:update` if Boost is already set up, and select `abetwothree/laravel-iconify-api` when it asks which third-party guidelines and skills to add.
 
 ## Missing Features
 
