@@ -372,7 +372,7 @@ npm run build
 npm prune --omit=dev
 ```
 
-In a Docker multi-stage build, prune at the end of the assets stage and copy `node_modules` into the final image:
+In a Docker multi-stage build, prune at the end of the assets stage and copy `node_modules` into the final image. Add `node_modules` to a `.dockerignore` next to the Dockerfile too. Otherwise `COPY . .` copies your machine's `node_modules` over the ones `npm ci` installed in the image, and platform-specific build tools can fail there.
 
 ```dockerfile
 FROM node:26-alpine AS assets
